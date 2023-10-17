@@ -1,0 +1,49 @@
+{
+  "name": "risk-treasury-refresher",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "concurrently \"npm run watch-compile\" \"npm run watch-dev\"",
+    "watch-compile": "swc src -w --out-dir dist",
+    "watch-dev": "nodemon --watch \"dist/**/*\" -e js ./dist/main.js",
+    "build": "swc src -d dist \"npm run lint\"",
+    "start": "NODE_ENV=production node dist/main.js",
+    "clean": "rm -rf dist",
+    "lint": "eslint --ext .ts src",
+    "lint:fix": "eslint --ext .ts src --fix"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "@swc/cli": "^0.1.62",
+    "@swc/core": "^1.3.83",
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.5.9",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "chokidar": "^3.5.3",
+    "concurrently": "^8.2.1",
+    "eslint": "^8.48.0",
+    "eslint-config-standard-with-typescript": "^39.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-n": "^16.0.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "nodemon": "^3.0.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@covalenthq/client-sdk": "^0.4.2",
+    "axios": "^1.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ethers": "^5.7.2",
+    "express": "^4.18.2",
+    "mongodb": "^6.0.0",
+    "web3": "^1.8.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "author": "Ilham Baghirov",
+  "license": "ISC"
+}
