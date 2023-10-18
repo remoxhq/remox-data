@@ -31,6 +31,8 @@ export const fetchAndStoreAnnualBalance = async () => {
                     annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury).filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
                 };
 
+                
+
                 await collection.insertOne(responseObj)
 
                 return { [daoName]: responseObj }

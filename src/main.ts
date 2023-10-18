@@ -1,21 +1,19 @@
 import express, { type Request, type Response } from 'express'
 import { fetchAndStoreAnnualBalance, fetchOrgs } from './services';
 import { config } from "dotenv"//* Express App
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const app = express()
 config();
 const port = process.env.PORT || 8080
+const mongoDbUri = process.env.MONGODB_URI || ""
+export const mongoClient = new MongoClient(mongoDbUri)
 
 app.route('/fetch/balance').get(async (req: Request, res: Response) => {
-    const mongoDbUri = process.env.MONGODB_URI || ""
-    const mongoClient = new MongoClient(mongoDbUri)
-    await mongoClient.connect()
+    const name = req.query.name;
     const db = mongoClient.db(process.env.DB_NAME);
     const collection = db.collection("OrganizationsHistoricalBalances");
-
-    const response = await collection.findOne({ name: 'Aave' })
-    await mongoClient.close()
+    const response = await collection.findOne({ name });
     res.json(response);
 })
 
@@ -29,6 +27,12 @@ app.route('/orgs/active').get(async (req: Request, res: Response) => {
     list ? res.status(200).send("Organizations imported!") : res.status(404).send('No organizations found!');
 })
 
-app.listen(port, () => {
+app.use(async (req, res, next) => {
+    await mongoClient.connect()
+    console.log("Connected to MongoDB");
+    next()
+})
+
+app.listen(port, async () => {
     console.log(`Ready: http://localhost:${port}`)
 })

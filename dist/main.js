@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+Object.defineProperty(exports, "mongoClient", {
+    enumerable: true,
+    get: function() {
+        return mongoClient;
+    }
+});
 const _express = /*#__PURE__*/ _interop_require_default(require("express"));
 const _services = require("./services");
 const _dotenv = require("dotenv" //* Express App
@@ -15,16 +21,15 @@ function _interop_require_default(obj) {
 const app = (0, _express.default)();
 (0, _dotenv.config)();
 const port = process.env.PORT || 8080;
+const mongoDbUri = process.env.MONGODB_URI || "";
+const mongoClient = new _mongodb.MongoClient(mongoDbUri);
 app.route('/fetch/balance').get(async (req, res)=>{
-    const mongoDbUri = process.env.MONGODB_URI || "";
-    const mongoClient = new _mongodb.MongoClient(mongoDbUri);
-    await mongoClient.connect();
+    const name = req.query.name;
     const db = mongoClient.db(process.env.DB_NAME);
     const collection = db.collection("OrganizationsHistoricalBalances");
     const response = await collection.findOne({
-        name: 'Aave'
+        name
     });
-    await mongoClient.close();
     res.json(response);
 });
 app.route('/orgs/balance/portfolio').get(async (req, res)=>{
@@ -35,6 +40,11 @@ app.route('/orgs/active').get(async (req, res)=>{
     const list = await (0, _services.fetchOrgs)();
     list ? res.status(200).send("Organizations imported!") : res.status(404).send('No organizations found!');
 });
-app.listen(port, ()=>{
+app.use(async (req, res, next)=>{
+    await mongoClient.connect();
+    console.log("Connected to MongoDB");
+    next();
+});
+app.listen(port, async ()=>{
     console.log(`Ready: http://localhost:${port}`);
 });
