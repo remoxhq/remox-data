@@ -28,6 +28,9 @@
       "@covalent/*": [
         "./src/covalent/*"
       ],
+      "@services/*": [
+        "./src/services/*"
+      ],
     }
   },
   "include": [

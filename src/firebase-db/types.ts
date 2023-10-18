@@ -1,6 +1,10 @@
-export interface Organizations {
-    [name: string]: {
-        addresses: string[],
-        network: string,
-    }
+export interface OrganizationIndexer {
+    [name: string]: Organization
+}
+
+export interface Organization {
+    wallets: {
+        address: string,
+        network: string
+    }[],
 }

@@ -18,8 +18,8 @@ _export(exports, {
 });
 _export_star(require("./types"), exports);
 _export_star(require("./orgs"), exports);
+const _firestore = _export_star(require("firebase/firestore"), exports);
 const _app = require("firebase/app");
-const _firestore = require("firebase/firestore");
 const _dotenv = /*#__PURE__*/ _interop_require_default(require("dotenv" //* Express App
 ));
 function _export_star(from, to) {

@@ -1,13 +1,4 @@
 export interface FilteredResponse {
-    week: {
-        [name: string]: number;
-    };
-    month: {
-        [name: string]: number;
-    };
-    quart: {
-        [name: string]: number;
-    };
     year: {
         [name: string]: number;
     };

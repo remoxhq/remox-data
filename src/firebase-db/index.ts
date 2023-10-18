@@ -1,5 +1,6 @@
 export * from './types'
 export * from './orgs'
+export * from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import dotenv from "dotenv"//* Express App
