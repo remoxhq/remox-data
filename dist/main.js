@@ -32,6 +32,10 @@ app.route('/fetch/balance').get(async (req, res)=>{
     });
     res.json(response);
 });
+app.route('/refresh/balance').get(async (req, res)=>{
+    await (0, _services.balanceRefresher)();
+    res.status(200).send("Balance refreshed!");
+});
 app.route('/orgs/balance/portfolio').get(async (req, res)=>{
     const mappedBalanceOfAllDaos = await (0, _services.fetchAndStoreAnnualBalance)();
     res.json(mappedBalanceOfAllDaos);

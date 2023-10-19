@@ -14,6 +14,7 @@ export const fetchAndStoreAnnualBalance = async () => {
         await mongoClient.connect()
         const db = mongoClient.db(process.env.DB_NAME);
         const collection = db.collection("OrganizationsHistoricalBalances");
+
         const mappedBalanceOfAllDaos = await Promise.all(
             Object.keys(daos).map(async (daoName) => {
                 if (!daos[daoName]) return;
@@ -30,8 +31,6 @@ export const fetchAndStoreAnnualBalance = async () => {
                     addresses: walletAddresses,
                     annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury).filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
                 };
-
-                
 
                 await collection.insertOne(responseObj)
 

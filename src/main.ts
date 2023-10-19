@@ -1,5 +1,5 @@
 import express, { type Request, type Response } from 'express'
-import { fetchAndStoreAnnualBalance, fetchOrgs } from './services';
+import { balanceRefresher, fetchAndStoreAnnualBalance, fetchOrgs } from './services';
 import { config } from "dotenv"//* Express App
 import { MongoClient, ObjectId } from 'mongodb';
 
@@ -15,6 +15,11 @@ app.route('/fetch/balance').get(async (req: Request, res: Response) => {
     const collection = db.collection("OrganizationsHistoricalBalances");
     const response = await collection.findOne({ name });
     res.json(response);
+})
+
+app.route('/refresh/balance').get(async (req: Request, res: Response) => {
+    await balanceRefresher()
+    res.status(200).send("Balance refreshed!");
 })
 
 app.route('/orgs/balance/portfolio').get(async (req: Request, res: Response) => {
