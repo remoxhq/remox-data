@@ -9,6 +9,7 @@ config();
 const port = process.env.PORT || 8080
 const mongoDbUri = process.env.MONGODB_URI || ""
 export const mongoClient = new MongoClient(mongoDbUri)
+app.use(cors());
 
 app.route('/fetch/balance').get(async (req: Request, res: Response) => {
     const name = req.query.name;
@@ -39,15 +40,14 @@ app.use(async (req, res, next) => {
     next()
 })
 
-
-app.use(cors({
-    origin: ['https://remox-git-dev-remox-dao.vercel.app',
-        'https://app.remox.io',
-        'https://community.remox.io',
-        'http://localhost:3000',
-        'https://localhost:3000'],
-    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
-}));
+// {
+//     origin: ['https://remox-git-dev-remox-dao.vercel.app',
+//         'https://app.remox.io',
+//         'https://community.remox.io',
+//         'http://localhost:3000',
+//         'https://localhost:3000'],
+//     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+// })
 
 app.listen(port, async () => {
     console.log(`Ready: http://localhost:${port}`)
