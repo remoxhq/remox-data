@@ -2,6 +2,7 @@ import express, { type Request, type Response } from 'express'
 import { balanceRefresher, fetchAndStoreAnnualBalance, fetchOrgs } from './services';
 import { config } from "dotenv"//* Express App
 import { MongoClient } from 'mongodb';
+import cors from 'cors';
 
 const app = express()
 config();
@@ -37,6 +38,17 @@ app.use(async (req, res, next) => {
     console.log("Connected to MongoDB");
     next()
 })
+
+
+app.use(cors({
+    origin: ['https://remox-git-dev-remox-dao.vercel.app',
+        'https://app.remox.io',
+        'https://community.remox.io',
+        'http://localhost:3000',
+        'https://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
+}));
 
 app.listen(port, async () => {
     console.log(`Ready: http://localhost:${port}`)
