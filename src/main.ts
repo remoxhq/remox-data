@@ -46,7 +46,6 @@ app.use(cors({
         'https://community.remox.io',
         'http://localhost:3000',
         'https://localhost:3000'],
-    credentials: true,
     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
 }));
 
