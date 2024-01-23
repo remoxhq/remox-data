@@ -40,15 +40,6 @@ app.use(async (req, res, next) => {
     next()
 })
 
-// {
-//     origin: ['https://remox-git-dev-remox-dao.vercel.app',
-//         'https://app.remox.io',
-//         'https://community.remox.io',
-//         'http://localhost:3000',
-//         'https://localhost:3000'],
-//     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH']
-// })
-
 app.listen(port, async () => {
     console.log(`Ready: http://localhost:${port}`)
 })

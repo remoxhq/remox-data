@@ -12,7 +12,7 @@ const _covalent = require("../covalent");
 const _dotenv = require("dotenv");
 (0, _dotenv.config)();
 const covalentApiKey = process.env.COVALENT_API_KEY || "";
-const rootParser = async (dao, historicalTreasury, walletAddresses)=>{
+const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
     try {
         const covalentClient = new _covalent.CovalentClient(covalentApiKey);
         await Promise.all(dao.wallets.map(async (wallet)=>{
@@ -21,7 +21,8 @@ const rootParser = async (dao, historicalTreasury, walletAddresses)=>{
                 quoteCurrency: 'USD',
                 days: 365
             });
-            walletAnnualPortfolioBalance.data.items.map((token)=>{
+            console.log(name);
+            walletAnnualPortfolioBalance.data.items?.map((token)=>{
                 token.holdings.forEach((holding, index)=>{
                     if (!holding.close.pretty_quote || index === 0) return; // skip if there's no pretty_quote value
                     //split date and parse amount
@@ -49,6 +50,7 @@ const rootParser = async (dao, historicalTreasury, walletAddresses)=>{
                     historicalTreasury[date] = treasuryByDate;
                 });
             });
+            console.log(name + "1");
         }));
     } catch (error) {
         throw new Error(error);

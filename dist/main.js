@@ -13,6 +13,7 @@ const _services = require("./services");
 const _dotenv = require("dotenv" //* Express App
 );
 const _mongodb = require("mongodb");
+const _cors = /*#__PURE__*/ _interop_require_default(require("cors"));
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -23,6 +24,7 @@ const app = (0, _express.default)();
 const port = process.env.PORT || 8080;
 const mongoDbUri = process.env.MONGODB_URI || "";
 const mongoClient = new _mongodb.MongoClient(mongoDbUri);
+app.use((0, _cors.default)());
 app.route('/fetch/balance').get(async (req, res)=>{
     const name = req.query.name;
     const db = mongoClient.db(process.env.DB_NAME);

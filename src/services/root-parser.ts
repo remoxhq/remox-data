@@ -6,7 +6,7 @@ import { TreasuryIndexer } from "./types";
 config()
 const covalentApiKey = process.env.COVALENT_API_KEY || "";
 
-export const rootParser = async (dao: Organization, historicalTreasury: TreasuryIndexer, walletAddresses: string[]) => {
+export const rootParser = async (dao: Organization, historicalTreasury: TreasuryIndexer, walletAddresses: string[], name?: string) => {
     try {
         const covalentClient = new CovalentClient(covalentApiKey);
 
@@ -23,7 +23,9 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     }
                 )
 
-                walletAnnualPortfolioBalance.data.items.map((token) => {
+                console.log(name);
+
+                walletAnnualPortfolioBalance.data.items?.map((token) => {
                     token.holdings.forEach((holding, index) => {
                         if (!holding.close.pretty_quote || index === 0) return;  // skip if there's no pretty_quote value
 
@@ -51,6 +53,8 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                         historicalTreasury[date] = treasuryByDate;
                     });
                 })
+
+                console.log(name + "1");
             })
         )
     } catch (error: any) {
