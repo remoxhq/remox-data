@@ -73,22 +73,22 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "OrangeDAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x33e51759A7E6eBEC938fE8FBFae6d195C57D64a0",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x775C74917cAF01be3D8BF735DAAb9419ed1979BF",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x081D84829b1B8f8A46CCe0392C524604ee785508",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "OrangeDAO": {
+    "wallets": [
+      {
+        "address": "0x33e51759A7E6eBEC938fE8FBFae6d195C57D64a0",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x775C74917cAF01be3D8BF735DAAb9419ed1979BF",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x081D84829b1B8f8A46CCe0392C524604ee785508",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "NumerAI": {
     "wallets": [
       {
@@ -105,22 +105,22 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "Decentraland": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xB796f6d32a925ec9beb32889D2B2c356d209E8C5",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xB08E3e7cc815213304d884C88cA476ebC50EaAB2",
-  //       "network": "matic-mainnet"
-  //     },
-  //     {
-  //       "address": "0x89214c8Ca9A49E60a3bfa8e00544F384C93719b1",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "Decentraland": {
+    "wallets": [
+      {
+        "address": "0xB796f6d32a925ec9beb32889D2B2c356d209E8C5",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xB08E3e7cc815213304d884C88cA476ebC50EaAB2",
+        "network": "matic-mainnet"
+      },
+      {
+        "address": "0x89214c8Ca9A49E60a3bfa8e00544F384C93719b1",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Synthetix": {
     "wallets": [
       {
@@ -185,14 +185,14 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "StakeDAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xF930EBBd05eF8b25B1797b9b2109DDC9B0d43063",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "StakeDAO": {
+    "wallets": [
+      {
+        "address": "0xF930EBBd05eF8b25B1797b9b2109DDC9B0d43063",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Liquity": {
     "wallets": [
       {
@@ -241,22 +241,22 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "Balancer": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xaF23DC5983230E9eEAf93280e312e57539D098D0",
-  //       "network": "arbitrum-mainnet"
-  //     },
-  //     {
-  //       "address": "0xeE071f4B516F69a1603dA393CdE8e76C40E5Be85",
-  //       "network": "matic-mainnet"
-  //     }
-  //   ]
-  // },
+  "Balancer": {
+    "wallets": [
+      {
+        "address": "0x10A19e7eE7d7F8a52822f6817de8ea18204F2e4f",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xaF23DC5983230E9eEAf93280e312e57539D098D0",
+        "network": "arbitrum-mainnet"
+      },
+      {
+        "address": "0xeE071f4B516F69a1603dA393CdE8e76C40E5Be85",
+        "network": "matic-mainnet"
+      }
+    ]
+  },
   "Metis": {
     "wallets": [
       {
@@ -321,22 +321,22 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "DAO Maker": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x19C0E462C9CF1C988c5dbdb93EB70c3f2f6E3A41",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x7BB4C06104d0169F3CA8f61765bdB0db21b89E00",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x87E85Da80725508eFD6925fA9C67E8853bfC6B31",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "DAO Maker": {
+    "wallets": [
+      {
+        "address": "0x19C0E462C9CF1C988c5dbdb93EB70c3f2f6E3A41",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x7BB4C06104d0169F3CA8f61765bdB0db21b89E00",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x87E85Da80725508eFD6925fA9C67E8853bfC6B31",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Rally": {
     "wallets": [
       {
@@ -353,14 +353,14 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "Pancake": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x21835332cBDf1b3530fAE9f6Cd66FEB9477dFC02",
-  //       "network": "bsc-mainnet"
-  //     }
-  //   ]
-  // },
+  "Pancake": {
+    "wallets": [
+      {
+        "address": "0x21835332cBDf1b3530fAE9f6Cd66FEB9477dFC02",
+        "network": "bsc-mainnet"
+      }
+    ]
+  },
   "Cream": {
     "wallets": [
       {
@@ -409,30 +409,30 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "MetaCartel": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x7ac712ec4C58dEd138CC4e63e0fd59F697cC6963",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x4570b4fAF71E23942B8B9F934b47ccEdF7540162",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Unlock": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xa39b44c4AFfbb56b76a1BF1d19Eb93a5DfC2EBA9",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x17EEDFb0a6E6e06E95B3A1F928dc4024240BC76B",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "MetaCartel": {
+    "wallets": [
+      {
+        "address": "0x7ac712ec4C58dEd138CC4e63e0fd59F697cC6963",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x4570b4fAF71E23942B8B9F934b47ccEdF7540162",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Unlock": {
+    "wallets": [
+      {
+        "address": "0xa39b44c4AFfbb56b76a1BF1d19Eb93a5DfC2EBA9",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x17EEDFb0a6E6e06E95B3A1F928dc4024240BC76B",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Arbitrum": {
     "wallets": [
       {
@@ -445,94 +445,94 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "VitaDAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x270f6ef8d01e80725e5d32589178b8a041021a45",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Polygon": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xcD6507d87F605F5E95C12F7c4B1fC3279dc944aB",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xb316fa9Fa91700D7084D377bfdC81Eb9F232f5Ff",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xcbfE11b78C2E6cB25C6eDA2C6Ff46CD4755c8fCA",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Klima DAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x65A5076C0BA74e5f3e069995dc3DAB9D197d995c",
-  //       "network": "matic-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Aura": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xfc78f8e1Af80A3bF5A1783BB59eD2d1b10f78cA9",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x43B17088503F4CE1AED9fB302ED6BB51aD6694Fa",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Stargate": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x65bb797c2B9830d891D87288F029ed8dACc19705",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x8A27E7e98f62295018611DD681Ec47C7d9FF633A",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "DeXe": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x49497a98451f64c875ACa3b6f48dB37943850009",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Qi DAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x3FEACf904b152b1880bDE8BF04aC9Eb636fEE4d8",
-  //       "network": "matic-mainnet"
-  //     },
-  //     {
-  //       "address": "0xF32e759d5f1c63ed62042497d3a50F044eE0982b",
-  //       "network": "arbitrum-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Euler Finance": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xcAD001c30E96765aC90307669d578219D4fb1DCe",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xcAD001c30E96765aC90307669d578219D4fb1DCe",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "VitaDAO": {
+    "wallets": [
+      {
+        "address": "0x270f6ef8d01e80725e5d32589178b8a041021a45",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Polygon": {
+    "wallets": [
+      {
+        "address": "0xcD6507d87F605F5E95C12F7c4B1fC3279dc944aB",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xb316fa9Fa91700D7084D377bfdC81Eb9F232f5Ff",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xcbfE11b78C2E6cB25C6eDA2C6Ff46CD4755c8fCA",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Klima DAO": {
+    "wallets": [
+      {
+        "address": "0x65A5076C0BA74e5f3e069995dc3DAB9D197d995c",
+        "network": "matic-mainnet"
+      }
+    ]
+  },
+  "Aura": {
+    "wallets": [
+      {
+        "address": "0xfc78f8e1Af80A3bF5A1783BB59eD2d1b10f78cA9",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x43B17088503F4CE1AED9fB302ED6BB51aD6694Fa",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Stargate": {
+    "wallets": [
+      {
+        "address": "0x65bb797c2B9830d891D87288F029ed8dACc19705",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x8A27E7e98f62295018611DD681Ec47C7d9FF633A",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "DeXe": {
+    "wallets": [
+      {
+        "address": "0x49497a98451f64c875ACa3b6f48dB37943850009",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Qi DAO": {
+    "wallets": [
+      {
+        "address": "0x3FEACf904b152b1880bDE8BF04aC9Eb636fEE4d8",
+        "network": "matic-mainnet"
+      },
+      {
+        "address": "0xF32e759d5f1c63ed62042497d3a50F044eE0982b",
+        "network": "arbitrum-mainnet"
+      }
+    ]
+  },
+  "Euler Finance": {
+    "wallets": [
+      {
+        "address": "0xcAD001c30E96765aC90307669d578219D4fb1DCe",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xcAD001c30E96765aC90307669d578219D4fb1DCe",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Bankless": {
     "wallets": [
       {
@@ -541,30 +541,30 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "PoolTogether": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x42cd8312D2BCe04277dD5161832460e95b24262E",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Paladin": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x1Ae6DCBc88d6f81A7BCFcCC7198397D776F3592E",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x8B08B1E10a8189b7C8840F0C3dd7687b2BA7468c",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x0792dCb7080466e4Bbc678Bdb873FE7D969832B8",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "PoolTogether": {
+    "wallets": [
+      {
+        "address": "0x42cd8312D2BCe04277dD5161832460e95b24262E",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Paladin": {
+    "wallets": [
+      {
+        "address": "0x1Ae6DCBc88d6f81A7BCFcCC7198397D776F3592E",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x8B08B1E10a8189b7C8840F0C3dd7687b2BA7468c",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x0792dCb7080466e4Bbc678Bdb873FE7D969832B8",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Compound": {
     "wallets": [
       {
@@ -601,266 +601,267 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "Sarcophagus": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x7862a4314508a9De68FC5e71876D46a1bf4AE032",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xe74fC9DFc587241daD8A82aB50208355685D2b4C",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Benqi": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x142eB2ed775e6d497aa8D03A2151D016bbfE7Fc2",
-  //       "network": "avalanche-mainnet"
-  //     },
-  //     {
-  //       "address": "0x9D6eF2445FCc41B0d08865f0a7839490cC58a7B7",
-  //       "network": "avalanche-mainnet"
-  //     },
-  //     {
-  //       "address": "0x6632044b9EC224E0077BFC6A5639081e67ece991",
-  //       "network": "avalanche-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Layer2DAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x5318f07A3a20A2f8bb0DDf14F1DD58C517a76508",
-  //       "network": "arbitrum-mainnet"
-  //     },
-  //     {
-  //       "address": "0xaF5a0068f5465260A1a88A6264D0dcE4469609CF",
-  //       "network": "optimism-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Galxe": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x28Fda5FB2Ac9436BC4bb8bEDAfEe25a550956dE6",
-  //       "network": "arbitrum-mainnet"
-  //     },
-  //     {
-  //       "address": "0x03a42D37066726FfDc8F2BCd1C422f72A1717882",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x783c330A7A4968A08ce100A16ac27Ff2cCfAEbdf",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Gearbox": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x7b065Fcb0760dF0CEA8CFd144e08554F3CeA73D1",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x8ACEd4217bA809B0F7164cdbAF7c4901Bd6575Ac",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "LUKSO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xC67810de5816917F1DBc618c084B82441921F55f",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xD52306Eabc2BE4e2dC8Fbd1f929aC73008430f3F",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Frax Finance": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x63278bF9AcdFC9fA65CFa2940b89A34ADfbCb4A1",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Metafluence": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x083e60cE96123967Aa584F4ED6Fc4b847eEFAA08",
-  //       "network": "bsc-mainnet"
-  //     },
-  //     {
-  //       "address": "0xe636883F63479a25f03B5e60d04e4BDD1ce49BEF",
-  //       "network": "bsc-mainnet"
-  //     },
-  //     {
-  //       "address": "0x714842729E5494251532A5E720f47bdBB9f76051",
-  //       "network": "bsc-mainnet"
-  //     },
-  //     {
-  //       "address": "0x584AaAdE6fbe8AB39c1e1B0d6aB041A8a1C95751",
-  //       "network": "bsc-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Tempus": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xaB40A7e3cEF4AfB323cE23B6565012Ac7c76BFef",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "NexusMutual": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x586b9b2F8010b284A0197f392156f1A7Eb5e86e9",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Biconomy": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x48d601D601eD4cde44dd688573e2235aEa333BA2",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Push": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x68A9832153fd7f95f1a3FA24fcCC3D63a6486E66",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x6F3900606756FBC968536b2164BCed940f90848f",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x6B4FD234b827833dA40404de1FCf2a784d4bf033",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Gnosis": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x849D52316331967b6fF1198e5E32A0eB168D039d",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xeC83f750adfe0e52A8b0DbA6eeB6be5Ba0beE535",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "BarnBridge": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x4461258ADDa4085a93cf96A01F55A894d4bb2F5b",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Bella": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x7beC867a752dF5A61bC4266a90FA819B703bd801",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "PrimeDAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x567d220B0169836cBF351DF70A9c517096ec9De7",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Render Network": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xB6E39e540e3472E927001bbBf77FFB5AB357b0e0",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Bastion": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x7DB96909Da3fAbaB6c7Ee2c97c4F98221d583530",
-  //       "network": "aurora-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Radiant": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x750129c21c7846CFE0ce2c966D84c0bcA5658497",
-  //       "network": "arbitrum-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Merit Circle": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x7e9e4c0876B2102F33A1d82117Cc73B7FddD0032",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x73F7261cF493105202F8dcbB11C126a65703dA55",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Radicle": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x8dA8f82d2BbDd896822de723F55D6EdF416130ba",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Vesta": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xC9032419AA502fAFA107775DCa8b7d07575d9DB5",
-  //       "network": "arbitrum-mainnet"
-  //     },
-  //     {
-  //       "address": "0x4A4651B31d747D1DdbDDADCF1b1E24a5f6dcc7b0",
-  //       "network": "arbitrum-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Mycelium": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x95E8C5a56ACc8064311d79946c7Be87a1e90d17f",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x9F59e27Fd6c8D96DFb89da58C0C98Bac07E7A21a",
-  //       "network": "arbitrum-mainnet"
-  //     },
-  //     {
-  //       "address": "0x1C315Ae20c758d8Dc9B56415566c82F9085478a8",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x3E2d84477631691cC49B75a41bAe7ca8e032E8ac",
-  //       "network": "arbitrum-mainnet"
-  //     }
-  //   ]
-  // },
+  "Sarcophagus": {
+    "wallets": [
+      {
+        "address": "0x7862a4314508a9De68FC5e71876D46a1bf4AE032",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xe74fC9DFc587241daD8A82aB50208355685D2b4C",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Benqi": {
+    "wallets": [
+      {
+        "address": "0x142eB2ed775e6d497aa8D03A2151D016bbfE7Fc2",
+        "network": "avalanche-mainnet"
+      },
+      {
+        "address": "0x9D6eF2445FCc41B0d08865f0a7839490cC58a7B7",
+        "network": "avalanche-mainnet"
+      },
+      {
+        "address": "0x6632044b9EC224E0077BFC6A5639081e67ece991",
+        "network": "avalanche-mainnet"
+      }
+    ]
+  },
+  "Layer2DAO": {
+    "wallets": [
+      {
+        "address": "0x5318f07A3a20A2f8bb0DDf14F1DD58C517a76508",
+        "network": "arbitrum-mainnet"
+      },
+      {
+        "address": "0xaF5a0068f5465260A1a88A6264D0dcE4469609CF",
+        "network": "optimism-mainnet"
+      }
+    ]
+  },
+  "Galxe": {
+    "wallets": [
+      {
+        "address": "0x28Fda5FB2Ac9436BC4bb8bEDAfEe25a550956dE6",
+        "network": "arbitrum-mainnet"
+      },
+      {
+        "address": "0x03a42D37066726FfDc8F2BCd1C422f72A1717882",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x783c330A7A4968A08ce100A16ac27Ff2cCfAEbdf",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Gearbox": {
+    "wallets": [
+      {
+        "address": "0x7b065Fcb0760dF0CEA8CFd144e08554F3CeA73D1",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x8ACEd4217bA809B0F7164cdbAF7c4901Bd6575Ac",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "LUKSO": {
+    "wallets": [
+      {
+        "address": "0xC67810de5816917F1DBc618c084B82441921F55f",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xD52306Eabc2BE4e2dC8Fbd1f929aC73008430f3F",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Frax Finance": {
+    "wallets": [
+      {
+        "address": "0x63278bF9AcdFC9fA65CFa2940b89A34ADfbCb4A1",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Metafluence": {
+    "wallets": [
+      {
+        "address": "0x083e60cE96123967Aa584F4ED6Fc4b847eEFAA08",
+        "network": "bsc-mainnet"
+      },
+      {
+        "address": "0xe636883F63479a25f03B5e60d04e4BDD1ce49BEF",
+        "network": "bsc-mainnet"
+      },
+      {
+        "address": "0x714842729E5494251532A5E720f47bdBB9f76051",
+        "network": "bsc-mainnet"
+      },
+      {
+        "address": "0x584AaAdE6fbe8AB39c1e1B0d6aB041A8a1C95751",
+        "network": "bsc-mainnet"
+      }
+    ]
+  },
+
+  "Tempus": {
+    "wallets": [
+      {
+        "address": "0xaB40A7e3cEF4AfB323cE23B6565012Ac7c76BFef",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "NexusMutual": {
+    "wallets": [
+      {
+        "address": "0x586b9b2F8010b284A0197f392156f1A7Eb5e86e9",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Biconomy": {
+    "wallets": [
+      {
+        "address": "0x48d601D601eD4cde44dd688573e2235aEa333BA2",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Push": {
+    "wallets": [
+      {
+        "address": "0x68A9832153fd7f95f1a3FA24fcCC3D63a6486E66",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x6F3900606756FBC968536b2164BCed940f90848f",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x6B4FD234b827833dA40404de1FCf2a784d4bf033",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Gnosis": {
+    "wallets": [
+      {
+        "address": "0x849D52316331967b6fF1198e5E32A0eB168D039d",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xeC83f750adfe0e52A8b0DbA6eeB6be5Ba0beE535",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "BarnBridge": {
+    "wallets": [
+      {
+        "address": "0x4461258ADDa4085a93cf96A01F55A894d4bb2F5b",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Bella": {
+    "wallets": [
+      {
+        "address": "0x7beC867a752dF5A61bC4266a90FA819B703bd801",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "PrimeDAO": {
+    "wallets": [
+      {
+        "address": "0x567d220B0169836cBF351DF70A9c517096ec9De7",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Render Network": {
+    "wallets": [
+      {
+        "address": "0xB6E39e540e3472E927001bbBf77FFB5AB357b0e0",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Bastion": {
+    "wallets": [
+      {
+        "address": "0x7DB96909Da3fAbaB6c7Ee2c97c4F98221d583530",
+        "network": "aurora-mainnet"
+      }
+    ]
+  },
+  "Radiant": {
+    "wallets": [
+      {
+        "address": "0x750129c21c7846CFE0ce2c966D84c0bcA5658497",
+        "network": "arbitrum-mainnet"
+      }
+    ]
+  },
+  "Merit Circle": {
+    "wallets": [
+      {
+        "address": "0x7e9e4c0876B2102F33A1d82117Cc73B7FddD0032",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x73F7261cF493105202F8dcbB11C126a65703dA55",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Radicle": {
+    "wallets": [
+      {
+        "address": "0x8dA8f82d2BbDd896822de723F55D6EdF416130ba",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Vesta": {
+    "wallets": [
+      {
+        "address": "0xC9032419AA502fAFA107775DCa8b7d07575d9DB5",
+        "network": "arbitrum-mainnet"
+      },
+      {
+        "address": "0x4A4651B31d747D1DdbDDADCF1b1E24a5f6dcc7b0",
+        "network": "arbitrum-mainnet"
+      }
+    ]
+  },
+  "Mycelium": {
+    "wallets": [
+      {
+        "address": "0x95E8C5a56ACc8064311d79946c7Be87a1e90d17f",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x9F59e27Fd6c8D96DFb89da58C0C98Bac07E7A21a",
+        "network": "arbitrum-mainnet"
+      },
+      {
+        "address": "0x1C315Ae20c758d8Dc9B56415566c82F9085478a8",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x3E2d84477631691cC49B75a41bAe7ca8e032E8ac",
+        "network": "arbitrum-mainnet"
+      }
+    ]
+  },
   "JonesDAO": {
     "wallets": [
       {
@@ -885,22 +886,22 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "Trader Joe": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xD858eBAa943b4C2fb06BA0Ba8920A132fd2410eE",
-  //       "network": "avalanche-mainnet"
-  //     },
-  //     {
-  //       "address": "0x799d4C5E577cF80221A076064a2054430D2af5cD",
-  //       "network": "avalanche-mainnet"
-  //     },
-  //     {
-  //       "address": "0x8F38558188FAe593E8E6347F124351CF4fDd032D",
-  //       "network": "avalanche-mainnet"
-  //     }
-  //   ]
-  // },
+  "Trader Joe": {
+    "wallets": [
+      {
+        "address": "0xD858eBAa943b4C2fb06BA0Ba8920A132fd2410eE",
+        "network": "avalanche-mainnet"
+      },
+      {
+        "address": "0x799d4C5E577cF80221A076064a2054430D2af5cD",
+        "network": "avalanche-mainnet"
+      },
+      {
+        "address": "0x8F38558188FAe593E8E6347F124351CF4fDd032D",
+        "network": "avalanche-mainnet"
+      }
+    ]
+  },
   "Notional": {
     "wallets": [
       {
@@ -909,38 +910,38 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "UMA": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x8180D59b7175d4064bDFA8138A58e9baBFFdA44a",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x7b292034084A41B9D441B71b6E3557Edd0463fa8",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Paraswap": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x429c73dcb422f23ca9b2C9929eC7687c515dD810",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x5A61D9214adEFD7669428a03A4e8734A00E9F464",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Telcoin": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x4eF3c56e7e012903bdaB5A90fFa6ab527006b291",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "UMA": {
+    "wallets": [
+      {
+        "address": "0x8180D59b7175d4064bDFA8138A58e9baBFFdA44a",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x7b292034084A41B9D441B71b6E3557Edd0463fa8",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Paraswap": {
+    "wallets": [
+      {
+        "address": "0x429c73dcb422f23ca9b2C9929eC7687c515dD810",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x5A61D9214adEFD7669428a03A4e8734A00E9F464",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Telcoin": {
+    "wallets": [
+      {
+        "address": "0x4eF3c56e7e012903bdaB5A90fFa6ab527006b291",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Arbis": {
     "wallets": [
       {
@@ -965,38 +966,38 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "Lido": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x695C388153bEa0fbE3e1C049c149bAD3bc917740",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x12a43b049A7D330cB8aEAB5113032D18AE9a9030",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x87D93d9B2C672bf9c9642d853a8682546a5012B5",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Angle": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xdC4e6DFe07EFCa50a197DF15D9200883eF4Eb1c8",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xe02F8E39b8cFA7d3b62307E46077669010883459",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xdA2D2f638D6fcbE306236583845e5822554c02EA",
-  //       "network": "matic-mainnet"
-  //     }
-  //   ]
-  // },
+  "Lido": {
+    "wallets": [
+      {
+        "address": "0x695C388153bEa0fbE3e1C049c149bAD3bc917740",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x12a43b049A7D330cB8aEAB5113032D18AE9a9030",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x87D93d9B2C672bf9c9642d853a8682546a5012B5",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Angle": {
+    "wallets": [
+      {
+        "address": "0xdC4e6DFe07EFCa50a197DF15D9200883eF4Eb1c8",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xe02F8E39b8cFA7d3b62307E46077669010883459",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xdA2D2f638D6fcbE306236583845e5822554c02EA",
+        "network": "matic-mainnet"
+      }
+    ]
+  },
   "Goldfinch": {
     "wallets": [
       {
@@ -1005,46 +1006,46 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "Uniswap": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xe571dC7A558bb6D68FfE264c3d7BB98B0C6C73fC",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x3D30B1aB88D487B0F3061F40De76845Bec3F1e94",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x4b4e140D1f131fdaD6fb59C13AF796fD194e4135",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "HairDAO": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xe98134dCe5959Eb8D13b7d6543b8E16a20ed973E",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
-  // "Origin": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x70fCE97d671E81080CA3ab4cc7A59aAc2E117137",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "Uniswap": {
+    "wallets": [
+      {
+        "address": "0xe571dC7A558bb6D68FfE264c3d7BB98B0C6C73fC",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x3D30B1aB88D487B0F3061F40De76845Bec3F1e94",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x4b4e140D1f131fdaD6fb59C13AF796fD194e4135",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "HairDAO": {
+    "wallets": [
+      {
+        "address": "0xe98134dCe5959Eb8D13b7d6543b8E16a20ed973E",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
+  "Origin": {
+    "wallets": [
+      {
+        "address": "0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x70fCE97d671E81080CA3ab4cc7A59aAc2E117137",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Bend": {
     "wallets": [
       {
@@ -1065,26 +1066,26 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "dYdX": {
-  //   "wallets": [
-  //     {
-  //       "address": "0xFa3811E5C92358133330f9F787980ba1e8E0D99a",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xE710CEd57456D3A16152c32835B5FB4E72D9eA5b",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x08a90Fe0741B7DeF03fB290cc7B273F1855767D8",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0xb9431E19B29B952d9358025f680077C3Fd37292f",
-  //       "network": "eth-mainnet"
-  //     }
-  //   ]
-  // },
+  "dYdX": {
+    "wallets": [
+      {
+        "address": "0xFa3811E5C92358133330f9F787980ba1e8E0D99a",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xE710CEd57456D3A16152c32835B5FB4E72D9eA5b",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x08a90Fe0741B7DeF03fB290cc7B273F1855767D8",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0xb9431E19B29B952d9358025f680077C3Fd37292f",
+        "network": "eth-mainnet"
+      }
+    ]
+  },
   "Lyra": {
     "wallets": [
       {
@@ -1253,32 +1254,32 @@ export const daos: OrganizationIndexer = {
       }
     ]
   },
-  // "1inch": {
-  //   "wallets": [
-  //     {
-  //       "address": "0x7951c7ef839e26F63DA87a42C9a87986507f1c07",
-  //       "network": "eth-mainnet"
-  //     },
-  //     {
-  //       "address": "0x71890aC6209Fae61E9D66691c47B168B8300a7c5",
-  //       "network": "arbitrum-mainnet"
-  //     },
-  //     {
-  //       "address": "0x5ef96E97e25dB95B906d56A0A517a6c407FD4083",
-  //       "network": "avalanche-mainnet"
-  //     },
-  //     {
-  //       "address": "0xb946a9FD3935F3A6364F822e814a15E14b841e67",
-  //       "network": "bsc-mainnet"
-  //     },
-  //     {
-  //       "address": "0xdCBc42C20B7296BfEA6E47b8D88AdD4f69a6DCCB",
-  //       "network": "optimism-mainnet"
-  //     },
-  //     {
-  //       "address": "0x0A777DCD3F7924AD769aB2026b2Bb377bD08F4CA",
-  //       "network": "matic-mainnet"
-  //     }
-  //   ]
-  // }
+  "1inch": {
+    "wallets": [
+      {
+        "address": "0x7951c7ef839e26F63DA87a42C9a87986507f1c07",
+        "network": "eth-mainnet"
+      },
+      {
+        "address": "0x71890aC6209Fae61E9D66691c47B168B8300a7c5",
+        "network": "arbitrum-mainnet"
+      },
+      {
+        "address": "0x5ef96E97e25dB95B906d56A0A517a6c407FD4083",
+        "network": "avalanche-mainnet"
+      },
+      {
+        "address": "0xb946a9FD3935F3A6364F822e814a15E14b841e67",
+        "network": "bsc-mainnet"
+      },
+      {
+        "address": "0xdCBc42C20B7296BfEA6E47b8D88AdD4f69a6DCCB",
+        "network": "optimism-mainnet"
+      },
+      {
+        "address": "0x0A777DCD3F7924AD769aB2026b2Bb377bD08F4CA",
+        "network": "matic-mainnet"
+      }
+    ]
+  }
 }

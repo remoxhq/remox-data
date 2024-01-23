@@ -31,29 +31,26 @@ export const fetchAndStoreAnnualBalance = async () => {
 
         console.log(await collection.countDocuments());
 
-        await Promise.all(
-            Object.keys(daos).map(async (daoName) => {
-                if (!daos[daoName] || storedOrgsMap.get(daoName)) return;
+        await Promise.all(Object.keys(daos).map(async (daoName, index) => {
+            if (!daos[daoName] || storedOrgsMap.get(daoName)) return;
 
-                let historicalTreasury: TreasuryIndexer = {}
-                let walletAddresses: string[] = []
+            let historicalTreasury: TreasuryIndexer = {}
+            let walletAddresses: string[] = []
 
-                await rootParser(daos[daoName], historicalTreasury, walletAddresses, daoName);
+            await rootParser(daos[daoName], historicalTreasury, walletAddresses, daoName);
 
-                historicalTreasury = Object.entries(historicalTreasury).sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {})
+            historicalTreasury = Object.entries(historicalTreasury).sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {})
 
-                let responseObj = {
-                    name: daoName,
-                    addresses: walletAddresses,
-                    annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury).filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
-                };
+            let responseObj = {
+                name: daoName,
+                addresses: walletAddresses,
+                annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury).filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
+            };
 
-                await collection.insertOne(responseObj)
+            await collection.insertOne(responseObj)
 
-                return { [daoName]: responseObj }
-            })
-        )
-
+            return { [daoName]: responseObj }
+        }))
         return {};
     } catch (error: any) {
         throw new Error(error);

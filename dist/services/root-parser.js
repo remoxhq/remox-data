@@ -15,7 +15,7 @@ const covalentApiKey = process.env.COVALENT_API_KEY || "";
 const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
     try {
         const covalentClient = new _covalent.CovalentClient(covalentApiKey);
-        await Promise.all(dao.wallets.map(async (wallet)=>{
+        for await (const wallet of Object.values(dao.wallets)){
             walletAddresses.push(wallet.address);
             const walletAnnualPortfolioBalance = await covalentClient.BalanceService.getHistoricalPortfolioForWalletAddress(wallet.network, wallet.address, {
                 quoteCurrency: 'USD',
@@ -51,7 +51,7 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                 });
             });
             console.log(name + "1");
-        }));
+        }
     } catch (error) {
         throw new Error(error);
     }
