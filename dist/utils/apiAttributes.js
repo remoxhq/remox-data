@@ -16,11 +16,14 @@ _export(exports, {
         return TreasuryRoute;
     }
 });
+const base = "/api/v1";
 var TreasuryRoute;
 (function(TreasuryRoute) {
-    TreasuryRoute["GetAnnualTreasury"] = "/treasury/balance/:name";
+    TreasuryRoute[TreasuryRoute["GetAnnualTreasury"] = base + "/treasury/balance/:name"] = "GetAnnualTreasury";
 })(TreasuryRoute || (TreasuryRoute = {}));
 var OrganizationRoute;
 (function(OrganizationRoute) {
-    OrganizationRoute["Create"] = "/organization/create";
+    OrganizationRoute[OrganizationRoute["Create"] = base + "/organization/create"] = "Create";
+    OrganizationRoute[OrganizationRoute["GetByName"] = base + "/organization/:name"] = "GetByName";
+    OrganizationRoute[OrganizationRoute["GetAll"] = base + "/organization"] = "GetAll";
 })(OrganizationRoute || (OrganizationRoute = {}));

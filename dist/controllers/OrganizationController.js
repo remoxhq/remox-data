@@ -10,7 +10,6 @@ Object.defineProperty(exports, "OrganizationController", {
 });
 const _inversify = require("inversify");
 const _types = require("../utils/types");
-const _utils = require("../utils");
 function _define_property(obj, key, value) {
     if (key in obj) {
         Object.defineProperty(obj, key, {
@@ -37,9 +36,13 @@ function _ts_param(paramIndex, decorator) {
 }
 let OrganizationController = class OrganizationController {
     async create(req, res) {
-        const parserdBody = (0, _utils.parseFormData)(req.body, "accounts");
-        if (req.files) parserdBody['image'] = req.files[0];
-        res.send(parserdBody);
+        await this.organizationService.createOrganization(req, res);
+    }
+    async getByName(req, res) {
+        await this.organizationService.getOrganizationByName(req, res);
+    }
+    async getAll(req, res) {
+        await this.organizationService.getAllOrganizations(req, res);
     }
     constructor(organizationService){
         _define_property(this, "organizationService", void 0);

@@ -14,6 +14,7 @@ const _cors = /*#__PURE__*/ _interop_require_default(require("cors"));
 const _loadRoutes = /*#__PURE__*/ _interop_require_default(require("./loadRoutes"));
 const _middlewares = require("../middlewares");
 const _bodyparser = /*#__PURE__*/ _interop_require_default(require("body-parser"));
+const _multer = /*#__PURE__*/ _interop_require_default(require("multer"));
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -42,6 +43,7 @@ async function startServer(app) {
     }
 }
 function loadMiddlewares(app) {
+    app.use((0, _multer.default)().any());
     app.use(_bodyparser.default.urlencoded({
         extended: true
     }));

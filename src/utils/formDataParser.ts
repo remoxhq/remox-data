@@ -1,29 +1,28 @@
-export function parseFormData<T>(body: any, field: string) {
-    const parsedBody: any = {}
-    const data: T[] = [];
-    const bodyAsObject = body as { [key: string]: any };
+export const parseFormData = (fieldArrayPrefix: string, req: any) => {
+    let parsedBody: any = {}
 
-    Object.keys(body).map((key) => {
-        if (key.startsWith(`${field}[`)) {
-            const index = key.split('[')[1].charAt(0)
+    const dynamicFields = Object.keys(req.body);
 
-            if (index) {
-                const parsedIndex = parseInt(index);
-                const item = {} as T;
+    const resultArray = dynamicFields.reduce((acc: any[], field) => {
+        if (!field.startsWith(`${fieldArrayPrefix}[`))
+            parsedBody[field] = req.body[field]
 
-                for (const prop in bodyAsObject) {
-                    if (prop.startsWith(`${field}[${parsedIndex}].`)) {
-                        const propName = prop.substring(`${field}[${parsedIndex}].`.length);
-                        item[propName as keyof T] = bodyAsObject[prop];
-                    }
-                }
-                data[parsedIndex] = item;
-            }
+        const index = /\[(\d+)\]/.exec(field)?.[1];
+
+        if (index !== undefined) {
+            const propertyName = field.replace(`[${index}]`, '');
+            const resultObject = { [propertyName.split(".")[1]]: req.body[field] };
+            acc[index as keyof {}] = { ...(acc[index as keyof {}] || {}), ...resultObject };
         }
-        else parsedBody[key] = bodyAsObject[key]
-    })
+        return acc;
+    }, []);
 
-    parsedBody[field] = data
+    if (req.files) {
+        Array.from(req.files).forEach((file: any) => {
+            parsedBody[file.fieldname] = file
+        })
+    }
+    parsedBody[fieldArrayPrefix] = resultArray;
 
     return parsedBody;
-}
+};

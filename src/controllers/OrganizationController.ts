@@ -1,20 +1,21 @@
 import { Request, Response } from 'express'
 import { inject, injectable } from "inversify";
 import { TYPES } from "../utils/types";
-import OrganizationManager from "../services/organizations/OrganizationManager";
-import { Account, Organization } from '../models';
-import { parseFormData } from '../utils';
+import IOrganizationService from '../services/organizations/IOrganizationService';
 
 @injectable()
 export class OrganizationController {
-    constructor(@inject(TYPES.IOrganizationService) private organizationService: OrganizationManager) { }
+    constructor(@inject(TYPES.IOrganizationService) private organizationService: IOrganizationService) { }
 
-    async create(req: Request<Organization>, res: Response) {
+    async create(req: Request, res: Response) {
+        await this.organizationService.createOrganization(req, res)
+    }
 
-        const parserdBody = parseFormData<Account>(req.body as Organization, "accounts");
-        if (req.files)
-            parserdBody['image' as keyof Account] = req.files[0 as keyof {}];
+    async getByName(req: Request, res: Response) {
+        await this.organizationService.getOrganizationByName(req, res)
+    }
 
-        res.send(parserdBody);
+    async getAll(req: Request, res: Response) {
+        await this.organizationService.getAllOrganizations(req, res)
     }
 }

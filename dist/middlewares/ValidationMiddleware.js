@@ -9,13 +9,15 @@ Object.defineProperty(exports, "validateBody", {
     }
 });
 const _utils = require("../utils");
-const validateBody = (schema, field)=>async (req, res, next)=>{
+const validateBody = (schema, fieldArrayPrefix)=>async (req, res, next)=>{
         try {
-            let parserdBody = (0, _utils.parseFormData)(req.body, field ?? "");
-            if (req.files) parserdBody['image'] = req.files[0];
-            const { error } = schema.validate(parserdBody);
+            const parsedBody = (0, _utils.parseFormData)(fieldArrayPrefix, req);
+            const { error } = schema.validate(parsedBody);
             if (error) return res.status(422).json({
-                error: error.details.map((x)=>x.message.replace(/"/g, ""))
+                error: {
+                    messages: error.details.map((x)=>x.message.replace(/"/g, "")),
+                    statusCode: 422
+                }
             });
             next();
         } catch (err) {

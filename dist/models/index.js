@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 _export_star(require("./errors/types"), exports);
 _export_star(require("./treasuries/types"), exports);
 _export_star(require("./organizations/types"), exports);
+_export_star(require("./pagination"), exports);
 function _export_star(from, to) {
     Object.keys(from).forEach(function(k) {
         if (k !== "default" && !Object.prototype.hasOwnProperty.call(to, k)) {

@@ -17,15 +17,19 @@ function _interop_require_default(obj) {
 const accountSchema = _joi.default.object({
     name: _joi.default.string().alphanum().required().label("Account name"),
     address: _joi.default.string().alphanum().required().label("Account address"),
-    chain: _joi.default.string().alphanum().required().label("Organization chain")
+    chain: _joi.default.string().alphanum().required().label("Account chain")
 });
 const organizationShcema = _joi.default.object({
     name: _joi.default.string().alphanum().min(3).max(10).required().label("Organization name"),
     image: _joi.default.any().meta({
         accept: 'image/*'
     }).custom((value, helpers)=>{
-        if (value && value.mimetype !== 'image/jpeg') {
-            return helpers.error('File must be an FFile image');
+        if (value && ![
+            "image/jpeg",
+            "image/png",
+            "image/svg+xml"
+        ].some((x)=>x === value.mimetype)) {
+            return helpers.error('File must be an image/jpeg, image/png, image/svg+xml');
         }
         return value;
     }).required().label("Organization image"),
@@ -34,5 +38,6 @@ const organizationShcema = _joi.default.object({
     github: _joi.default.string().label("Organization github url"),
     discord: _joi.default.string().label("Organization discord url"),
     twitter: _joi.default.string().label("Organization twitter url"),
+    isPrivate: _joi.default.string(),
     accounts: _joi.default.array().items(accountSchema).required()
 });

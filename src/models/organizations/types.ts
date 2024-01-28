@@ -9,6 +9,8 @@ export interface Organization {
     github: string,
     discord: string,
     twitter: string,
+    isPrivate: boolean,
+    isVerified: boolean,
     accounts: Account[]
 };
 
@@ -32,7 +34,7 @@ const accountSchema = Joi.object<Account>({
     chain: Joi.string()
         .alphanum()
         .required()
-        .label("Organization chain")
+        .label("Account chain")
 });
 
 export const organizationShcema = Joi.object<Organization>({
@@ -46,8 +48,8 @@ export const organizationShcema = Joi.object<Organization>({
     image: Joi.any()
         .meta({ accept: 'image/*' })
         .custom((value, helpers) => {
-            if (value && value.mimetype !== 'image/jpeg') {
-                return helpers.error('File must be an FFile image');
+            if (value && !["image/jpeg", "image/png", "image/svg+xml"].some((x) => x === value.mimetype)) {
+                return helpers.error('File must be an image/jpeg, image/png, image/svg+xml');
             }
             return value;
         })
@@ -72,6 +74,8 @@ export const organizationShcema = Joi.object<Organization>({
 
     twitter: Joi.string()
         .label("Organization twitter url"),
+
+    isPrivate: Joi.string(),
 
     accounts: Joi.array().items(accountSchema).required(),
 });

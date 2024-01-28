@@ -4,6 +4,7 @@ import cors from "cors";
 import configureRouter from "./loadRoutes";
 import { errorHandler } from "../middlewares";
 import bodyParser from "body-parser";
+import multer from "multer";
 config();
 
 export async function startServer(app: any) {
@@ -33,6 +34,7 @@ export async function startServer(app: any) {
 }
 
 function loadMiddlewares(app: any) {
+    app.use(multer().any())
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.use(cors());
