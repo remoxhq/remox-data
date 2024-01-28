@@ -1,9 +1,9 @@
 import { MongoClient } from "mongodb";
 import { config } from "dotenv";
-import { TreasuryIndexer } from "./types";
 import { rootParser } from "./root-parser";
-import { daos } from "../firebase-db";
+import { daos } from "../libs/firebase-db";
 import date from 'date-and-time';
+import { TreasuryIndexer } from "../models/treasuries/types";
 
 config();
 

@@ -1,7 +1,7 @@
-import { CovalentClient, Chain } from "../covalent"
-import { Organization } from "../firebase-db"
+import { CovalentClient, Chain } from "../libs/covalent"
+import { Organization } from "../libs/firebase-db"
 import { config } from "dotenv"
-import { TreasuryIndexer } from "./types";
+import { TreasuryIndexer } from "../models/treasuries/types";
 
 config()
 const covalentApiKey = process.env.COVALENT_API_KEY || "";
@@ -21,8 +21,6 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     days: 365,
                 }
             )
-
-            console.log(name);
 
             walletAnnualPortfolioBalance.data.items?.map((token) => {
                 token.holdings.forEach((holding, index) => {
@@ -52,8 +50,6 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     historicalTreasury[date] = treasuryByDate;
                 });
             })
-
-            console.log(name + "1");
         }
     } catch (error: any) {
         throw new Error(error);

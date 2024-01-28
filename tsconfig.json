@@ -6,7 +6,8 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "typeRoots": [
-      "./node_modules/@types"
+      "./node_modules/@types",
+      "reflect-metadata"
     ],
     "sourceMap": true,
     "outDir": "dist",
@@ -23,13 +24,16 @@
     "skipLibCheck": true,
     "paths": {
       "@firebase-db/*": [
-        "./src/firebase-db/*"
+        "src/libs/firebase-db/*"
       ],
       "@covalent/*": [
-        "./src/covalent/*"
+        "src/libs/covalent/*"
       ],
       "@services/*": [
         "./src/services/*"
+      ],
+      "@controllers/*": [
+        "./src/controllers/*"
       ],
     }
   },
