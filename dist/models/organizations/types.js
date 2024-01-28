@@ -14,6 +14,25 @@ function _interop_require_default(obj) {
         default: obj
     };
 }
+const accountSchema = _joi.default.object({
+    name: _joi.default.string().alphanum().required().label("Account name"),
+    address: _joi.default.string().alphanum().required().label("Account address"),
+    chain: _joi.default.string().alphanum().required().label("Organization chain")
+});
 const organizationShcema = _joi.default.object({
-    name: _joi.default.string().alphanum().min(3).max(30).required().label("Organization name")
+    name: _joi.default.string().alphanum().min(3).max(10).required().label("Organization name"),
+    image: _joi.default.any().meta({
+        accept: 'image/*'
+    }).custom((value, helpers)=>{
+        if (value && value.mimetype !== 'image/jpeg') {
+            return helpers.error('File must be an FFile image');
+        }
+        return value;
+    }).required().label("Organization image"),
+    dashboardLink: _joi.default.string().alphanum().min(3).max(30).required().label("Organization dashboard link"),
+    website: _joi.default.string().label("Organization website url"),
+    github: _joi.default.string().label("Organization github url"),
+    discord: _joi.default.string().label("Organization discord url"),
+    twitter: _joi.default.string().label("Organization twitter url"),
+    accounts: _joi.default.array().items(accountSchema).required()
 });

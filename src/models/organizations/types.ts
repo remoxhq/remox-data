@@ -1,14 +1,79 @@
-import Joi, { ValidationErrorFunction } from "joi";
+import { File } from "buffer";
+import Joi from "joi";
 
 export interface Organization {
     name: number
+    image: File,
+    dashboardLink: string
+    website: string,
+    github: string,
+    discord: string,
+    twitter: string,
+    accounts: Account[]
 };
+
+export interface Account {
+    name: string
+    address: string,
+    chain: string
+};
+
+const accountSchema = Joi.object<Account>({
+    name: Joi.string()
+        .alphanum()
+        .required()
+        .label("Account name"),
+
+    address: Joi.string()
+        .alphanum()
+        .required()
+        .label("Account address"),
+
+    chain: Joi.string()
+        .alphanum()
+        .required()
+        .label("Organization chain")
+});
 
 export const organizationShcema = Joi.object<Organization>({
     name: Joi.string()
         .alphanum()
         .min(3)
-        .max(30)
+        .max(10)
         .required()
         .label("Organization name"),
+
+    image: Joi.any()
+        .meta({ accept: 'image/*' })
+        .custom((value, helpers) => {
+            if (value && value.mimetype !== 'image/jpeg') {
+                return helpers.error('File must be an FFile image');
+            }
+            return value;
+        })
+        .required()
+        .label("Organization image"),
+
+    dashboardLink: Joi.string()
+        .alphanum()
+        .min(3)
+        .max(30)
+        .required()
+        .label("Organization dashboard link"),
+
+    website: Joi.string()
+        .label("Organization website url"),
+
+    github: Joi.string()
+        .label("Organization github url"),
+
+    discord: Joi.string()
+        .label("Organization discord url"),
+
+    twitter: Joi.string()
+        .label("Organization twitter url"),
+
+    accounts: Joi.array().items(accountSchema).required(),
 });
+
+

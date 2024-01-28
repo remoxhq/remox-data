@@ -2,7 +2,6 @@ import { MongoClient } from "mongodb";
 import { config } from "dotenv";
 import cors from "cors";
 import configureRouter from "./loadRoutes";
-import { configureContainer } from "./serviceProvider";
 import { errorHandler } from "../middlewares";
 import bodyParser from "body-parser";
 config();
@@ -34,9 +33,9 @@ export async function startServer(app: any) {
 }
 
 function loadMiddlewares(app: any) {
-    app.use(cors());
-    app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    app.use(cors());
 }
 
 async function closeMongoConnection(client: MongoClient) {

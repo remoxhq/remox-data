@@ -42,11 +42,11 @@ async function startServer(app) {
     }
 }
 function loadMiddlewares(app) {
-    app.use((0, _cors.default)());
-    app.use(_bodyparser.default.json());
     app.use(_bodyparser.default.urlencoded({
         extended: true
     }));
+    app.use(_bodyparser.default.json());
+    app.use((0, _cors.default)());
 }
 async function closeMongoConnection(client) {
     try {

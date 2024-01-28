@@ -1,9 +1,10 @@
 import { TYPES } from "./types";
 import { OrganizationRoute, TreasuryRoute } from "./apiAttributes";
 import { OrganizationController, TreasuryController } from "../controllers";
-import { validateBody } from "../middlewares";
-import { organizationShcema } from "../models";
 import { configureContainer } from "./serviceProvider";
+import multer from "multer";
+import { validateBody } from "../middlewares";
+import { Account, organizationShcema } from "../models";
 
 export default function configureRouter(app: any) {
     const diContainer = configureContainer(); //DI Container configuration
@@ -17,5 +18,8 @@ export default function configureRouter(app: any) {
         .get(treasuryController.getAnnualTreasury.bind(treasuryController))
 
     app.route(OrganizationRoute.Create)
-        .post(validateBody(organizationShcema), organizationController.create.bind(organizationController))
+        .post(
+            multer().any(),
+            validateBody(organizationShcema, "accounts")<Account>,
+            organizationController.create.bind(organizationController))
 }

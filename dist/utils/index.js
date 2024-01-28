@@ -9,6 +9,7 @@ _export_star(require("./apiAttributes"), exports);
 _export_star(require("./loadRoutes"), exports);
 _export_star(require("./serverConfig"), exports);
 _export_star(require("./serviceProvider"), exports);
+_export_star(require("./formDataParser"), exports);
 function _export_star(from, to) {
     Object.keys(from).forEach(function(k) {
         if (k !== "default" && !Object.prototype.hasOwnProperty.call(to, k)) {

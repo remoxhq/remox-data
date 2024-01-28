@@ -8,9 +8,12 @@ Object.defineProperty(exports, "validateBody", {
         return validateBody;
     }
 });
-const validateBody = (schema)=>(req, res, next)=>{
+const _utils = require("../utils");
+const validateBody = (schema, field)=>async (req, res, next)=>{
         try {
-            const { error } = schema.validate(req.body);
+            let parserdBody = (0, _utils.parseFormData)(req.body, field ?? "");
+            if (req.files) parserdBody['image'] = req.files[0];
+            const { error } = schema.validate(parserdBody);
             if (error) return res.status(422).json({
                 error: error.details.map((x)=>x.message.replace(/"/g, ""))
             });
