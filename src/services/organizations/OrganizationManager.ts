@@ -16,6 +16,13 @@ class OrganizationManager implements IOrganizationService {
     async createOrganization(req: Request, res: Response): Promise<Response> {
         const parsedBody = parseFormData("accounts", req);
         parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
+        parsedBody.networks = {};
+
+        Array.from(parsedBody.accounts).forEach((account: any) => {
+            if (!parsedBody.networks[account.chain]) {
+                parsedBody.networks[account.chain] = account.chain
+            }
+        })
 
         const db = req.app.locals.db as Db;
         const collection = db.collection(organizationCollection);
@@ -39,10 +46,11 @@ class OrganizationManager implements IOrganizationService {
     async getAllOrganizations(req: Request, res: Response): Promise<Response> {
         const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
         const pageSize = parseInt(req.query.pageSize as string, 10) || 10;
-
+        const filter = req.filter;
         const db = req.app.locals.db as Db;
+        
         const collection = db.collection(organizationCollection);
-        const response = await collection.find().skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
+        const response = await collection.find(filter).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
         if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
         return res.status(200).send(new Pagination(response, await collection.countDocuments(), pageIndex, pageSize,));

@@ -4,6 +4,7 @@ import { OrganizationController, TreasuryController } from "../controllers";
 import { configureContainer } from "./serviceProvider";
 import { validateBody } from "../middlewares";
 import { organizationShcema } from "../models";
+import { addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
 
 export default function configureRouter(app: any) {
     const diContainer = configureContainer(); //DI Container configuration
@@ -25,5 +26,5 @@ export default function configureRouter(app: any) {
         .get(organizationController.getByName.bind(organizationController))
 
     app.route(OrganizationRoute.GetAll)
-        .get(organizationController.getAll.bind(organizationController))
+        .get(addOrganizationFilter(), organizationController.getAll.bind(organizationController))
 }
