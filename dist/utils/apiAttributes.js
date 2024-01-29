@@ -9,6 +9,9 @@ function _export(target, all) {
     });
 }
 _export(exports, {
+    AuthRoute: function() {
+        return AuthRoute;
+    },
     OrganizationRoute: function() {
         return OrganizationRoute;
     },
@@ -28,3 +31,8 @@ var OrganizationRoute;
     OrganizationRoute[OrganizationRoute["GetAll"] = base + "/organization"] = "GetAll";
     OrganizationRoute[OrganizationRoute["Update"] = base + "/organization/:name"] = "Update";
 })(OrganizationRoute || (OrganizationRoute = {}));
+var AuthRoute;
+(function(AuthRoute) {
+    AuthRoute[AuthRoute["SingIn"] = base + "/auth/signin"] = "SingIn";
+    AuthRoute[AuthRoute["UpdateRole"] = base + "/auth/role/update"] = "UpdateRole";
+})(AuthRoute || (AuthRoute = {}));

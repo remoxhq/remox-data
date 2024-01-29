@@ -10,3 +10,8 @@ export const enum OrganizationRoute {
     GetAll = base + "/organization",
     Update = base + "/organization/:name",
 }
+
+export const enum AuthRoute {
+    SingIn = base + "/auth/signin",
+    UpdateRole = base + "/auth/role/update"
+}

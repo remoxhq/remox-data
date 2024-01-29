@@ -1,8 +1,8 @@
-import { TYPES } from "./types";
-import { OrganizationRoute, TreasuryRoute } from "./apiAttributes";
-import { OrganizationController, TreasuryController } from "../controllers";
+import { Roles, TYPES } from "./types";
+import { AuthRoute, OrganizationRoute, TreasuryRoute } from "./apiAttributes";
+import { AuthController, OrganizationController, TreasuryController } from "../controllers";
 import { configureContainer } from "./serviceProvider";
-import { checkUserSignature, validateBody } from "../middlewares";
+import { checkUserJwt, checkUserPermission, checkUserSignature, validateBody } from "../middlewares";
 import { organizationShcema } from "../models";
 import { addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
 
@@ -12,13 +12,14 @@ export default function configureRouter(app: any) {
     // inject controllers
     const treasuryController = diContainer.get<TreasuryController>(TYPES.TreasuryController);
     const organizationController = diContainer.get<OrganizationController>(TYPES.OrganizationController);
+    const authController = diContainer.get<AuthController>(TYPES.AuthController);
 
     // bind actions
     app.route(TreasuryRoute.GetAnnualTreasury)
         .get(treasuryController.getAnnualTreasury.bind(treasuryController))
 
     app.route(OrganizationRoute.Create)
-        .post(checkUserSignature(),
+        .post(checkUserJwt(),
             validateBody(organizationShcema, "accounts"),
             organizationController.create.bind(organizationController))
 
@@ -29,6 +30,15 @@ export default function configureRouter(app: any) {
         .get(addOrganizationFilter(), organizationController.getAll.bind(organizationController))
 
     app.route(OrganizationRoute.Update)
-        .put(validateBody(organizationShcema, "accounts"),
+        .put(checkUserJwt(),
+            validateBody(organizationShcema, "accounts"),
             organizationController.update.bind(organizationController))
+
+    app.route(AuthRoute.SingIn)
+        .post(checkUserSignature(),
+            authController.signIn.bind(authController))
+
+    app.route(AuthRoute.UpdateRole)
+        .post(checkUserPermission(Roles.SuperAdmin),
+            authController.updateRole.bind(authController))
 }

@@ -12,6 +12,9 @@ _export(exports, {
     ResponseMessage: function() {
         return ResponseMessage;
     },
+    Roles: function() {
+        return Roles;
+    },
     TYPES: function() {
         return TYPES;
     }
@@ -20,8 +23,10 @@ const TYPES = {
     IOrganizationService: Symbol.for("IOrganizationService"),
     ITreasuryService: Symbol.for("ITreasuryService"),
     IStorageService: Symbol.for("IStorageService"),
+    IAuthService: Symbol.for("IAuthService"),
     TreasuryController: Symbol.for("TreasuryController"),
-    OrganizationController: Symbol.for("OrganizationController")
+    OrganizationController: Symbol.for("OrganizationController"),
+    AuthController: Symbol.for("AuthController")
 };
 var ResponseMessage;
 (function(ResponseMessage) {
@@ -29,4 +34,11 @@ var ResponseMessage;
     ResponseMessage["OrganizationNotFound"] = "Organization is not found";
     ResponseMessage["OrganizationUpdated"] = "Organization is updated successfully";
     ResponseMessage["UnAuthorizedAction"] = "Signature is invalid";
+    ResponseMessage["UnknownServerError"] = "Internal server error";
 })(ResponseMessage || (ResponseMessage = {}));
+var Roles;
+(function(Roles) {
+    Roles["SuperAdmin"] = "Super Admin";
+    Roles["Admin"] = "Admin";
+    Roles["User"] = "User";
+})(Roles || (Roles = {}));
