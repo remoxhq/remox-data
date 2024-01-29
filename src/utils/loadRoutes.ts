@@ -2,7 +2,7 @@ import { TYPES } from "./types";
 import { OrganizationRoute, TreasuryRoute } from "./apiAttributes";
 import { OrganizationController, TreasuryController } from "../controllers";
 import { configureContainer } from "./serviceProvider";
-import { validateBody } from "../middlewares";
+import { checkUserSignature, validateBody } from "../middlewares";
 import { organizationShcema } from "../models";
 import { addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
 
@@ -18,7 +18,8 @@ export default function configureRouter(app: any) {
         .get(treasuryController.getAnnualTreasury.bind(treasuryController))
 
     app.route(OrganizationRoute.Create)
-        .post(validateBody(organizationShcema, "accounts"),
+        .post(checkUserSignature(),
+            validateBody(organizationShcema, "accounts"),
             organizationController.create.bind(organizationController))
 
     app.route(OrganizationRoute.GetByName)

@@ -28,4 +28,5 @@ var ResponseMessage;
     ResponseMessage["OrganizationCreated"] = "Organization is created successfully";
     ResponseMessage["OrganizationNotFound"] = "Organization is not found";
     ResponseMessage["OrganizationUpdated"] = "Organization is updated successfully";
+    ResponseMessage["UnAuthorizedAction"] = "Signature is invalid";
 })(ResponseMessage || (ResponseMessage = {}));
