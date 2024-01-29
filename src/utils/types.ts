@@ -7,6 +7,7 @@ export const TYPES = {
 };
 
 export const enum ResponseMessage {
-    OrganizationCreated = "Organization is created",
+    OrganizationCreated = "Organization is created successfully",
     OrganizationNotFound = "Organization is not found",
+    OrganizationUpdated = "Organization is updated successfully",
 };

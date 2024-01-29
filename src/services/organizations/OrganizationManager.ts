@@ -48,12 +48,38 @@ class OrganizationManager implements IOrganizationService {
         const pageSize = parseInt(req.query.pageSize as string, 10) || 10;
         const filter = req.filter;
         const db = req.app.locals.db as Db;
-        
+
         const collection = db.collection(organizationCollection);
         const response = await collection.find(filter).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
         if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
         return res.status(200).send(new Pagination(response, await collection.countDocuments(), pageIndex, pageSize,));
+    }
+
+    async updateOrganization(req: Request, res: Response): Promise<Response> {
+        const parsedBody = parseFormData("accounts", req);
+        const orgName = req.params.name;
+        parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
+        parsedBody.networks = {};
+
+        Array.from(parsedBody.accounts).forEach((account: any) => {
+            if (!parsedBody.networks[account.chain]) {
+                parsedBody.networks[account.chain] = account.chain
+            }
+        })
+
+        const db = req.app.locals.db as Db;
+        const collection = db.collection(organizationCollection);
+
+        const result = await collection.updateOne(
+            { name: orgName },
+            { $set: parsedBody }
+        );
+
+        if (result.modifiedCount > 0)
+            return res.json({ message: ResponseMessage.OrganizationUpdated });
+
+        return res.status(404).json(ResponseMessage.OrganizationNotFound);
     }
 }
 

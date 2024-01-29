@@ -44,6 +44,9 @@ let OrganizationController = class OrganizationController {
     async getAll(req, res) {
         await this.organizationService.getAllOrganizations(req, res);
     }
+    async update(req, res) {
+        await this.organizationService.updateOrganization(req, res);
+    }
     constructor(organizationService){
         _define_property(this, "organizationService", void 0);
         this.organizationService = organizationService;

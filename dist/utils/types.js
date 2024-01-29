@@ -25,6 +25,7 @@ const TYPES = {
 };
 var ResponseMessage;
 (function(ResponseMessage) {
-    ResponseMessage["OrganizationCreated"] = "Organization is created";
+    ResponseMessage["OrganizationCreated"] = "Organization is created successfully";
     ResponseMessage["OrganizationNotFound"] = "Organization is not found";
+    ResponseMessage["OrganizationUpdated"] = "Organization is updated successfully";
 })(ResponseMessage || (ResponseMessage = {}));

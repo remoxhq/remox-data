@@ -4,6 +4,7 @@ interface IOrganizationService {
     createOrganization(req: Request, res: Response): Promise<Response>;
     getOrganizationByName(req: Request, res: Response): Promise<Response>;
     getAllOrganizations(req: Request, res: Response): Promise<Response>;
+    updateOrganization(req: Request, res: Response): Promise<Response>;
 }
 
 export default IOrganizationService;

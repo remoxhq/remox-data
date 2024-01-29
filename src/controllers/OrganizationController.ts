@@ -18,4 +18,8 @@ export class OrganizationController {
     async getAll(req: Request, res: Response) {
         await this.organizationService.getAllOrganizations(req, res)
     }
+
+    async update(req: Request, res: Response) {
+        await this.organizationService.updateOrganization(req, res)
+    }
 }

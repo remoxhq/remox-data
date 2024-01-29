@@ -73,6 +73,28 @@ let OrganizationManager = class OrganizationManager {
         if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
         return res.status(200).send(new _models.Pagination(response, await collection.countDocuments(), pageIndex, pageSize));
     }
+    async updateOrganization(req, res) {
+        const parsedBody = (0, _utils.parseFormData)("accounts", req);
+        const orgName = req.params.name;
+        parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
+        parsedBody.networks = {};
+        Array.from(parsedBody.accounts).forEach((account)=>{
+            if (!parsedBody.networks[account.chain]) {
+                parsedBody.networks[account.chain] = account.chain;
+            }
+        });
+        const db = req.app.locals.db;
+        const collection = db.collection(organizationCollection);
+        const result = await collection.updateOne({
+            name: orgName
+        }, {
+            $set: parsedBody
+        });
+        if (result.modifiedCount > 0) return res.json({
+            message: _types.ResponseMessage.OrganizationUpdated
+        });
+        return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
+    }
     constructor(storageService){
         _define_property(this, "storageService", void 0);
         this.storageService = storageService;

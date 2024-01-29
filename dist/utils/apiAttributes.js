@@ -26,4 +26,5 @@ var OrganizationRoute;
     OrganizationRoute[OrganizationRoute["Create"] = base + "/organization/create"] = "Create";
     OrganizationRoute[OrganizationRoute["GetByName"] = base + "/organization/:name"] = "GetByName";
     OrganizationRoute[OrganizationRoute["GetAll"] = base + "/organization"] = "GetAll";
+    OrganizationRoute[OrganizationRoute["Update"] = base + "/organization/:name"] = "Update";
 })(OrganizationRoute || (OrganizationRoute = {}));

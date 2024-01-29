@@ -24,4 +24,5 @@ function configureRouter(app) {
     app.route(_apiAttributes.OrganizationRoute.Create).post((0, _middlewares.validateBody)(_models.organizationShcema, "accounts"), organizationController.create.bind(organizationController));
     app.route(_apiAttributes.OrganizationRoute.GetByName).get(organizationController.getByName.bind(organizationController));
     app.route(_apiAttributes.OrganizationRoute.GetAll).get((0, _OrganizationFilter.addOrganizationFilter)(), organizationController.getAll.bind(organizationController));
+    app.route(_apiAttributes.OrganizationRoute.Update).put((0, _middlewares.validateBody)(_models.organizationShcema, "accounts"), organizationController.update.bind(organizationController));
 }

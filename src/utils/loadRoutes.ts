@@ -18,8 +18,7 @@ export default function configureRouter(app: any) {
         .get(treasuryController.getAnnualTreasury.bind(treasuryController))
 
     app.route(OrganizationRoute.Create)
-        .post(
-            validateBody(organizationShcema, "accounts"),
+        .post(validateBody(organizationShcema, "accounts"),
             organizationController.create.bind(organizationController))
 
     app.route(OrganizationRoute.GetByName)
@@ -27,4 +26,8 @@ export default function configureRouter(app: any) {
 
     app.route(OrganizationRoute.GetAll)
         .get(addOrganizationFilter(), organizationController.getAll.bind(organizationController))
+
+    app.route(OrganizationRoute.Update)
+        .put(validateBody(organizationShcema, "accounts"),
+            organizationController.update.bind(organizationController))
 }
