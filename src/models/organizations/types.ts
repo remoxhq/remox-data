@@ -11,6 +11,10 @@ export interface Organization {
     twitter: string,
     isPrivate: boolean,
     isVerified: boolean,
+    createdBy: string,
+    createdDate: string,
+    updatedDate: string,
+    isDeleted: string,
     accounts: Account[]
 };
 
@@ -75,7 +79,17 @@ export const organizationShcema = Joi.object<Organization>({
     twitter: Joi.string()
         .label("Organization twitter url"),
 
-    isPrivate: Joi.string(),
+    createdBy: Joi.string()
+        .label("Organization Creator wallet address")
+        .required(),
+
+    isPrivate: Joi.boolean(),
+
+    isDeleted: Joi.boolean(),
+
+    createdDate: Joi.string(),
+
+    updatedDate: Joi.string(),
 
     accounts: Joi.array().items(accountSchema).required(),
 });

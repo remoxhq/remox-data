@@ -38,6 +38,10 @@ const organizationShcema = _joi.default.object({
     github: _joi.default.string().label("Organization github url"),
     discord: _joi.default.string().label("Organization discord url"),
     twitter: _joi.default.string().label("Organization twitter url"),
-    isPrivate: _joi.default.string(),
+    createdBy: _joi.default.string().label("Organization Creator wallet address").required(),
+    isPrivate: _joi.default.boolean(),
+    isDeleted: _joi.default.boolean(),
+    createdDate: _joi.default.string(),
+    updatedDate: _joi.default.string(),
     accounts: _joi.default.array().items(accountSchema).required()
 });

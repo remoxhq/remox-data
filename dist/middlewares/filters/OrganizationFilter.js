@@ -21,6 +21,9 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                 $regex: req.query.searchParam,
                 $options: 'i'
             };
+            if (req.query.mine) filter.createdBy = {
+                $regex: req.query.mine
+            };
             req.filter = filter;
             next();
         } catch (err) {

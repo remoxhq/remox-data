@@ -39,14 +39,9 @@ function _ts_param(paramIndex, decorator) {
 const organizationCollection = "Organizations";
 let OrganizationManager = class OrganizationManager {
     async createOrganization(req, res) {
-        const parsedBody = (0, _utils.parseFormData)("accounts", req);
-        parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
-        parsedBody.networks = {};
-        Array.from(parsedBody.accounts).forEach((account)=>{
-            if (!parsedBody.networks[account.chain]) {
-                parsedBody.networks[account.chain] = account.chain;
-            }
-        });
+        let parsedBody = (0, _utils.parseFormData)("accounts", req);
+        parsedBody.createdDate = new Date().toDateString();
+        await this.attachCommonFields(parsedBody);
         const db = req.app.locals.db;
         const collection = db.collection(organizationCollection);
         await collection.insertOne(parsedBody);
@@ -76,13 +71,8 @@ let OrganizationManager = class OrganizationManager {
     async updateOrganization(req, res) {
         const parsedBody = (0, _utils.parseFormData)("accounts", req);
         const orgName = req.params.name;
-        parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
-        parsedBody.networks = {};
-        Array.from(parsedBody.accounts).forEach((account)=>{
-            if (!parsedBody.networks[account.chain]) {
-                parsedBody.networks[account.chain] = account.chain;
-            }
-        });
+        parsedBody.updatedDate = new Date().toDateString();
+        await this.attachCommonFields(parsedBody);
         const db = req.app.locals.db;
         const collection = db.collection(organizationCollection);
         const result = await collection.updateOne({
@@ -94,6 +84,17 @@ let OrganizationManager = class OrganizationManager {
             message: _types.ResponseMessage.OrganizationUpdated
         });
         return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
+    }
+    async attachCommonFields(parsedBody) {
+        parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
+        parsedBody.networks = {};
+        parsedBody.isDeleted = false;
+        parsedBody.isVerified = false;
+        Array.from(parsedBody.accounts).forEach((account)=>{
+            if (!parsedBody.networks[account.chain]) {
+                parsedBody.networks[account.chain] = account.chain;
+            }
+        });
     }
     constructor(storageService){
         _define_property(this, "storageService", void 0);

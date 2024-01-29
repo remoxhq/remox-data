@@ -12,6 +12,9 @@ export const addOrganizationFilter = () =>
             if (req.query.searchParam)
                 filter.name = { $regex: req.query.searchParam as string, $options: 'i' };
 
+            if (req.query.mine)
+                filter.createdBy = { $regex: req.query.mine as string };
+
             req.filter = filter
             next();
         } catch (err) {
