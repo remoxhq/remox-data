@@ -2,16 +2,26 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-Object.defineProperty(exports, "default", {
-    enumerable: true,
-    get: function() {
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: all[name]
+    });
+}
+_export(exports, {
+    default: function() {
         return _default;
+    },
+    organizationCollection: function() {
+        return organizationCollection;
     }
 });
 const _inversify = require("inversify");
 const _utils = require("../../utils");
+const _mongodb = require("mongodb");
 const _types = require("../../utils/types");
 const _models = require("../../models");
+const _AuthManager = require("../auth/AuthManager");
 function _define_property(obj, key, value) {
     if (key in obj) {
         Object.defineProperty(obj, key, {
@@ -85,6 +95,36 @@ let OrganizationManager = class OrganizationManager {
         });
         return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
     }
+    async addFavorites(req, res) {
+        const orgId = req.params.organizationId;
+        if (!orgId) return res.status(422).json({
+            message: _types.ResponseMessage.OrganizationIdRequired
+        });
+        const db = req.app.locals.db;
+        const orgs = db.collection(organizationCollection);
+        const users = db.collection(_AuthManager.usersCollection);
+        let organization = await orgs.findOne({
+            _id: new _mongodb.ObjectId(orgId)
+        });
+        if (!organization) return res.json({
+            message: _types.ResponseMessage.OrganizationNotFound
+        });
+        const user = await this.authService.getUserByPublicKey(req, res);
+        const result = await users.updateOne({
+            publicKey: user.publicKey
+        }, {
+            $set: {
+                favoriteOrgs: [
+                    ...user.favoriteOrgs,
+                    new _mongodb.ObjectId(orgId)
+                ]
+            }
+        });
+        if (result.acknowledged) return res.json({
+            message: _types.ResponseMessage.UserUpdated
+        });
+        return res.status(500).json(_types.ResponseMessage.UnknownServerError);
+    }
     async attachCommonFields(parsedBody) {
         parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
         parsedBody.networks = {};
@@ -96,13 +136,16 @@ let OrganizationManager = class OrganizationManager {
             }
         });
     }
-    constructor(storageService){
+    constructor(storageService, authService){
         _define_property(this, "storageService", void 0);
+        _define_property(this, "authService", void 0);
         this.storageService = storageService;
+        this.authService = authService;
     }
 };
 OrganizationManager = _ts_decorate([
     (0, _inversify.injectable)(),
-    _ts_param(0, (0, _inversify.inject)(_types.TYPES.IStorageService))
+    _ts_param(0, (0, _inversify.inject)(_types.TYPES.IStorageService)),
+    _ts_param(1, (0, _inversify.inject)(_types.TYPES.IAuthService))
 ], OrganizationManager);
 const _default = OrganizationManager;

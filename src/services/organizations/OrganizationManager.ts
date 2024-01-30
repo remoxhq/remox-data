@@ -2,16 +2,20 @@ import { inject, injectable } from "inversify";
 import IOrganizationService from "./IOrganizationService";
 import { Request, Response } from "express";
 import { parseFormData } from "../../utils";
-import { Db } from "mongodb";
+import { Db, ObjectId } from "mongodb";
 import { ResponseMessage, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
 import { Pagination } from "../../models";
+import IAuthService from "../auth/IAuthService";
+import { usersCollection } from "../auth/AuthManager";
 
-const organizationCollection = "Organizations"
+export const organizationCollection = "Organizations"
 
 @injectable()
 class OrganizationManager implements IOrganizationService {
-    constructor(@inject(TYPES.IStorageService) private storageService: IStorageService) { }
+    constructor(@inject(TYPES.IStorageService) private storageService: IStorageService,
+        @inject(TYPES.IAuthService) private authService: IAuthService
+    ) { }
 
     async createOrganization(req: Request, res: Response): Promise<Response> {
         let parsedBody = parseFormData("accounts", req);
@@ -68,6 +72,33 @@ class OrganizationManager implements IOrganizationService {
             return res.json({ message: ResponseMessage.OrganizationUpdated });
 
         return res.status(404).json(ResponseMessage.OrganizationNotFound);
+    }
+
+    async addFavorites(req: Request, res: Response): Promise<Response> {
+        const orgId = req.params.organizationId;
+        if (!orgId) return res.status(422).json({ message: ResponseMessage.OrganizationIdRequired });
+
+        const db = req.app.locals.db as Db;
+        const orgs = db.collection(organizationCollection);
+        const users = db.collection(usersCollection);
+        let organization = await orgs.findOne({ _id: new ObjectId(orgId) });
+        if (!organization) return res.json({ message: ResponseMessage.OrganizationNotFound });
+
+        const user = await this.authService.getUserByPublicKey(req, res);
+
+        const result = await users.updateOne(
+            { publicKey: user.publicKey },
+            {
+                $set: {
+                    favoriteOrgs: [...user.favoriteOrgs, new ObjectId(orgId)]
+                }
+            }
+        );
+
+        if (result.acknowledged)
+            return res.json({ message: ResponseMessage.UserUpdated });
+
+        return res.status(500).json(ResponseMessage.UnknownServerError);
     }
 
     private async attachCommonFields(parsedBody: any) {

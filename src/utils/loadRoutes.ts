@@ -4,7 +4,7 @@ import { AuthController, OrganizationController, TreasuryController } from "../c
 import { configureContainer } from "./serviceProvider";
 import { checkUserJwt, checkUserPermission, checkUserSignature, validateBody } from "../middlewares";
 import { organizationShcema } from "../models";
-import { addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
+import { addFavOrganizationFilter, addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
 
 export default function configureRouter(app: any) {
     const diContainer = configureContainer(); //DI Container configuration
@@ -34,6 +34,10 @@ export default function configureRouter(app: any) {
             validateBody(organizationShcema, "accounts"),
             organizationController.update.bind(organizationController))
 
+    app.route(OrganizationRoute.AddFavorites)
+        .post(checkUserJwt(),
+            organizationController.addFavorites.bind(organizationController))
+
     app.route(AuthRoute.SingIn)
         .post(checkUserSignature(),
             authController.signIn.bind(authController))
@@ -41,4 +45,9 @@ export default function configureRouter(app: any) {
     app.route(AuthRoute.UpdateRole)
         .post(checkUserPermission(Roles.SuperAdmin),
             authController.updateRole.bind(authController))
+
+    app.route(AuthRoute.UserFavOrgs)
+        .get(checkUserJwt(),
+            addFavOrganizationFilter(),
+            authController.getUserFavOrgs.bind(authController))
 }

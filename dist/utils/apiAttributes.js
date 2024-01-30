@@ -30,9 +30,11 @@ var OrganizationRoute;
     OrganizationRoute[OrganizationRoute["GetByName"] = base + "/organization/:name"] = "GetByName";
     OrganizationRoute[OrganizationRoute["GetAll"] = base + "/organization"] = "GetAll";
     OrganizationRoute[OrganizationRoute["Update"] = base + "/organization/:name"] = "Update";
+    OrganizationRoute[OrganizationRoute["AddFavorites"] = base + "/organization/favorite/:organizationId"] = "AddFavorites";
 })(OrganizationRoute || (OrganizationRoute = {}));
 var AuthRoute;
 (function(AuthRoute) {
     AuthRoute[AuthRoute["SingIn"] = base + "/auth/signin"] = "SingIn";
     AuthRoute[AuthRoute["UpdateRole"] = base + "/auth/role/update"] = "UpdateRole";
+    AuthRoute[AuthRoute["UserFavOrgs"] = base + "/auth/favorites"] = "UserFavOrgs";
 })(AuthRoute || (AuthRoute = {}));

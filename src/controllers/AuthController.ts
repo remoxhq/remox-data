@@ -14,4 +14,8 @@ export class AuthController {
     async updateRole(req: Request, res: Response) {
         await this.authService.udpateRole(req, res)
     }
+
+    async getUserFavOrgs(req: Request, res: Response) {
+        await this.authService.getUserByPublicKeyWithOrgs(req, res)
+    }
 }

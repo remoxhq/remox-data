@@ -2,10 +2,18 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-Object.defineProperty(exports, "default", {
-    enumerable: true,
-    get: function() {
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: all[name]
+    });
+}
+_export(exports, {
+    default: function() {
         return _default;
+    },
+    usersCollection: function() {
+        return usersCollection;
     }
 });
 const _inversify = require("inversify");
@@ -28,7 +36,6 @@ const usersCollection = "Users";
 let AuthManager = class AuthManager {
     async signIn(req, res) {
         const publicKey = req.headers.address;
-        if (!publicKey) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
         const db = req.app.locals.db;
         const collection = db.collection(usersCollection);
         let existingUser = await collection.findOne({
@@ -56,7 +63,6 @@ let AuthManager = class AuthManager {
     async udpateRole(req, res) {
         const publicKey = req.body.to;
         const newRole = req.body.role;
-        if (!publicKey) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
         const db = req.app.locals.db;
         const collection = db.collection(usersCollection);
         const result = await collection.updateOne({
@@ -69,7 +75,77 @@ let AuthManager = class AuthManager {
         if (result.acknowledged) return res.json({
             message: _types.ResponseMessage.OrganizationUpdated
         });
-        return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
+        return res.status(404).json(_types.ResponseMessage.UserNotFound);
+    }
+    async getUserByPublicKey(req, res) {
+        const publicKey = req.headers.address;
+        if (!publicKey) return res.status(422).json({
+            message: _types.ResponseMessage.UserPublicKeyRequired
+        });
+        const db = req.app.locals.db;
+        const users = db.collection(usersCollection);
+        let user = await users.findOne({
+            publicKey
+        });
+        if (!user) return res.json({
+            message: _types.ResponseMessage.UserNotFound
+        });
+        return user;
+    }
+    async getUserByPublicKeyWithOrgs(req, res) {
+        const publicKey = req.headers.address;
+        if (!publicKey) return res.status(422).json({
+            message: _types.ResponseMessage.UserPublicKeyRequired
+        });
+        console.log(req.filter);
+        const db = req.app.locals.db;
+        const users = db.collection(usersCollection);
+        const result = await users.aggregate([
+            {
+                $match: {
+                    publicKey
+                }
+            },
+            {
+                $lookup: {
+                    from: 'Organizations',
+                    localField: 'favoriteOrgs',
+                    foreignField: '_id',
+                    as: 'favOrgs'
+                }
+            },
+            {
+                $project: {
+                    favoriteOrgs: 0
+                }
+            },
+            {
+                $unwind: {
+                    path: '$favOrgs',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    user: {
+                        $mergeObjects: '$$ROOT'
+                    },
+                    favOrgs: {
+                        $push: '$favOrgs'
+                    }
+                }
+            },
+            {
+                $match: req.filter
+            },
+            {
+                $project: {
+                    "user.favOrgs": 0
+                }
+            }
+        ]).toArray();
+        return res.status(200).send(result);
     }
 };
 AuthManager = _ts_decorate([

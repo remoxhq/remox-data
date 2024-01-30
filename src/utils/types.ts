@@ -11,9 +11,13 @@ export const TYPES = {
 export const enum ResponseMessage {
     OrganizationCreated = "Organization is created successfully",
     OrganizationNotFound = "Organization is not found",
+    OrganizationIdRequired = "Organization id is required",
     OrganizationUpdated = "Organization is updated successfully",
     UnAuthorizedAction = "Signature is invalid",
     UnknownServerError = "Internal server error",
+    UserNotFound = "User is not found",
+    UserUpdated = "User is updated",
+    UserPublicKeyRequired = "User public key is required",
 };
 
 export const enum Roles {

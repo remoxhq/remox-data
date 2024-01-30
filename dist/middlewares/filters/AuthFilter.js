@@ -65,7 +65,6 @@ const checkUserPermission = (role)=>async (req, res, next)=>{
             if (!token) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
             _jsonwebtoken.default.verify(token.split(" ")[1], process.env.AUTH_SECRET_KEY, (err, decoded)=>{
                 if (err || !decoded) return res.status(401).json(_types.ResponseMessage.UnAuthorizedAction);
-                console.log(decoded);
                 if (role !== decoded.role || createdBy !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
                 next();
             });

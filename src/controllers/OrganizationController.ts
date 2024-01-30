@@ -22,4 +22,8 @@ export class OrganizationController {
     async update(req: Request, res: Response) {
         await this.organizationService.updateOrganization(req, res)
     }
+
+    async addFavorites(req: Request, res: Response) {
+        await this.organizationService.addFavorites(req, res)
+    }
 }

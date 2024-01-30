@@ -9,9 +9,11 @@ export const enum OrganizationRoute {
     GetByName = base + "/organization/:name",
     GetAll = base + "/organization",
     Update = base + "/organization/:name",
+    AddFavorites = base + "/organization/favorite/:organizationId",
 }
 
 export const enum AuthRoute {
     SingIn = base + "/auth/signin",
-    UpdateRole = base + "/auth/role/update"
+    UpdateRole = base + "/auth/role/update",
+    UserFavOrgs = base + "/auth/favorites",
 }

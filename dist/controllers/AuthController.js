@@ -41,6 +41,9 @@ let AuthController = class AuthController {
     async updateRole(req, res) {
         await this.authService.udpateRole(req, res);
     }
+    async getUserFavOrgs(req, res) {
+        await this.authService.getUserByPublicKeyWithOrgs(req, res);
+    }
     constructor(authService){
         _define_property(this, "authService", void 0);
         this.authService = authService;

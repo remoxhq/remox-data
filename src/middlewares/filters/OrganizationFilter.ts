@@ -22,3 +22,31 @@ export const addOrganizationFilter = () =>
         }
     }
 
+export const addFavOrganizationFilter = () =>
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const filter: any = {};
+            if (req.query.chain) {
+                const chain = req.query.chain as string;
+                filter['favOrgs'] = {
+                    $elemMatch: {
+                        [`networks.${chain}`]: { $regex: chain as string }
+                    }
+                };
+            }
+
+            if (req.query.searchParam) {
+                filter['favOrgs'] = {
+                    $elemMatch: {
+                        [`name`]: { $regex: req.query.searchParam as string, $options: 'i' }
+                    }
+                };
+            }
+
+            req.filter = filter
+            next();
+        } catch (err) {
+            next(err);
+        }
+    }
+

@@ -32,9 +32,13 @@ var ResponseMessage;
 (function(ResponseMessage) {
     ResponseMessage["OrganizationCreated"] = "Organization is created successfully";
     ResponseMessage["OrganizationNotFound"] = "Organization is not found";
+    ResponseMessage["OrganizationIdRequired"] = "Organization id is required";
     ResponseMessage["OrganizationUpdated"] = "Organization is updated successfully";
     ResponseMessage["UnAuthorizedAction"] = "Signature is invalid";
     ResponseMessage["UnknownServerError"] = "Internal server error";
+    ResponseMessage["UserNotFound"] = "User is not found";
+    ResponseMessage["UserUpdated"] = "User is updated";
+    ResponseMessage["UserPublicKeyRequired"] = "User public key is required";
 })(ResponseMessage || (ResponseMessage = {}));
 var Roles;
 (function(Roles) {
