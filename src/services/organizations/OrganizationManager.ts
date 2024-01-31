@@ -5,9 +5,10 @@ import { parseFormData } from "../../utils";
 import { Db, ObjectId } from "mongodb";
 import { ResponseMessage, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
-import { Pagination } from "../../models";
+import { Organization, Pagination } from "../../models";
 import IAuthService from "../auth/IAuthService";
 import { usersCollection } from "../auth/AuthManager";
+import { OrganizationFilterRequest } from "../../middlewares";
 
 export const organizationCollection = "Organizations"
 
@@ -41,14 +42,24 @@ class OrganizationManager implements IOrganizationService {
         return res.status(200).send(response);
     }
 
-    async getAllOrganizations(req: Request, res: Response): Promise<Response> {
+    async getAllOrganizations(req: OrganizationFilterRequest, res: Response): Promise<Response> {
         const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
-        const pageSize = parseInt(req.query.pageSize as string, 10) || 10;
-        const filter = req.filter;
+        const pageSize = parseInt(req.query.pageSize as string, 10) || 20;
+        const aggregationPipeline = req.aggregationPipeline;
+        console.log(aggregationPipeline);
+
         const db = req.app.locals.db as Db;
 
-        const collection = db.collection(organizationCollection);
-        const response = await collection.find(filter).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
+        const collection = db.collection<Organization>(organizationCollection);
+        let response = await collection.aggregate<Organization>(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
+        // const user = await this.authService.getUserByPublicKey(req, res)
+        // const favoriteOrganizationsMap = new Map(Object.entries(user.favoriteOrganizations));
+
+        // response = response.map((org) => ({
+        //     ...org,
+        //     isFavorited: favoriteOrganizationsMap.has(org._id.toString()),
+        // }));
+
         if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
         return res.status(200).send(new Pagination(response, await collection.countDocuments(), pageIndex, pageSize,));
@@ -90,7 +101,7 @@ class OrganizationManager implements IOrganizationService {
             { publicKey: user.publicKey },
             {
                 $set: {
-                    favoriteOrgs: [...user.favoriteOrgs, new ObjectId(orgId)]
+                    [`favoriteOrganizations.${organization._id.toString()}`]: true
                 }
             }
         );

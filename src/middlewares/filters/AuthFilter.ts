@@ -26,13 +26,15 @@ export const checkUserJwt = () =>
         try {
             const token = req.headers.authorization?.toString();
             const createdBy = req.headers.address;
+
             if (!token) return res.status(401).send(ResponseMessage.UnAuthorizedAction)
 
             Jwt.verify(token.split(" ")[1], process.env.AUTH_SECRET_KEY!, (err, decoded: any) => {
                 if (err || !decoded)
                     return res.status(401).json(ResponseMessage.UnAuthorizedAction);
 
-                if (createdBy !== toChecksumAddress(decoded.publicKey)) return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+                if (createdBy !== toChecksumAddress(decoded.publicKey))
+                    return res.status(401).send(ResponseMessage.UnAuthorizedAction)
 
                 next();
             });
@@ -57,6 +59,17 @@ export const checkUserPermission = (role: string) =>
 
                 next();
             });
+        } catch (err) {
+            return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+        }
+    }
+
+export const authenticateUserOrAllowAnonymous = () =>
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const createdBy = req.headers.address;
+            if (createdBy) await checkUserJwt()(req, res, next);
+            else next()
         } catch (err) {
             return res.status(401).send(ResponseMessage.UnAuthorizedAction)
         }

@@ -70,11 +70,18 @@ let OrganizationManager = class OrganizationManager {
     }
     async getAllOrganizations(req, res) {
         const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
-        const pageSize = parseInt(req.query.pageSize, 10) || 10;
-        const filter = req.filter;
+        const pageSize = parseInt(req.query.pageSize, 10) || 20;
+        const aggregationPipeline = req.aggregationPipeline;
+        console.log(aggregationPipeline);
         const db = req.app.locals.db;
         const collection = db.collection(organizationCollection);
-        const response = await collection.find(filter).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
+        let response = await collection.aggregate(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
+        // const user = await this.authService.getUserByPublicKey(req, res)
+        // const favoriteOrganizationsMap = new Map(Object.entries(user.favoriteOrganizations));
+        // response = response.map((org) => ({
+        //     ...org,
+        //     isFavorited: favoriteOrganizationsMap.has(org._id.toString()),
+        // }));
         if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
         return res.status(200).send(new _models.Pagination(response, await collection.countDocuments(), pageIndex, pageSize));
     }
@@ -114,10 +121,7 @@ let OrganizationManager = class OrganizationManager {
             publicKey: user.publicKey
         }, {
             $set: {
-                favoriteOrgs: [
-                    ...user.favoriteOrgs,
-                    new _mongodb.ObjectId(orgId)
-                ]
+                [`favoriteOrganizations.${organization._id.toString()}`]: true
             }
         });
         if (result.acknowledged) return res.json({

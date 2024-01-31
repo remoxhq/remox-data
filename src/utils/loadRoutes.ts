@@ -2,12 +2,21 @@ import { Roles, TYPES } from "./types";
 import { AuthRoute, OrganizationRoute, TreasuryRoute } from "./apiAttributes";
 import { AuthController, OrganizationController, TreasuryController } from "../controllers";
 import { configureContainer } from "./serviceProvider";
-import { checkUserJwt, checkUserPermission, checkUserSignature, validateBody } from "../middlewares";
+import { authenticateUserOrAllowAnonymous, checkUserJwt, checkUserPermission, checkUserSignature, validateBody } from "../middlewares";
 import { organizationShcema } from "../models";
-import { addFavOrganizationFilter, addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
+import { addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
+import { Container } from "inversify";
+
+let diContainer: Container | null = null;
+
+export function getContainer(): Container {
+    if (!diContainer)
+        diContainer = configureContainer();
+    return diContainer;
+}
 
 export default function configureRouter(app: any) {
-    const diContainer = configureContainer(); //DI Container configuration
+    const diContainer = getContainer(); //DI Container configuration
 
     // inject controllers
     const treasuryController = diContainer.get<TreasuryController>(TYPES.TreasuryController);
@@ -27,7 +36,9 @@ export default function configureRouter(app: any) {
         .get(organizationController.getByName.bind(organizationController))
 
     app.route(OrganizationRoute.GetAll)
-        .get(addOrganizationFilter(), organizationController.getAll.bind(organizationController))
+        .get(authenticateUserOrAllowAnonymous(),
+            addOrganizationFilter(),
+            organizationController.getAll.bind(organizationController))
 
     app.route(OrganizationRoute.Update)
         .put(checkUserJwt(),
@@ -48,6 +59,5 @@ export default function configureRouter(app: any) {
 
     app.route(AuthRoute.UserFavOrgs)
         .get(checkUserJwt(),
-            addFavOrganizationFilter(),
             authController.getUserFavOrgs.bind(authController))
 }

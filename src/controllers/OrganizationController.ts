@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { inject, injectable } from "inversify";
 import { TYPES } from "../utils/types";
 import IOrganizationService from '../services/organizations/IOrganizationService';
+import { OrganizationFilterRequest } from '../middlewares';
 
 @injectable()
 export class OrganizationController {
@@ -15,7 +16,7 @@ export class OrganizationController {
         await this.organizationService.getOrganizationByName(req, res)
     }
 
-    async getAll(req: Request, res: Response) {
+    async getAll(req: OrganizationFilterRequest, res: Response) {
         await this.organizationService.getAllOrganizations(req, res)
     }
 

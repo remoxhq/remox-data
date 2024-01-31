@@ -20,6 +20,7 @@ const _inversify = require("inversify");
 const _dotenv = require("dotenv");
 const _types = require("../../utils/types");
 const _jsonwebtoken = /*#__PURE__*/ _interop_require_default(require("jsonwebtoken"));
+const _models = require("../../models");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -43,9 +44,9 @@ let AuthManager = class AuthManager {
         });
         if (!existingUser) {
             const newUser = {
-                publicKey,
+                publicKey: publicKey,
                 role: _types.Roles.User,
-                favoriteOrgs: []
+                favoriteOrganizations: new Map()
             };
             const createdUser = await collection.insertOne(newUser);
             if (!createdUser.insertedId) return res.status(500).send(_types.ResponseMessage.UnknownServerError);
@@ -79,17 +80,13 @@ let AuthManager = class AuthManager {
     }
     async getUserByPublicKey(req, res) {
         const publicKey = req.headers.address;
-        if (!publicKey) return res.status(422).json({
-            message: _types.ResponseMessage.UserPublicKeyRequired
-        });
+        if (!publicKey) throw new _models.CustomError(_types.ResponseMessage.UserNotFound, _models.ExceptionType.NotFound);
         const db = req.app.locals.db;
         const users = db.collection(usersCollection);
         let user = await users.findOne({
             publicKey
         });
-        if (!user) return res.json({
-            message: _types.ResponseMessage.UserNotFound
-        });
+        if (!user) throw new _models.CustomError(_types.ResponseMessage.UserNotFound, _models.ExceptionType.NotFound);
         return user;
     }
     async getUserByPublicKeyWithOrgs(req, res) {

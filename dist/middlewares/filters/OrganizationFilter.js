@@ -2,66 +2,48 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-function _export(target, all) {
-    for(var name in all)Object.defineProperty(target, name, {
-        enumerable: true,
-        get: all[name]
-    });
-}
-_export(exports, {
-    addFavOrganizationFilter: function() {
-        return addFavOrganizationFilter;
-    },
-    addOrganizationFilter: function() {
+Object.defineProperty(exports, "addOrganizationFilter", {
+    enumerable: true,
+    get: function() {
         return addOrganizationFilter;
     }
 });
+const _utils = require("../../utils");
+const _types = require("../../utils/types");
+const _mongodb = require("mongodb");
 const addOrganizationFilter = ()=>async (req, res, next)=>{
         try {
-            const filter = {};
-            if (req.query.chain) {
-                const chain = req.query.chain;
-                filter[`networks.${chain}`] = {
-                    $exists: true
-                };
-            }
-            if (req.query.searchParam) filter.name = {
+            const diContainer = (0, _utils.getContainer)();
+            const usrPulicKey = req.headers.address;
+            const aggregationPipeline = [];
+            const match = {};
+            const field = {};
+            if (req.query.chain) match[`networks.${req.query.chain}`] = {
+                $exists: true
+            };
+            if (req.query.searchParam) match.name = {
                 $regex: req.query.searchParam,
                 $options: 'i'
             };
-            if (req.query.mine) filter.createdBy = {
-                $regex: req.query.mine
-            };
-            req.filter = filter;
-            next();
-        } catch (err) {
-            next(err);
-        }
-    };
-const addFavOrganizationFilter = ()=>async (req, res, next)=>{
-        try {
-            const filter = {};
-            if (req.query.chain) {
-                const chain = req.query.chain;
-                filter['favOrgs'] = {
-                    $elemMatch: {
-                        [`networks.${chain}`]: {
-                            $regex: chain
-                        }
-                    }
+            if (req.query.mine && usrPulicKey) match.createdBy = usrPulicKey;
+            if (usrPulicKey) {
+                const authService = diContainer.get(_types.TYPES.IAuthService);
+                const user = await authService.getUserByPublicKey(req, res);
+                field[`isFavorited`] = {
+                    $in: [
+                        '$_id',
+                        Object.keys(user.favoriteOrganizations).map((id)=>new _mongodb.ObjectId(id))
+                    ]
                 };
             }
-            if (req.query.searchParam) {
-                filter['favOrgs'] = {
-                    $elemMatch: {
-                        [`name`]: {
-                            $regex: req.query.searchParam,
-                            $options: 'i'
-                        }
-                    }
-                };
-            }
-            req.filter = filter;
+            if (req.query.favOnly) match.isFavorited = true;
+            aggregationPipeline.push({
+                $addFields: field
+            });
+            aggregationPipeline.push({
+                $match: match
+            });
+            req.aggregationPipeline = aggregationPipeline;
             next();
         } catch (err) {
             next(err);

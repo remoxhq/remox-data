@@ -1,7 +1,9 @@
 import { File } from "buffer";
 import Joi from "joi";
+import { ObjectId } from "mongodb";
 
 export interface Organization {
+    _id: ObjectId,
     name: number
     image: File,
     dashboardLink: string

@@ -1,49 +1,47 @@
 import { NextFunction, Request, Response } from "express"
+import { getContainer } from "../../utils";
+import IAuthService from "../../services/auth/IAuthService";
+import { TYPES } from "../../utils/types";
+import { ObjectId } from "mongodb";
+
+export interface OrganizationFilterRequest extends Request {
+    aggregationPipeline?: Array<any>;
+}
 
 export const addOrganizationFilter = () =>
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: OrganizationFilterRequest, res: Response, next: NextFunction) => {
         try {
-            const filter: any = {};
-            if (req.query.chain) {
-                const chain = req.query.chain as string;
-                filter[`networks.${chain}`] = { $exists: true };
-            }
+            const diContainer = getContainer();
+            const usrPulicKey = req.headers.address;
+            
+            const aggregationPipeline: any[] = [];
+            const match: any = {};
+            const field: any = {};
+
+            if (req.query.chain)
+                match[`networks.${req.query.chain as string}`] = { $exists: true };
 
             if (req.query.searchParam)
-                filter.name = { $regex: req.query.searchParam as string, $options: 'i' };
+                match.name = { $regex: req.query.searchParam as string, $options: 'i' };
 
-            if (req.query.mine)
-                filter.createdBy = { $regex: req.query.mine as string };
+            if (req.query.mine && usrPulicKey)
+                match.createdBy = usrPulicKey;
 
-            req.filter = filter
-            next();
-        } catch (err) {
-            next(err);
-        }
-    }
-
-export const addFavOrganizationFilter = () =>
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const filter: any = {};
-            if (req.query.chain) {
-                const chain = req.query.chain as string;
-                filter['favOrgs'] = {
-                    $elemMatch: {
-                        [`networks.${chain}`]: { $regex: chain as string }
-                    }
-                };
+            if (usrPulicKey) {
+                const authService = diContainer.get<IAuthService>(TYPES.IAuthService);
+                const user = await authService.getUserByPublicKey(req, res)
+                field[`isFavorited`] = {
+                    $in: ['$_id', Object.keys(user.favoriteOrganizations).map((id) => new ObjectId(id))],
+                }
             }
 
-            if (req.query.searchParam) {
-                filter['favOrgs'] = {
-                    $elemMatch: {
-                        [`name`]: { $regex: req.query.searchParam as string, $options: 'i' }
-                    }
-                };
-            }
+            if (req.query.favOnly)
+                match.isFavorited = true;
 
-            req.filter = filter
+            aggregationPipeline.push({ $addFields: field });
+            aggregationPipeline.push({ $match: match });
+
+            req.aggregationPipeline = aggregationPipeline
             next();
         } catch (err) {
             next(err);

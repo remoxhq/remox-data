@@ -9,6 +9,9 @@ function _export(target, all) {
     });
 }
 _export(exports, {
+    authenticateUserOrAllowAnonymous: function() {
+        return authenticateUserOrAllowAnonymous;
+    },
     checkUserJwt: function() {
         return checkUserJwt;
     },
@@ -68,6 +71,15 @@ const checkUserPermission = (role)=>async (req, res, next)=>{
                 if (role !== decoded.role || createdBy !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
                 next();
             });
+        } catch (err) {
+            return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+        }
+    };
+const authenticateUserOrAllowAnonymous = ()=>async (req, res, next)=>{
+        try {
+            const createdBy = req.headers.address;
+            if (createdBy) await checkUserJwt()(req, res, next);
+            else next();
         } catch (err) {
             return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
         }
