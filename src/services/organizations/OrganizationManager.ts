@@ -87,18 +87,19 @@ class OrganizationManager implements IOrganizationService {
 
     async addFavorites(req: Request, res: Response): Promise<Response> {
         const orgId = req.params.organizationId;
-        if (!orgId) return res.status(422).json({ message: ResponseMessage.OrganizationIdRequired });
+        const publicKey = req.headers.address;
+        if (!orgId || orgId.length > 24) return res.status(422).json({ message: ResponseMessage.OrganizationIdRequired });
 
         const db = req.app.locals.db as Db;
         const orgs = db.collection(organizationCollection);
         const users = db.collection(usersCollection);
+        
         let organization = await orgs.findOne({ _id: new ObjectId(orgId) });
         if (!organization) return res.json({ message: ResponseMessage.OrganizationNotFound });
 
-        const user = await this.authService.getUserByPublicKey(req, res);
-
+        users.createIndex({ publicKey: 1 }, { unique: true });
         const result = await users.updateOne(
-            { publicKey: user.publicKey },
+            { publicKey: publicKey },
             {
                 $set: {
                     [`favoriteOrganizations.${organization._id.toString()}`]: true

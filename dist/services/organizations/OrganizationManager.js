@@ -104,7 +104,8 @@ let OrganizationManager = class OrganizationManager {
     }
     async addFavorites(req, res) {
         const orgId = req.params.organizationId;
-        if (!orgId) return res.status(422).json({
+        const publicKey = req.headers.address;
+        if (!orgId || orgId.length > 24) return res.status(422).json({
             message: _types.ResponseMessage.OrganizationIdRequired
         });
         const db = req.app.locals.db;
@@ -116,9 +117,13 @@ let OrganizationManager = class OrganizationManager {
         if (!organization) return res.json({
             message: _types.ResponseMessage.OrganizationNotFound
         });
-        const user = await this.authService.getUserByPublicKey(req, res);
+        users.createIndex({
+            publicKey: 1
+        }, {
+            unique: true
+        });
         const result = await users.updateOne({
-            publicKey: user.publicKey
+            publicKey: publicKey
         }, {
             $set: {
                 [`favoriteOrganizations.${organization._id.toString()}`]: true
