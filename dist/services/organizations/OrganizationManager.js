@@ -47,7 +47,7 @@ function _ts_param(paramIndex, decorator) {
     };
 }
 const organizationCollection = "Organizations";
-let OrganizationManager = class OrganizationManager {
+class OrganizationManager {
     async createOrganization(req, res) {
         let parsedBody = (0, _utils.parseFormData)("accounts", req);
         parsedBody.createdDate = new Date().toDateString();
@@ -151,7 +151,7 @@ let OrganizationManager = class OrganizationManager {
         this.storageService = storageService;
         this.authService = authService;
     }
-};
+}
 OrganizationManager = _ts_decorate([
     (0, _inversify.injectable)(),
     _ts_param(0, (0, _inversify.inject)(_types.TYPES.IStorageService)),

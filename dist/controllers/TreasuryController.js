@@ -34,7 +34,7 @@ function _ts_param(paramIndex, decorator) {
         decorator(target, key, paramIndex);
     };
 }
-let TreasuryController = class TreasuryController {
+class TreasuryController {
     async getAnnualTreasury(req, res) {
         const response = await this.treasuryService.getAnnualTreasury(req);
         res.send(response);
@@ -43,7 +43,7 @@ let TreasuryController = class TreasuryController {
         _define_property(this, "treasuryService", void 0);
         this.treasuryService = treasuryService;
     }
-};
+}
 TreasuryController = _ts_decorate([
     (0, _inversify.injectable)(),
     _ts_param(0, (0, _inversify.inject)(_types.TYPES.ITreasuryService))

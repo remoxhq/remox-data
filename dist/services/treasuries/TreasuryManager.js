@@ -16,7 +16,7 @@ function _ts_decorate(decorators, target, key, desc) {
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 }
 const tresuryCollection = "OrganizationsHistoricalBalances";
-let TreasuryManager = class TreasuryManager {
+class TreasuryManager {
     async getAnnualTreasury(req) {
         const orgName = req.params.name;
         if (!orgName) return;
@@ -27,7 +27,7 @@ let TreasuryManager = class TreasuryManager {
         });
         return response;
     }
-};
+}
 TreasuryManager = _ts_decorate([
     (0, _inversify.injectable)()
 ], TreasuryManager);
