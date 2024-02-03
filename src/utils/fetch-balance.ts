@@ -29,8 +29,6 @@ export const fetchAndStoreAnnualBalance = async () => {
             storedOrgsMap.set(item.name, item.name)
         })
 
-        console.log(await collection.countDocuments());
-
         await Promise.all(Object.keys(daos).map(async (daoName, index) => {
             if (!daos[daoName] || storedOrgsMap.get(daoName)) return;
 

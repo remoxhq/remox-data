@@ -1,16 +1,19 @@
 import { inject, injectable } from "inversify";
 import IOrganizationService from "./IOrganizationService";
 import { Request, Response } from "express";
-import { parseFormData } from "../../utils";
-import { Db, ObjectId } from "mongodb";
+import { parseFormData, rootParser } from "../../utils";
+import { Collection, Db, Document, ObjectId } from "mongodb";
 import { ResponseMessage, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
-import { Organization, Pagination } from "../../models";
+import { Organization, Pagination, TreasuryIndexer } from "../../models";
 import IAuthService from "../auth/IAuthService";
 import { usersCollection } from "../auth/AuthManager";
 import { OrganizationFilterRequest } from "../../middlewares";
+import { Organization as OrgObj } from "../../libs/firebase-db"
+import date from 'date-and-time';
 
 export const organizationCollection = "Organizations"
+export const organizationHistoricalBalanceCollection = "OrganizationsHistoricalBalances"
 
 @injectable()
 class OrganizationManager implements IOrganizationService {
@@ -25,7 +28,9 @@ class OrganizationManager implements IOrganizationService {
 
         const db = req.app.locals.db as Db;
         const collection = db.collection(organizationCollection);
-        await collection.insertOne(parsedBody)
+        // await collection.insertOne(parsedBody)
+
+        await this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection))
 
         return res.status(200).send(ResponseMessage.OrganizationCreated);
     }
@@ -93,7 +98,7 @@ class OrganizationManager implements IOrganizationService {
         const db = req.app.locals.db as Db;
         const orgs = db.collection(organizationCollection);
         const users = db.collection(usersCollection);
-        
+
         let organization = await orgs.findOne({ _id: new ObjectId(orgId) });
         if (!organization) return res.json({ message: ResponseMessage.OrganizationNotFound });
 
@@ -124,6 +129,38 @@ class OrganizationManager implements IOrganizationService {
                 parsedBody.networks[account.chain] = account.chain
             }
         })
+    }
+
+    private async fetchOrganizationAnnualBalance(collection: Collection<Document>, newOrganization: Organization, balanceCollection: Collection<Document>) {
+        try {
+            let historicalTreasury: TreasuryIndexer = {}
+            let walletAddresses: string[] = []
+            const { accounts, name } = newOrganization;
+            const orgObj: OrgObj = { wallets: [] }
+
+            accounts.forEach(account => {
+                orgObj.wallets.push({
+                    address: account.address,
+                    network: account.chain
+                })
+            })
+
+            await rootParser(orgObj, historicalTreasury, walletAddresses, name);
+
+            historicalTreasury = Object.entries(historicalTreasury).sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {})
+
+            let responseObj = {
+                name: name,
+                addresses: walletAddresses,
+                annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury).filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
+            };
+
+            await balanceCollection.insertOne(responseObj)
+
+            return {};
+        } catch (error: any) {
+            throw new Error(error);
+        }
     }
 }
 

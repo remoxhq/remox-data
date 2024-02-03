@@ -17,7 +17,7 @@ function _interop_require_default(obj) {
 const accountSchema = _joi.default.object({
     name: _joi.default.string().alphanum().required().label("Account name"),
     address: _joi.default.string().alphanum().required().label("Account address"),
-    chain: _joi.default.string().alphanum().required().label("Account chain")
+    chain: _joi.default.string().required().label("Account chain")
 });
 const organizationShcema = _joi.default.object({
     name: _joi.default.string().alphanum().min(3).max(10).required().label("Organization name"),

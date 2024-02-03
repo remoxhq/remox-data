@@ -42,7 +42,6 @@ const fetchAndStoreAnnualBalance = async ()=>{
         storedOrgs.forEach((item, index)=>{
             storedOrgsMap.set(item.name, item.name);
         });
-        console.log(await collection.countDocuments());
         await Promise.all(Object.keys(_firebasedb.daos).map(async (daoName, index)=>{
             if (!_firebasedb.daos[daoName] || storedOrgsMap.get(daoName)) return;
             let historicalTreasury = {};

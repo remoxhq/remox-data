@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 
 export interface Organization {
     _id: ObjectId,
-    name: number
+    name: string
     image: File,
     dashboardLink: string
     website: string,
@@ -38,7 +38,6 @@ const accountSchema = Joi.object<Account>({
         .label("Account address"),
 
     chain: Joi.string()
-        .alphanum()
         .required()
         .label("Account chain")
 });
