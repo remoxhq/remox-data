@@ -27,10 +27,12 @@ class OrganizationManager implements IOrganizationService {
         await this.attachCommonFields(parsedBody);
 
         const db = req.app.locals.db as Db;
+        const io = req.app.locals.io as any; //socket connection
+
         const collection = db.collection(organizationCollection);
         // await collection.insertOne(parsedBody)
 
-        await this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection))
+        this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
 
         return res.status(200).send(ResponseMessage.OrganizationCreated);
     }
@@ -131,7 +133,11 @@ class OrganizationManager implements IOrganizationService {
         })
     }
 
-    private async fetchOrganizationAnnualBalance(collection: Collection<Document>, newOrganization: Organization, balanceCollection: Collection<Document>) {
+    private async fetchOrganizationAnnualBalance(
+        collection: Collection<Document>,
+        newOrganization: Organization,
+        balanceCollection: Collection<Document>,
+        io: any) {
         try {
             let historicalTreasury: TreasuryIndexer = {}
             let walletAddresses: string[] = []
@@ -156,6 +162,8 @@ class OrganizationManager implements IOrganizationService {
             };
 
             await balanceCollection.insertOne(responseObj)
+
+            io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
 
             return {};
         } catch (error: any) {

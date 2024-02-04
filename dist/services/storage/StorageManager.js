@@ -31,7 +31,7 @@ function _ts_decorate(decorators, target, key, desc) {
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 }
 (0, _dotenv.config)();
-class StorageManager {
+let StorageManager = class StorageManager {
     async uploadByteArray(file) {
         const { mimetype, buffer, originalname } = file;
         const bucketFile = this._storage.bucket(process.env.BUCKET_NAME).file(originalname);
@@ -56,7 +56,7 @@ class StorageManager {
             keyFilename: process.env.STORAGE_KEY_FILE
         });
     }
-}
+};
 StorageManager = _ts_decorate([
     (0, _inversify.injectable)()
 ], StorageManager);

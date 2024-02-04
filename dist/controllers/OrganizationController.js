@@ -34,7 +34,7 @@ function _ts_param(paramIndex, decorator) {
         decorator(target, key, paramIndex);
     };
 }
-class OrganizationController {
+let OrganizationController = class OrganizationController {
     async create(req, res) {
         await this.organizationService.createOrganization(req, res);
     }
@@ -54,7 +54,7 @@ class OrganizationController {
         _define_property(this, "organizationService", void 0);
         this.organizationService = organizationService;
     }
-}
+};
 OrganizationController = _ts_decorate([
     (0, _inversify.injectable)(),
     _ts_param(0, (0, _inversify.inject)(_types.TYPES.IOrganizationService))

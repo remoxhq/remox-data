@@ -34,7 +34,7 @@ function _ts_param(paramIndex, decorator) {
         decorator(target, key, paramIndex);
     };
 }
-class AuthController {
+let AuthController = class AuthController {
     async signIn(req, res) {
         await this.authService.signIn(req, res);
     }
@@ -48,7 +48,7 @@ class AuthController {
         _define_property(this, "authService", void 0);
         this.authService = authService;
     }
-}
+};
 AuthController = _ts_decorate([
     (0, _inversify.injectable)(),
     _ts_param(0, (0, _inversify.inject)(_types.TYPES.IAuthService))
