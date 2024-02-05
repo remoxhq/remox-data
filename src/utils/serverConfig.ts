@@ -41,19 +41,12 @@ function loadMiddlewares(app: any) {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.use(cors());
-    app.use((req: Request, res: Response, next: NextFunction) => {
-        res.setHeader('Access-Control-Allow-Origin', req.headers.origin!);
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
-        next();
-    });
 }
 
 function configureWSS(app: any, server: any) {
     const io = new Server(server, {
         cors: {
-            origin: "https://remox.io/",
+            origin: "*",
             methods: ["GET", "POST"]
         }
     });
