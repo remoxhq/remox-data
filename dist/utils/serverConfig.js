@@ -55,7 +55,7 @@ function loadMiddlewares(app) {
 function configureWSS(app, server) {
     const io = new _socketio.Server(server, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: "https://remox.io/",
             methods: [
                 "GET",
                 "POST"

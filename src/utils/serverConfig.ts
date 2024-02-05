@@ -5,8 +5,6 @@ import configureRouter from "./loadRoutes";
 import { errorHandler } from "../middlewares";
 import bodyParser from "body-parser";
 import multer from "multer";
-import { Request } from "express";
-import http from "http"
 import { Server } from "socket.io"
 config();
 
@@ -47,7 +45,7 @@ function loadMiddlewares(app: any) {
 function configureWSS(app: any, server: any) {
     const io = new Server(server, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: "https://remox.io/",
             methods: ["GET", "POST"]
         }
     });
