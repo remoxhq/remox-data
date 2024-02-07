@@ -149,7 +149,7 @@ class OrganizationManager implements IOrganizationService {
                     network: account.chain
                 })
             })
-
+            console.log("#########Fetch################");
             await rootParser(orgObj, historicalTreasury, walletAddresses, name);
 
             historicalTreasury = Object.entries(historicalTreasury)

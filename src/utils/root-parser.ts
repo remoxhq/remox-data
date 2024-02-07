@@ -8,9 +8,10 @@ const covalentApiKey = process.env.COVALENT_API_KEY || "";
 
 export const rootParser = async (dao: Organization, historicalTreasury: TreasuryIndexer, walletAddresses: string[], name?: string) => {
     try {
+        console.log("############Root Parser#############");
+        console.log(covalentApiKey);
         const covalentClient = new CovalentClient(covalentApiKey);
         for await (const wallet of Object.values(dao.wallets)) {
-            
             walletAddresses.push(wallet.address)
 
             const walletAnnualPortfolioBalance = await covalentClient.BalanceService.getHistoricalPortfolioForWalletAddress(
