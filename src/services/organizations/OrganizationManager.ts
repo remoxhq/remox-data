@@ -32,7 +32,7 @@ class OrganizationManager implements IOrganizationService {
         const collection = db.collection(organizationCollection);
         // await collection.insertOne(parsedBody)
 
-        //await this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
+        this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
 
         return res.status(200).send(ResponseMessage.OrganizationCreated);
     }
@@ -152,7 +152,9 @@ class OrganizationManager implements IOrganizationService {
 
             await rootParser(orgObj, historicalTreasury, walletAddresses, name);
 
-            historicalTreasury = Object.entries(historicalTreasury).sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {})
+            historicalTreasury = Object.entries(historicalTreasury)
+                .sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1)
+                .reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {})
 
             let responseObj = {
                 name: name,
@@ -162,9 +164,8 @@ class OrganizationManager implements IOrganizationService {
 
             await balanceCollection.insertOne(responseObj)
             console.log("aue");
-            
 
-            io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
+            // io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
 
             return {};
         } catch (error: any) {
