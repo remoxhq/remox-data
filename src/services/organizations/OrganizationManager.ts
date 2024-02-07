@@ -32,7 +32,7 @@ class OrganizationManager implements IOrganizationService {
         const collection = db.collection(organizationCollection);
         // await collection.insertOne(parsedBody)
 
-        await this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
+        //await this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
 
         return res.status(200).send(ResponseMessage.OrganizationCreated);
     }
