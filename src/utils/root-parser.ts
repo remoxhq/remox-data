@@ -23,6 +23,9 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                 }
             )
 
+            console.log("############walletAnnualPortfolioBalance#############");
+            console.log(walletAnnualPortfolioBalance.data.address);
+
             walletAnnualPortfolioBalance.data.items?.map((token) => {
                 token.holdings.forEach((holding, index) => {
                     if (!holding.close.pretty_quote || index === 0) return;  // skip if there's no pretty_quote value
@@ -51,6 +54,8 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     historicalTreasury[date] = treasuryByDate;
                 });
             })
+
+            console.log("############items map result#############");
         }
     } catch (error: any) {
         throw new Error(error);

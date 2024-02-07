@@ -152,6 +152,9 @@ class OrganizationManager implements IOrganizationService {
             console.log("#########Fetch################");
             await rootParser(orgObj, historicalTreasury, walletAddresses, name);
 
+            console.log("#########FetchResult################");
+            console.log(historicalTreasury);
+
             historicalTreasury = Object.entries(historicalTreasury)
                 .sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1)
                 .reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {})
