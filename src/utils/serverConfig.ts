@@ -6,7 +6,6 @@ import { errorHandler } from "../middlewares";
 import bodyParser from "body-parser";
 import multer from "multer";
 import { Server } from "socket.io"
-import { NextFunction, Request, Response } from "express";
 config();
 
 export async function startServer(app: any) {

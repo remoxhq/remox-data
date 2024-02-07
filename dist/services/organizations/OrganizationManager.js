@@ -57,7 +57,7 @@ function _ts_param(paramIndex, decorator) {
 }
 const organizationCollection = "Organizations";
 const organizationHistoricalBalanceCollection = "OrganizationsHistoricalBalances";
-let OrganizationManager = class OrganizationManager {
+class OrganizationManager {
     async createOrganization(req, res) {
         let parsedBody = (0, _utils.parseFormData)("accounts", req);
         parsedBody.createdDate = new Date().toDateString();
@@ -66,7 +66,7 @@ let OrganizationManager = class OrganizationManager {
         const io = req.app.locals.io; //socket connection
         const collection = db.collection(organizationCollection);
         // await collection.insertOne(parsedBody)
-        this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io);
+        await this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io);
         return res.status(200).send(_types.ResponseMessage.OrganizationCreated);
     }
     async getOrganizationByName(req, res) {
@@ -84,7 +84,6 @@ let OrganizationManager = class OrganizationManager {
         const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
         const pageSize = parseInt(req.query.pageSize, 10) || 20;
         const aggregationPipeline = req.aggregationPipeline;
-        console.log(aggregationPipeline);
         const db = req.app.locals.db;
         const collection = db.collection(organizationCollection);
         let response = await collection.aggregate(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
@@ -200,7 +199,7 @@ let OrganizationManager = class OrganizationManager {
         this.storageService = storageService;
         this.authService = authService;
     }
-};
+}
 OrganizationManager = _ts_decorate([
     (0, _inversify.injectable)(),
     _ts_param(0, (0, _inversify.inject)(_types.TYPES.IStorageService)),

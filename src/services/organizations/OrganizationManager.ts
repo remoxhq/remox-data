@@ -32,7 +32,7 @@ class OrganizationManager implements IOrganizationService {
         const collection = db.collection(organizationCollection);
         // await collection.insertOne(parsedBody)
 
-        this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
+        await this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
 
         return res.status(200).send(ResponseMessage.OrganizationCreated);
     }
@@ -53,7 +53,6 @@ class OrganizationManager implements IOrganizationService {
         const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
         const pageSize = parseInt(req.query.pageSize as string, 10) || 20;
         const aggregationPipeline = req.aggregationPipeline;
-        console.log(aggregationPipeline);
 
         const db = req.app.locals.db as Db;
 
@@ -162,6 +161,8 @@ class OrganizationManager implements IOrganizationService {
             };
 
             await balanceCollection.insertOne(responseObj)
+            console.log("aue");
+            
 
             io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
 
