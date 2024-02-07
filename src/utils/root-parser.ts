@@ -14,6 +14,9 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
         for await (const wallet of Object.values(dao.wallets)) {
             walletAddresses.push(wallet.address)
 
+            console.log("############walletAnnualPortfolioBalance#############");
+            console.log(wallet);
+
             const walletAnnualPortfolioBalance = await covalentClient.BalanceService.getHistoricalPortfolioForWalletAddress(
                 wallet.network as Chain,
                 wallet.address,
@@ -22,10 +25,6 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     days: 365,
                 }
             )
-
-            console.log("############walletAnnualPortfolioBalance#############");
-            console.log(walletAnnualPortfolioBalance.data.address);
-
             walletAnnualPortfolioBalance.data.items?.map((token) => {
                 token.holdings.forEach((holding, index) => {
                     if (!holding.close.pretty_quote || index === 0) return;  // skip if there's no pretty_quote value
@@ -54,7 +53,6 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     historicalTreasury[date] = treasuryByDate;
                 });
             })
-
             console.log("############items map result#############");
         }
     } catch (error: any) {
