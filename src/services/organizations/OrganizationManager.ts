@@ -168,7 +168,7 @@ class OrganizationManager implements IOrganizationService {
             await balanceCollection.insertOne(responseObj)
             console.log("aue");
 
-            // io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
+            io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
 
             return {};
         } catch (error: any) {
