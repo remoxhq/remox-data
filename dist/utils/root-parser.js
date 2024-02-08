@@ -8,24 +8,26 @@ Object.defineProperty(exports, "rootParser", {
         return rootParser;
     }
 });
-const _covalent = require("../libs/covalent");
 const _dotenv = require("dotenv");
+const _axios = /*#__PURE__*/ _interop_require_default(require("axios"));
+function _interop_require_default(obj) {
+    return obj && obj.__esModule ? obj : {
+        default: obj
+    };
+}
 (0, _dotenv.config)();
 const covalentApiKey = process.env.COVALENT_API_KEY || "";
 const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
     try {
-        const covalentClient = new _covalent.CovalentClient(covalentApiKey);
         for await (const wallet of Object.values(dao.wallets)){
             walletAddresses.push(wallet.address);
-            const walletAnnualPortfolioBalance = await covalentClient.BalanceService.getHistoricalPortfolioForWalletAddress(wallet.network, wallet.address, {
-                quoteCurrency: 'USD',
-                days: 365
-            });
+            const { data: walletAnnualPortfolioBalance } = await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.network}/address/${wallet.address}/portfolio_v2/?key=${covalentApiKey}&quote-currency=usd&days=${365}`);
             walletAnnualPortfolioBalance.data.items?.map((token)=>{
                 token.holdings.forEach((holding, index)=>{
                     if (!holding.close.pretty_quote || index === 0) return; // skip if there's no pretty_quote value
                     //split date and parse amount
-                    const date = holding.timestamp.toISOString().split("T")[0];
+                    const date = holding.timestamp.toString().split("T")[0];
+                    console.log(date);
                     const originAmount = holding.close?.quote ?? 0;
                     const amount = originAmount < 0 ? 0 : originAmount;
                     const { contract_ticker_symbol } = token;

@@ -6,7 +6,6 @@ import { Collection, Db, Document, ObjectId } from "mongodb";
 import { ResponseMessage, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
 import { Organization, Pagination, TreasuryIndexer } from "../../models";
-import IAuthService from "../auth/IAuthService";
 import { usersCollection } from "../auth/AuthManager";
 import { OrganizationFilterRequest } from "../../middlewares";
 import { Organization as OrgObj } from "../../libs/firebase-db"
@@ -17,9 +16,7 @@ export const organizationHistoricalBalanceCollection = "OrganizationsHistoricalB
 
 @injectable()
 class OrganizationManager implements IOrganizationService {
-    constructor(@inject(TYPES.IStorageService) private storageService: IStorageService,
-        @inject(TYPES.IAuthService) private authService: IAuthService
-    ) { }
+    constructor(@inject(TYPES.IStorageService) private storageService: IStorageService) { }
 
     async createOrganization(req: Request, res: Response): Promise<Response> {
         let parsedBody = parseFormData("accounts", req);
@@ -30,20 +27,25 @@ class OrganizationManager implements IOrganizationService {
         const io = req.app.locals.io as any; //socket connection
 
         const collection = db.collection(organizationCollection);
-        // await collection.insertOne(parsedBody)
+        const createdOrg = await collection.insertOne(parsedBody)
 
-        this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io)
+        this.fetchOrganizationAnnualBalance(
+            collection,
+            parsedBody,
+            db.collection(organizationHistoricalBalanceCollection),
+            io,
+            createdOrg.insertedId)
 
         return res.status(200).send(ResponseMessage.OrganizationCreated);
     }
 
     async getOrganizationByName(req: Request, res: Response): Promise<Response> {
-        const orgName = req.params.name;
-        if (!orgName) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+        const orgId = req.params.id;
+        if (!orgId) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
         const db = req.app.locals.db as Db;
         const collection = db.collection(organizationCollection);
-        const response = await collection.findOne({ name: orgName });
+        const response = await collection.findOne({ _id: new ObjectId(orgId) });
         if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
         return res.status(200).send(response);
@@ -55,16 +57,12 @@ class OrganizationManager implements IOrganizationService {
         const aggregationPipeline = req.aggregationPipeline;
 
         const db = req.app.locals.db as Db;
-
         const collection = db.collection<Organization>(organizationCollection);
-        let response = await collection.aggregate<Organization>(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
-        // const user = await this.authService.getUserByPublicKey(req, res)
-        // const favoriteOrganizationsMap = new Map(Object.entries(user.favoriteOrganizations));
 
-        // response = response.map((org) => ({
-        //     ...org,
-        //     isFavorited: favoriteOrganizationsMap.has(org._id.toString()),
-        // }));
+        let response = await collection.aggregate<Organization>(aggregationPipeline)
+            .skip((pageIndex - 1) * pageSize)
+            .limit(pageSize)
+            .toArray();
 
         if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
@@ -73,22 +71,33 @@ class OrganizationManager implements IOrganizationService {
 
     async updateOrganization(req: Request, res: Response): Promise<Response> {
         const parsedBody = parseFormData("accounts", req);
-        const orgName = req.params.name;
         parsedBody.updatedDate = new Date().toDateString();
         await this.attachCommonFields(parsedBody)
 
+        const orgId = req.params.id;
+        if (!orgId) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+
         const db = req.app.locals.db as Db;
+        const io = req.app.locals.io as any; //socket connection
         const collection = db.collection(organizationCollection);
 
         const result = await collection.updateOne(
-            { name: orgName },
+            { _id: new ObjectId(orgId) },
             { $set: parsedBody }
         );
 
-        if (result.modifiedCount > 0)
-            return res.json({ message: ResponseMessage.OrganizationUpdated });
+        if (result.modifiedCount <= 0)
+            return res.status(404).json(ResponseMessage.OrganizationNotFound);
 
-        return res.status(404).json(ResponseMessage.OrganizationNotFound);
+        parsedBody._id = orgId;
+        this.fetchOrganizationAnnualBalance(
+            collection,
+            parsedBody,
+            db.collection(organizationHistoricalBalanceCollection),
+            io,
+            result.upsertedId!)
+
+        return res.json({ message: ResponseMessage.OrganizationUpdated });
     }
 
     async addFavorites(req: Request, res: Response): Promise<Response> {
@@ -124,6 +133,7 @@ class OrganizationManager implements IOrganizationService {
         parsedBody.networks = {};
         parsedBody.isDeleted = false;
         parsedBody.isVerified = false;
+        parsedBody.isActive = false;
 
         Array.from(parsedBody.accounts).forEach((account: any) => {
             if (!parsedBody.networks[account.chain]) {
@@ -133,10 +143,11 @@ class OrganizationManager implements IOrganizationService {
     }
 
     private async fetchOrganizationAnnualBalance(
-        collection: Collection<Document>,
+        organizationCollection: Collection<Document>,
         newOrganization: Organization,
         balanceCollection: Collection<Document>,
-        io: any) {
+        io: any,
+        createdOrgId: ObjectId) {
         try {
             let historicalTreasury: TreasuryIndexer = {}
             let walletAddresses: string[] = []
@@ -149,11 +160,7 @@ class OrganizationManager implements IOrganizationService {
                     network: account.chain
                 })
             })
-            console.log("#########Fetch################");
             await rootParser(orgObj, historicalTreasury, walletAddresses, name);
-
-            console.log("#########FetchResult################");
-            console.log(historicalTreasury);
 
             historicalTreasury = Object.entries(historicalTreasury)
                 .sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1)
@@ -161,12 +168,23 @@ class OrganizationManager implements IOrganizationService {
 
             let responseObj = {
                 name: name,
+                orgId: newOrganization._id,
                 addresses: walletAddresses,
-                annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury).filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365).reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
+                annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury)
+                    .filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365)
+                    .reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
             };
 
-            await balanceCollection.insertOne(responseObj)
-            console.log("aue");
+            await balanceCollection.updateOne(
+                { orgId: newOrganization._id },
+                { $set: responseObj },
+                { upsert: true }
+            )
+
+            await organizationCollection.updateOne(
+                { _id: createdOrgId },
+                { $set: { isActive: true } }
+            );
 
             io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
 
@@ -178,3 +196,12 @@ class OrganizationManager implements IOrganizationService {
 }
 
 export default OrganizationManager;
+
+
+// const user = await this.authService.getUserByPublicKey(req, res)
+// const favoriteOrganizationsMap = new Map(Object.entries(user.favoriteOrganizations));
+
+// response = response.map((org) => ({
+//     ...org,
+//     isFavorited: favoriteOrganizationsMap.has(org._id.toString()),
+// }));

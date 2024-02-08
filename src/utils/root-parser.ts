@@ -9,18 +9,11 @@ const covalentApiKey = process.env.COVALENT_API_KEY || "";
 
 export const rootParser = async (dao: Organization, historicalTreasury: TreasuryIndexer, walletAddresses: string[], name?: string) => {
     try {
-        console.log("############Root Parser#############");
-        console.log(covalentApiKey);
         for await (const wallet of Object.values(dao.wallets)) {
             walletAddresses.push(wallet.address)
 
-            console.log("############walletAnnualPortfolioBalance#############");
-            console.log(wallet);
-
             const { data: walletAnnualPortfolioBalance } = await axios
                 .get<{ data: PortfolioResponse }>(`https://api.covalenthq.com/v1/${wallet.network as Chain}/address/${wallet.address}/portfolio_v2/?key=${covalentApiKey}&quote-currency=usd&days=${365}`,)
-
-            console.log(walletAnnualPortfolioBalance);
 
             walletAnnualPortfolioBalance.data.items?.map((token) => {
                 token.holdings.forEach((holding, index) => {
@@ -51,7 +44,6 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     historicalTreasury[date] = treasuryByDate;
                 });
             })
-            console.log("############items map result#############");
         }
     } catch (error: any) {
         throw new Error(error);

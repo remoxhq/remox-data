@@ -27,9 +27,9 @@ var TreasuryRoute;
 var OrganizationRoute;
 (function(OrganizationRoute) {
     OrganizationRoute[OrganizationRoute["Create"] = base + "/organization/create"] = "Create";
-    OrganizationRoute[OrganizationRoute["GetByName"] = base + "/organization/:name"] = "GetByName";
+    OrganizationRoute[OrganizationRoute["GetByName"] = base + "/organization/:id"] = "GetByName";
     OrganizationRoute[OrganizationRoute["GetAll"] = base + "/organization"] = "GetAll";
-    OrganizationRoute[OrganizationRoute["Update"] = base + "/organization/:name"] = "Update";
+    OrganizationRoute[OrganizationRoute["Update"] = base + "/organization/:id"] = "Update";
     OrganizationRoute[OrganizationRoute["AddFavorites"] = base + "/organization/favorite/:organizationId"] = "AddFavorites";
 })(OrganizationRoute || (OrganizationRoute = {}));
 var AuthRoute;
