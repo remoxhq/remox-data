@@ -27,6 +27,9 @@ export default function configureRouter(app: any) {
     app.route(TreasuryRoute.GetAnnualTreasury)
         .get(treasuryController.getAnnualTreasury.bind(treasuryController))
 
+    app.route(TreasuryRoute.GetAssets)
+        .post(treasuryController.getAssets.bind(treasuryController))
+
     app.route(OrganizationRoute.Create)
         .post(checkUserJwt(),
             validateBody(organizationShcema, "accounts"),

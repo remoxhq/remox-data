@@ -34,7 +34,7 @@ function _ts_decorate(decorators, target, key, desc) {
 }
 (0, _dotenv.config)();
 const usersCollection = "Users";
-let AuthManager = class AuthManager {
+class AuthManager {
     async signIn(req, res) {
         const publicKey = req.headers.address;
         const db = req.app.locals.db;
@@ -144,7 +144,7 @@ let AuthManager = class AuthManager {
         ]).toArray();
         return res.status(200).send(result);
     }
-};
+}
 AuthManager = _ts_decorate([
     (0, _inversify.injectable)()
 ], AuthManager);

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { inject, injectable } from "inversify";
 import { TYPES } from "../utils/types";
-import ITreasuryService from "../services/treasuries/ITreasuryService";
+import ITreasuryService from "../services/treasury/ITreasuryService";
 
 @injectable()
 export class TreasuryController {
@@ -10,5 +10,9 @@ export class TreasuryController {
     async getAnnualTreasury(req: Request, res: Response) {
         const response = await this.treasuryService.getAnnualTreasury(req);
         res.send(response);
+    }
+
+    async getAssets(req: Request, res: Response) {
+        await this.treasuryService.getAssets(req, res);
     }
 }

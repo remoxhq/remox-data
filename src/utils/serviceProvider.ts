@@ -1,9 +1,9 @@
 import { Container } from "inversify";
 import { TYPES } from "./types";
 import IOrganizationService from "../services/organizations/IOrganizationService";
-import ITreasuryService from "../services/treasuries/ITreasuryService";
+import ITreasuryService from "../services/treasury/ITreasuryService";
 import OrganizationManager from "../services/organizations/OrganizationManager";
-import TreasuryManager from "../services/treasuries/TreasuryManager";
+import TreasuryManager from "../services/treasury/TreasuryManager";
 import { OrganizationController, TreasuryController } from "../controllers";
 import StorageManager from "../services/storage/StorageManager";
 import IStorageService from "../services/storage/IStorageService";

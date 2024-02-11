@@ -23,6 +23,7 @@ const base = "/api/v1";
 var TreasuryRoute;
 (function(TreasuryRoute) {
     TreasuryRoute[TreasuryRoute["GetAnnualTreasury"] = base + "/treasury/balance/:name"] = "GetAnnualTreasury";
+    TreasuryRoute[TreasuryRoute["GetAssets"] = base + "/treasury/assets"] = "GetAssets";
 })(TreasuryRoute || (TreasuryRoute = {}));
 var OrganizationRoute;
 (function(OrganizationRoute) {

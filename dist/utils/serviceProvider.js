@@ -11,7 +11,7 @@ Object.defineProperty(exports, "configureContainer", {
 const _inversify = require("inversify");
 const _types = require("./types");
 const _OrganizationManager = /*#__PURE__*/ _interop_require_default(require("../services/organizations/OrganizationManager"));
-const _TreasuryManager = /*#__PURE__*/ _interop_require_default(require("../services/treasuries/TreasuryManager"));
+const _TreasuryManager = /*#__PURE__*/ _interop_require_default(require("../services/treasury/TreasuryManager"));
 const _controllers = require("../controllers");
 const _StorageManager = /*#__PURE__*/ _interop_require_default(require("../services/storage/StorageManager"));
 const _AuthManager = /*#__PURE__*/ _interop_require_default(require("../services/auth/AuthManager"));
