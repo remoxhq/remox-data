@@ -25,10 +25,6 @@ export interface CovalentAssetHold {
     items: CovalentAsset[]
   }
   
-  export interface CoinsCovalent {
-    [address: string]: CovalentAsset
-  }
-  
   export interface CovalentAsset {
     contract_decimals: number,
     contract_ticker_symbol: string,
@@ -37,4 +33,31 @@ export interface CovalentAssetHold {
     quote: number,
     quote_rate: number,
     balance: string
+  }
+
+  export interface AssetMap {
+    [address: string]: AssetDto
+  }
+
+  export interface AssetByBlockchainMap {
+    [blockchain: string]: AssetByBlockchainDto
+  }
+
+  export interface AssetByBlockchainDto {
+    blockchain: string,
+    totalAssetUsdValue: number,
+    topHolding:string,
+    topHoldingUrl: string,
+    top3HoldingsUrls: string[],
+    assets: AssetMap
+  }
+
+  export interface AssetDto {
+    decimals: number,
+    symbol: string,
+    address: string,
+    logo: string,
+    quote: number,
+    quote_rate: number,
+    balance: number
   }
