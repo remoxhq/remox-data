@@ -84,7 +84,7 @@ class TreasuryManager implements ITreasuryService {
         totalAssets[uniqueKey].quote += token.quote;
         totalAssets[uniqueKey].balance += token.balance;
 
-        return token;
+        return totalAssets[uniqueKey];
     }
 
     private updateBlockchainAssets(totalAssetsByBlockchain: AssetByBlockchainMap, chain: string, token: AssetDto) {

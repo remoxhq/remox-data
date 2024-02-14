@@ -89,7 +89,7 @@ class TreasuryManager {
         };
         totalAssets[uniqueKey].quote += token.quote;
         totalAssets[uniqueKey].balance += token.balance;
-        return token;
+        return totalAssets[uniqueKey];
     }
     updateBlockchainAssets(totalAssetsByBlockchain, chain, token) {
         const blockchainAssets = totalAssetsByBlockchain[chain] || {
