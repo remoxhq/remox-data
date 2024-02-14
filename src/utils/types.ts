@@ -25,3 +25,8 @@ export const enum Roles {
     Admin = "Admin",
     User = "User",
 };
+
+export const enum DesiredTokens {
+    Safe = "SAFE",
+    Orange = "✺ORANGE",
+};

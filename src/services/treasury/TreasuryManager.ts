@@ -3,7 +3,11 @@ import { injectable } from "inversify";
 import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
 import axios from 'axios';
+import { config } from 'dotenv';
 import { AssetByBlockchainDto, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, CovalentAsset, CovalentAssetHold } from '../../models';
+import { DesiredTokens } from '../../utils/types';
+
+config();
 
 const tresuryCollection = "OrganizationsHistoricalBalances";
 
@@ -22,7 +26,6 @@ class TreasuryManager implements ITreasuryService {
 
     async getAssets(req: Request, res: Response) {
         const totalAssets = await this.getAssetsFromProvider(req)
-
         return res.status(200).send(totalAssets);
     }
 
@@ -32,64 +35,81 @@ class TreasuryManager implements ITreasuryService {
         const totalAssets: AssetMap = {}
         const totalAssetsByBlockchain: AssetByBlockchainMap = {}
 
-        const apikey = `cqt_rQRqWWR7HXY7mjbyWdyhpRhQq7BK`
-        const nativeTokenAddress = "0x0000000000000000000000000000000000000000";
-        const ethCovalentAddress = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-        const celoTokenAddress = "0x471ece3750da237f93b8e339c536989b8978a438"
-
         if (!Array.isArray(wallets)) return;
 
         await Promise.all(wallets.map(async (wallet: AssetWallet) => {
             const covalentAssets = await axios
-                .get<{ data: CovalentAssetHold }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${apikey}&`);
+                .get<{ data: CovalentAssetHold }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}&`);
 
-            covalentAssets.data.data.items.forEach((item: CovalentAsset) => {
-                if (item.quote || item.contract_ticker_symbol === "SAFE" || item.contract_ticker_symbol === "✺ORANGE") {
-                    const token_address = item.contract_address.includes(ethCovalentAddress) ? nativeTokenAddress : item.contract_address;
-                    const token: AssetDto = {
-                        decimals: item.contract_decimals,
-                        symbol: item.contract_ticker_symbol,
-                        address: token_address,
-                        logo: item.logo_url,
-                        quote: item.quote,
-                        quote_rate: item.quote_rate,
-                        balance: item.quote / item.quote_rate
-                    };
+            const filteredAssets = this.filterWalletAssets(covalentAssets.data.data);
 
-                    totalAssets[token_address] = totalAssets[token_address] || { ...token, quote: 0, balance: 0 };
-                    totalAssets[token_address].quote += token.quote;
-                    totalAssets[token_address].balance += token.balance;
-
-                    const blockchainAssets = totalAssetsByBlockchain[wallet.chain] || {
-                        blockchain: wallet.chain,
-                        totalAssetUsdValue: 0,
-                        topHolding: '',
-                        topHoldingUrl: '',
-                        top3HoldingsUrls: [],
-                        assets: {}
-                    };
-
-                    blockchainAssets.totalAssetUsdValue += token.quote;
-                    blockchainAssets.assets[token_address] = totalAssets[token_address];
-
-                    const sortedAssets = Object.values(blockchainAssets.assets).sort((a, b) => b.quote - a.quote);
-                    if (token.quote > sortedAssets[0].quote) {
-                        blockchainAssets.topHolding = token.symbol;
-                        blockchainAssets.topHoldingUrl = token.logo;
-                    }
-
-                    blockchainAssets.top3HoldingsUrls = sortedAssets.slice(0, 3).map(asset => asset.logo);
-
-                    totalAssetsByBlockchain[wallet.chain] = blockchainAssets;
-                }
+            filteredAssets.forEach((item: CovalentAsset) => {
+                const token = this.processToken(item, totalAssets);
+                this.updateBlockchainAssets(totalAssetsByBlockchain, wallet.chain, token)
             });
         }))
 
+        const sortedAssets = Object.values(totalAssets).sort((a, b) => b.quote - a.quote);
+        const sortedAssetsByBlockchain = Object.values(totalAssetsByBlockchain).map((item) => ({
+          ...item,
+          assets: Object.values(item.assets).sort((a, b) => b.quote - a.quote),
+        }));
+      
         return {
-            assets: Object.values(totalAssets),
-            assetsByBlockchain: Object.values(totalAssetsByBlockchain)
-                .map(item => { return { ...item, assets: Object.values(item.assets) } })
+            assets: sortedAssets,
+            assetsByBlockchain: sortedAssetsByBlockchain
         };
+    }
+
+    private filterWalletAssets(walletData: CovalentAssetHold) {
+        const desiredTokens = [DesiredTokens.Safe.toString(), DesiredTokens.Orange.toString()];
+        return walletData.items.filter(item => item.quote || (desiredTokens.includes(item.contract_ticker_symbol)));
+    }
+
+    private processToken(item: CovalentAsset, totalAssets: AssetMap) {
+        const uniqueKey = item.contract_address + item.contract_ticker_symbol;
+
+        const token: AssetDto = {
+            decimals: item.contract_decimals,
+            symbol: item.contract_ticker_symbol,
+            address: item.contract_address,
+            logo: item.logo_url,
+            quote: item.quote,
+            quote_rate: item.quote_rate,
+            balance: item.quote / item.quote_rate,
+            uniqueKey
+        };
+
+        totalAssets[uniqueKey] = totalAssets[uniqueKey] || { ...token, quote: 0, balance: 0 };
+        totalAssets[uniqueKey].quote += token.quote;
+        totalAssets[uniqueKey].balance += token.balance;
+
+        return token;
+    }
+
+    private updateBlockchainAssets(totalAssetsByBlockchain: AssetByBlockchainMap, chain: string, token: AssetDto) {
+        const blockchainAssets = totalAssetsByBlockchain[chain] || {
+            blockchain: chain,
+            totalAssetUsdValue: 0,
+            topHolding: '',
+            topHoldingUrl: '',
+            top3HoldingsUrls: [],
+            assets: {},
+        };
+
+        blockchainAssets.totalAssetUsdValue += token.quote;
+        blockchainAssets.assets[token.uniqueKey] = token;
+
+        const sortedAssets = Object.values(blockchainAssets.assets).sort((a, b) => b.quote - a.quote);
+
+        if (token.quote >= sortedAssets[0].quote) {
+            blockchainAssets.topHolding = token.symbol;
+            blockchainAssets.topHoldingUrl = token.logo;
+        }
+
+        blockchainAssets.top3HoldingsUrls = sortedAssets.slice(0, 3).map(asset => asset.logo);
+
+        totalAssetsByBlockchain[chain] = blockchainAssets;
     }
 }
 

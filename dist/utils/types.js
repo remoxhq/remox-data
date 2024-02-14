@@ -9,6 +9,9 @@ function _export(target, all) {
     });
 }
 _export(exports, {
+    DesiredTokens: function() {
+        return DesiredTokens;
+    },
     ResponseMessage: function() {
         return ResponseMessage;
     },
@@ -46,3 +49,8 @@ var Roles;
     Roles["Admin"] = "Admin";
     Roles["User"] = "User";
 })(Roles || (Roles = {}));
+var DesiredTokens;
+(function(DesiredTokens) {
+    DesiredTokens["Safe"] = "SAFE";
+    DesiredTokens["Orange"] = "✺ORANGE";
+})(DesiredTokens || (DesiredTokens = {}));

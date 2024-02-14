@@ -60,4 +60,5 @@ export interface CovalentAssetHold {
     quote: number,
     quote_rate: number,
     balance: number
+    uniqueKey:string
   }
