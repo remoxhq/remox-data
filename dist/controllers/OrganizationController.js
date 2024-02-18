@@ -47,6 +47,9 @@ class OrganizationController {
     async update(req, res) {
         await this.organizationService.updateOrganization(req, res);
     }
+    async delete(req, res) {
+        await this.organizationService.deleteOrganization(req, res);
+    }
     async addFavorites(req, res) {
         await this.organizationService.addFavorites(req, res);
     }

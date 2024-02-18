@@ -16,7 +16,8 @@ export interface Organization {
     createdBy: string,
     createdDate: string,
     updatedDate: string,
-    isDeleted: string,
+    isDeleted: boolean,
+    isActive: boolean,
     accounts: Account[]
 };
 
@@ -87,6 +88,8 @@ export const organizationShcema = Joi.object<Organization>({
     isPrivate: Joi.boolean(),
 
     isDeleted: Joi.boolean(),
+
+    isVerified: Joi.boolean(),
 
     createdDate: Joi.string(),
 

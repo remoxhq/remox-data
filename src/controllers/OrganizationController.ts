@@ -3,12 +3,13 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../utils/types";
 import IOrganizationService from '../services/organizations/IOrganizationService';
 import { OrganizationFilterRequest } from '../middlewares';
+import { AppRequest } from '../models';
 
 @injectable()
 export class OrganizationController {
     constructor(@inject(TYPES.IOrganizationService) private organizationService: IOrganizationService) { }
 
-    async create(req: Request, res: Response) {
+    async create(req: AppRequest, res: Response) {
         await this.organizationService.createOrganization(req, res)
     }
 
@@ -20,8 +21,12 @@ export class OrganizationController {
         await this.organizationService.getAllOrganizations(req, res)
     }
 
-    async update(req: Request, res: Response) {
+    async update(req: AppRequest, res: Response) {
         await this.organizationService.updateOrganization(req, res)
+    }
+
+    async delete(req: AppRequest, res: Response) {
+        await this.organizationService.deleteOrganization(req, res)
     }
 
     async addFavorites(req: Request, res: Response) {

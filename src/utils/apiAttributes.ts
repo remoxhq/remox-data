@@ -9,7 +9,8 @@ export const enum OrganizationRoute {
     Create = base + "/organization/create",
     GetByName = base + "/organization/:id",
     GetAll = base + "/organization",
-    Update = base + "/organization/:id",
+    Update = base + "/organization/update/:id",
+    Delete = base + "/organization/:id",
     AddFavorites = base + "/organization/favorite/:organizationId",
 }
 

@@ -3,6 +3,7 @@ import { recoverPersonalSignature } from "@metamask/eth-sig-util"
 import { toChecksumAddress } from "ethereumjs-util"
 import { ResponseMessage } from "../../utils/types";
 import Jwt from "jsonwebtoken";
+import { AppRequest } from "../../models";
 
 export const checkUserSignature = () =>
     async (req: Request, res: Response, next: NextFunction) => {
@@ -22,10 +23,10 @@ export const checkUserSignature = () =>
     }
 
 export const checkUserJwt = () =>
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: AppRequest, res: Response, next: NextFunction) => {
         try {
             const token = req.headers.authorization?.toString();
-            const createdBy = req.headers.address;
+            const createdBy = req.headers.address as string;
 
             if (!token) return res.status(401).send(ResponseMessage.UnAuthorizedAction)
 
@@ -33,9 +34,10 @@ export const checkUserJwt = () =>
                 if (err || !decoded)
                     return res.status(401).json(ResponseMessage.UnAuthorizedAction);
 
-                if (createdBy !== toChecksumAddress(decoded.publicKey))
+                if (toChecksumAddress(createdBy) !== toChecksumAddress(decoded.publicKey))
                     return res.status(401).send(ResponseMessage.UnAuthorizedAction)
 
+                req.user = { role: decoded.role };
                 next();
             });
         } catch (err) {
@@ -65,7 +67,7 @@ export const checkUserPermission = (role: string) =>
     }
 
 export const authenticateUserOrAllowAnonymous = () =>
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: AppRequest, res: Response, next: NextFunction) => {
         try {
             const createdBy = req.headers.address;
             if (createdBy) await checkUserJwt()(req, res, next);

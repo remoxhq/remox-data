@@ -41,6 +41,7 @@ const organizationShcema = _joi.default.object({
     createdBy: _joi.default.string().label("Organization Creator wallet address").required(),
     isPrivate: _joi.default.boolean(),
     isDeleted: _joi.default.boolean(),
+    isVerified: _joi.default.boolean(),
     createdDate: _joi.default.string(),
     updatedDate: _joi.default.string(),
     accounts: _joi.default.array().items(accountSchema).required()

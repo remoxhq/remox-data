@@ -27,7 +27,6 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                     if (!holding.close.pretty_quote || index === 0) return; // skip if there's no pretty_quote value
                     //split date and parse amount
                     const date = holding.timestamp.toString().split("T")[0];
-                    console.log(date);
                     const originAmount = holding.close?.quote ?? 0;
                     const amount = originAmount < 0 ? 0 : originAmount;
                     const { contract_ticker_symbol } = token;

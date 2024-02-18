@@ -42,6 +42,7 @@ var ResponseMessage;
     ResponseMessage["UserNotFound"] = "User is not found";
     ResponseMessage["UserUpdated"] = "User is updated";
     ResponseMessage["UserPublicKeyRequired"] = "User public key is required";
+    ResponseMessage["ForbiddenRequest"] = "Forbidden attempt.";
 })(ResponseMessage || (ResponseMessage = {}));
 var Roles;
 (function(Roles) {

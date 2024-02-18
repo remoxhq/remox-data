@@ -3,9 +3,9 @@ import IOrganizationService from "./IOrganizationService";
 import { Request, Response } from "express";
 import { parseFormData, rootParser } from "../../utils";
 import { Collection, Db, Document, ObjectId } from "mongodb";
-import { ResponseMessage, TYPES } from "../../utils/types";
+import { ResponseMessage, Roles, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
-import { Organization, Pagination, TreasuryIndexer } from "../../models";
+import { AppRequest, Organization, Pagination, TreasuryIndexer } from "../../models";
 import { usersCollection } from "../auth/AuthManager";
 import { OrganizationFilterRequest } from "../../middlewares";
 import { Organization as OrgObj } from "../../libs/firebase-db"
@@ -18,13 +18,16 @@ export const organizationHistoricalBalanceCollection = "OrganizationsHistoricalB
 class OrganizationManager implements IOrganizationService {
     constructor(@inject(TYPES.IStorageService) private storageService: IStorageService) { }
 
-    async createOrganization(req: Request, res: Response): Promise<Response> {
+    async createOrganization(req: AppRequest, res: Response): Promise<Response> {
         let parsedBody = parseFormData("accounts", req);
         parsedBody.createdDate = new Date().toDateString();
         await this.attachCommonFields(parsedBody);
 
         const db = req.app.locals.db as Db;
         const io = req.app.locals.io as any; //socket connection
+
+        if (parsedBody.isVerified && req.user.role !== Roles.SuperAdmin)
+            return res.status(403).send(ResponseMessage.ForbiddenRequest);
 
         const collection = db.collection(organizationCollection);
         const createdOrg = await collection.insertOne(parsedBody)
@@ -66,27 +69,34 @@ class OrganizationManager implements IOrganizationService {
 
         if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
-        return res.status(200).send(new Pagination(response, await collection.countDocuments(), pageIndex, pageSize,));
+        return res.status(200).send(new Pagination(response, await collection.countDocuments({ isDeleted: { $ne: true } }), pageIndex, pageSize,));
     }
 
-    async updateOrganization(req: Request, res: Response): Promise<Response> {
+    async updateOrganization(req: AppRequest, res: Response): Promise<Response> {
         const parsedBody = parseFormData("accounts", req);
         parsedBody.updatedDate = new Date().toDateString();
         await this.attachCommonFields(parsedBody)
 
         const orgId = req.params.id;
+        const publicKey = req.headers.address;
         if (!orgId) return res.status(404).send(ResponseMessage.OrganizationNotFound);
 
         const db = req.app.locals.db as Db;
         const io = req.app.locals.io as any; //socket connection
         const collection = db.collection(organizationCollection);
 
+        const response = await collection.findOne({ _id: new ObjectId(orgId) });
+        if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+
+        if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
+            return res.status(403).send(ResponseMessage.ForbiddenRequest);
+
         const result = await collection.updateOne(
             { _id: new ObjectId(orgId) },
             { $set: parsedBody }
         );
 
-        if (result.modifiedCount <= 0)
+        if (!result.acknowledged)
             return res.status(404).json(ResponseMessage.OrganizationNotFound);
 
         parsedBody._id = orgId;
@@ -98,6 +108,31 @@ class OrganizationManager implements IOrganizationService {
             result.upsertedId!)
 
         return res.json({ message: ResponseMessage.OrganizationUpdated });
+    }
+
+    async deleteOrganization(req: AppRequest, res: Response): Promise<Response> {
+        const orgId = req.params.id;
+        const publicKey = req.headers.address;
+        const db = req.app.locals.db as Db;
+        if (!orgId) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+
+        const collection = db.collection(organizationCollection);
+
+        const response = await collection.findOne({ _id: new ObjectId(orgId) });
+        if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+
+        if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
+            return res.status(403).send(ResponseMessage.ForbiddenRequest);
+
+        const result = await collection.updateOne(
+            { _id: new ObjectId(orgId) },
+            { $set: { isDeleted: true } }
+        );
+
+        if (!result.acknowledged)
+            return res.status(404).json(ResponseMessage.OrganizationNotFound);
+
+        return res.status(200).send("");
     }
 
     async addFavorites(req: Request, res: Response): Promise<Response> {
@@ -131,9 +166,10 @@ class OrganizationManager implements IOrganizationService {
     private async attachCommonFields(parsedBody: any) {
         parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
         parsedBody.networks = {};
-        parsedBody.isDeleted = false;
-        parsedBody.isVerified = false;
+        parsedBody.isPrivate = parsedBody.isPrivate.toLowerCase() === 'true';
+        parsedBody.isVerified = parsedBody.isVerified.toLowerCase() === 'true';
         parsedBody.isActive = false;
+        parsedBody.isDeleted = false;
 
         Array.from(parsedBody.accounts).forEach((account: any) => {
             if (!parsedBody.networks[account.chain]) {
@@ -186,9 +222,7 @@ class OrganizationManager implements IOrganizationService {
                 { $set: { isActive: true } }
             );
 
-            io.emit('annualBalanceFetched', { message: 'Balance fething task completed successfully' });
-
-            return {};
+            io.emit('annualBalanceFetched', { message: `Balance fething task completed successfully for organization id ${createdOrgId}` });
         } catch (error: any) {
             throw new Error(error);
         }

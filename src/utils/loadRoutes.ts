@@ -52,6 +52,10 @@ export default function configureRouter(app: any) {
         .post(checkUserJwt(),
             organizationController.addFavorites.bind(organizationController))
 
+    app.route(OrganizationRoute.Delete)
+        .delete(checkUserJwt(),
+            organizationController.delete.bind(organizationController))
+
     app.route(AuthRoute.SingIn)
         .post(checkUserSignature(),
             authController.signIn.bind(authController))

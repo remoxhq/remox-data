@@ -70,6 +70,7 @@ class OrganizationManager {
         await this.attachCommonFields(parsedBody);
         const db = req.app.locals.db;
         const io = req.app.locals.io; //socket connection
+        if (parsedBody.isVerified && req.user.role !== _types.Roles.SuperAdmin) return res.status(403).send(_types.ResponseMessage.ForbiddenRequest);
         const collection = db.collection(organizationCollection);
         const createdOrg = await collection.insertOne(parsedBody);
         this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
@@ -94,28 +95,59 @@ class OrganizationManager {
         const collection = db.collection(organizationCollection);
         let response = await collection.aggregate(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
         if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        return res.status(200).send(new _models.Pagination(response, await collection.countDocuments(), pageIndex, pageSize));
+        return res.status(200).send(new _models.Pagination(response, await collection.countDocuments({
+            isDeleted: {
+                $ne: true
+            }
+        }), pageIndex, pageSize));
     }
     async updateOrganization(req, res) {
         const parsedBody = (0, _utils.parseFormData)("accounts", req);
         parsedBody.updatedDate = new Date().toDateString();
         await this.attachCommonFields(parsedBody);
         const orgId = req.params.id;
+        const publicKey = req.headers.address;
         if (!orgId) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
         const db = req.app.locals.db;
         const io = req.app.locals.io; //socket connection
         const collection = db.collection(organizationCollection);
+        const response = await collection.findOne({
+            _id: new _mongodb.ObjectId(orgId)
+        });
+        if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
+        if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) return res.status(403).send(_types.ResponseMessage.ForbiddenRequest);
         const result = await collection.updateOne({
             _id: new _mongodb.ObjectId(orgId)
         }, {
             $set: parsedBody
         });
-        if (result.modifiedCount <= 0) return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
+        if (!result.acknowledged) return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
         parsedBody._id = orgId;
         this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
         return res.json({
             message: _types.ResponseMessage.OrganizationUpdated
         });
+    }
+    async deleteOrganization(req, res) {
+        const orgId = req.params.id;
+        const publicKey = req.headers.address;
+        const db = req.app.locals.db;
+        if (!orgId) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
+        const collection = db.collection(organizationCollection);
+        const response = await collection.findOne({
+            _id: new _mongodb.ObjectId(orgId)
+        });
+        if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
+        if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) return res.status(403).send(_types.ResponseMessage.ForbiddenRequest);
+        const result = await collection.updateOne({
+            _id: new _mongodb.ObjectId(orgId)
+        }, {
+            $set: {
+                isDeleted: true
+            }
+        });
+        if (!result.acknowledged) return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
+        return res.status(200).send("");
     }
     async addFavorites(req, res) {
         const orgId = req.params.organizationId;
@@ -152,9 +184,10 @@ class OrganizationManager {
     async attachCommonFields(parsedBody) {
         parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
         parsedBody.networks = {};
-        parsedBody.isDeleted = false;
-        parsedBody.isVerified = false;
+        parsedBody.isPrivate = parsedBody.isPrivate.toLowerCase() === 'true';
+        parsedBody.isVerified = parsedBody.isVerified.toLowerCase() === 'true';
         parsedBody.isActive = false;
+        parsedBody.isDeleted = false;
         Array.from(parsedBody.accounts).forEach((account)=>{
             if (!parsedBody.networks[account.chain]) {
                 parsedBody.networks[account.chain] = account.chain;
@@ -204,9 +237,8 @@ class OrganizationManager {
                 }
             });
             io.emit('annualBalanceFetched', {
-                message: 'Balance fething task completed successfully'
+                message: `Balance fething task completed successfully for organization id ${createdOrgId}`
             });
-            return {};
         } catch (error) {
             throw new Error(error);
         }

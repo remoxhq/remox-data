@@ -2,12 +2,9 @@ import { Request, Response } from 'express'
 import { injectable } from "inversify";
 import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
-import axios from 'axios';
-import { config } from 'dotenv';
-import { AssetByBlockchainDto, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, CovalentAsset, CovalentAssetHold } from '../../models';
+import { AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, CovalentAsset, CovalentAssetHold } from '../../models';
 import { DesiredTokens } from '../../utils/types';
-
-config();
+import { covalentPortfolioRequest } from '../../libs/covalent';
 
 const tresuryCollection = "OrganizationsHistoricalBalances";
 
@@ -38,8 +35,7 @@ class TreasuryManager implements ITreasuryService {
         if (!Array.isArray(wallets)) return;
 
         await Promise.all(wallets.map(async (wallet: AssetWallet) => {
-            const covalentAssets = await axios
-                .get<{ data: CovalentAssetHold }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}&`);
+            const covalentAssets = await covalentPortfolioRequest(wallet);
 
             const filteredAssets = this.filterWalletAssets(covalentAssets.data.data);
 
@@ -51,10 +47,10 @@ class TreasuryManager implements ITreasuryService {
 
         const sortedAssets = Object.values(totalAssets).sort((a, b) => b.quote - a.quote);
         const sortedAssetsByBlockchain = Object.values(totalAssetsByBlockchain).map((item) => ({
-          ...item,
-          assets: Object.values(item.assets).sort((a, b) => b.quote - a.quote),
+            ...item,
+            assets: Object.values(item.assets).sort((a, b) => b.quote - a.quote),
         }));
-      
+
         return {
             assets: sortedAssets,
             assetsByBlockchain: sortedAssetsByBlockchain

@@ -54,7 +54,10 @@ const checkUserJwt = ()=>async (req, res, next)=>{
             if (!token) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
             _jsonwebtoken.default.verify(token.split(" ")[1], process.env.AUTH_SECRET_KEY, (err, decoded)=>{
                 if (err || !decoded) return res.status(401).json(_types.ResponseMessage.UnAuthorizedAction);
-                if (createdBy !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+                if ((0, _ethereumjsutil.toChecksumAddress)(createdBy) !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+                req.user = {
+                    role: decoded.role
+                };
                 next();
             });
         } catch (err) {

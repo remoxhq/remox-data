@@ -41,6 +41,7 @@ function configureRouter(app) {
     app.route(_apiAttributes.OrganizationRoute.GetAll).get((0, _middlewares.authenticateUserOrAllowAnonymous)(), (0, _OrganizationFilter.addOrganizationFilter)(), organizationController.getAll.bind(organizationController));
     app.route(_apiAttributes.OrganizationRoute.Update).put((0, _middlewares.checkUserJwt)(), (0, _middlewares.validateBody)(_models.organizationShcema, "accounts"), organizationController.update.bind(organizationController));
     app.route(_apiAttributes.OrganizationRoute.AddFavorites).post((0, _middlewares.checkUserJwt)(), organizationController.addFavorites.bind(organizationController));
+    app.route(_apiAttributes.OrganizationRoute.Delete).delete((0, _middlewares.checkUserJwt)(), organizationController.delete.bind(organizationController));
     app.route(_apiAttributes.AuthRoute.SingIn).post((0, _middlewares.checkUserSignature)(), authController.signIn.bind(authController));
     app.route(_apiAttributes.AuthRoute.UpdateRole).post((0, _middlewares.checkUserPermission)(_types.Roles.SuperAdmin), authController.updateRole.bind(authController));
     app.route(_apiAttributes.AuthRoute.UserFavOrgs).get((0, _middlewares.checkUserJwt)(), authController.getUserFavOrgs.bind(authController));

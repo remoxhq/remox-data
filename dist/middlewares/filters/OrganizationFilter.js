@@ -26,6 +26,7 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                 $options: 'i'
             };
             if (req.query.mine && usrPulicKey) match.createdBy = usrPulicKey;
+            else match.isPrivate = false;
             if (usrPulicKey) {
                 const authService = diContainer.get(_types.TYPES.IAuthService);
                 const user = await authService.getUserByPublicKey(req, res);
@@ -37,6 +38,7 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                 };
             }
             if (req.query.favOnly) match.isFavorited = true;
+            match.isDeleted = false;
             aggregationPipeline.push({
                 $addFields: field
             });

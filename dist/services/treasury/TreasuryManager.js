@@ -9,21 +9,14 @@ Object.defineProperty(exports, "default", {
     }
 });
 const _inversify = require("inversify");
-const _axios = /*#__PURE__*/ _interop_require_default(require("axios"));
-const _dotenv = require("dotenv");
 const _types = require("../../utils/types");
-function _interop_require_default(obj) {
-    return obj && obj.__esModule ? obj : {
-        default: obj
-    };
-}
+const _covalent = require("../../libs/covalent");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for(var i = decorators.length - 1; i >= 0; i--)if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 }
-(0, _dotenv.config)();
 const tresuryCollection = "OrganizationsHistoricalBalances";
 class TreasuryManager {
     async getAnnualTreasury(req) {
@@ -46,7 +39,7 @@ class TreasuryManager {
         const totalAssetsByBlockchain = {};
         if (!Array.isArray(wallets)) return;
         await Promise.all(wallets.map(async (wallet)=>{
-            const covalentAssets = await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}&`);
+            const covalentAssets = await (0, _covalent.covalentPortfolioRequest)(wallet);
             const filteredAssets = this.filterWalletAssets(covalentAssets.data.data);
             filteredAssets.forEach((item)=>{
                 const token = this.processToken(item, totalAssets);

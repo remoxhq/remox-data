@@ -13,7 +13,7 @@ export const addOrganizationFilter = () =>
         try {
             const diContainer = getContainer();
             const usrPulicKey = req.headers.address;
-            
+
             const aggregationPipeline: any[] = [];
             const match: any = {};
             const field: any = {};
@@ -26,6 +26,7 @@ export const addOrganizationFilter = () =>
 
             if (req.query.mine && usrPulicKey)
                 match.createdBy = usrPulicKey;
+            else match.isPrivate = false;
 
             if (usrPulicKey) {
                 const authService = diContainer.get<IAuthService>(TYPES.IAuthService);
@@ -38,6 +39,7 @@ export const addOrganizationFilter = () =>
             if (req.query.favOnly)
                 match.isFavorited = true;
 
+            match.isDeleted = false;
             aggregationPipeline.push({ $addFields: field });
             aggregationPipeline.push({ $match: match });
 
