@@ -42,6 +42,9 @@ class TreasuryController {
     async getAssets(req, res) {
         await this.treasuryService.getAssets(req, res);
     }
+    async getTransactions(req, res) {
+        await this.treasuryService.getTransactions(req, res);
+    }
     constructor(treasuryService){
         _define_property(this, "treasuryService", void 0);
         this.treasuryService = treasuryService;

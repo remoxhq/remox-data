@@ -2,9 +2,10 @@ import { Request, Response } from 'express'
 import { injectable } from "inversify";
 import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
-import { AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, CovalentAsset, CovalentAssetHold } from '../../models';
+import { AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, CovalentAsset, CovalentAssetHold, TxnAsset, TxnData } from '../../models';
 import { DesiredTokens } from '../../utils/types';
-import { covalentPortfolioRequest } from '../../libs/covalent';
+import { covalentPortfolioRequest, moralisTransactionsRequest } from '../../libs/covalent';
+import { ethers } from 'ethers';
 
 const tresuryCollection = "OrganizationsHistoricalBalances";
 
@@ -24,6 +25,61 @@ class TreasuryManager implements ITreasuryService {
     async getAssets(req: Request, res: Response) {
         const totalAssets = await this.getAssetsFromProvider(req)
         return res.status(200).send(totalAssets);
+    }
+
+    async getTransactions(req: Request, res: Response) {
+        const txs = await this.getTransactionsFromProvider(req)
+        return res.status(200).send(txs);
+    }
+
+    private async getTransactionsFromProvider(req: Request) {
+        const wallets = req.body["wallets"] as AssetWallet[];
+
+        let totalTxs: any[] = []
+
+        await Promise.all(wallets.map(async (wallet: AssetWallet) => {
+            const moralisTxns = await moralisTransactionsRequest(wallet);
+
+            const mappedTxns = moralisTxns.raw.result.map(txn => {
+                const tranferLogs = txn.logs.filter(log => log.decoded_event && log.decoded_event.label === "Transfer")
+
+                const txnData = {} as TxnData;
+                const txnAssets: TxnAsset = {}
+
+                tranferLogs.map((transferLog, index) => {
+                    const params = transferLog.decoded_event.params;
+                    const amount = params && params[2].value;
+                    const from = params && params[0].value;
+                    const to = params && params[1].value;
+
+
+                    txnAssets[transferLog.address] = txnAssets[transferLog.address] || {
+                        adress: transferLog.address,
+                        amount: amount
+                    }
+
+                    txnAssets[transferLog.address].amount += amount ? amount : 0;
+
+                    if (index === 0) {
+                        txnData.from = from ?? ""
+                        txnData.to = tranferLogs.length === 1 ? to ?? "" : `Transfer (${tranferLogs.length})`
+                        txnData.date = txn.block_timestamp,
+                            txnData.hash = txn.hash
+                    }
+                })
+
+                return {
+                    txnAssets,
+                    txnData
+                }
+            })
+
+            totalTxs = [...totalTxs, ...mappedTxns]
+        }))
+
+        return {
+            txs: totalTxs,
+        };
     }
 
     private async getAssetsFromProvider(req: Request) {

@@ -2,7 +2,8 @@ const base = "/api/v1"
 
 export const enum TreasuryRoute {
     GetAnnualTreasury = base + "/treasury/balance/:name",
-    GetAssets = base + "/treasury/assets"
+    GetAssets = base + "/treasury/assets",
+    GetTransactions = base + "/treasury/txs"
 }
 
 export const enum OrganizationRoute {

@@ -15,4 +15,8 @@ export class TreasuryController {
     async getAssets(req: Request, res: Response) {
         await this.treasuryService.getAssets(req, res);
     }
+
+    async getTransactions(req: Request, res: Response) {
+        await this.treasuryService.getTransactions(req, res);
+    }
 }

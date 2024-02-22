@@ -33,6 +33,49 @@ class TreasuryManager {
         const totalAssets = await this.getAssetsFromProvider(req);
         return res.status(200).send(totalAssets);
     }
+    async getTransactions(req, res) {
+        const txs = await this.getTransactionsFromProvider(req);
+        return res.status(200).send(txs);
+    }
+    async getTransactionsFromProvider(req) {
+        const wallets = req.body["wallets"];
+        let totalTxs = [];
+        await Promise.all(wallets.map(async (wallet)=>{
+            const moralisTxns = await (0, _covalent.moralisTransactionsRequest)(wallet);
+            const mappedTxns = moralisTxns.raw.result.map((txn)=>{
+                const tranferLogs = txn.logs.filter((log)=>log.decoded_event && log.decoded_event.label === "Transfer");
+                const txnData = {};
+                const txnAssets = {};
+                tranferLogs.map((transferLog, index)=>{
+                    const params = transferLog.decoded_event.params;
+                    const amount = params && params[2].value;
+                    const from = params && params[0].value;
+                    const to = params && params[1].value;
+                    txnAssets[transferLog.address] = txnAssets[transferLog.address] || {
+                        adress: transferLog.address,
+                        amount: amount
+                    };
+                    txnAssets[transferLog.address].amount += amount ? amount : 0;
+                    if (index === 0) {
+                        txnData.from = from ?? "";
+                        txnData.to = tranferLogs.length === 1 ? to ?? "" : `Transfer (${tranferLogs.length})`;
+                        txnData.date = txn.block_timestamp, txnData.hash = txn.hash;
+                    }
+                });
+                return {
+                    txnAssets,
+                    txnData
+                };
+            });
+            totalTxs = [
+                ...totalTxs,
+                ...mappedTxns
+            ];
+        }));
+        return {
+            txs: totalTxs
+        };
+    }
     async getAssetsFromProvider(req) {
         const wallets = req.body["wallets"];
         const totalAssets = {};
