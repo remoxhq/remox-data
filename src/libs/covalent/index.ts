@@ -13,16 +13,29 @@ export const covalentPortfolioRequest = async (wallet: AssetWallet) => {
         .get<{ data: CovalentAssetHold }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}`);
 }
 
-export const moralisTransactionsRequest = async (wallet: AssetWallet) => {
-    await Moralis.start({
-        apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjRjMzU4NGVhLTVlNjUtNDkzMS05NTE3LWFmMzE2NTYyNTcyNyIsIm9yZ0lkIjoiMzc4Mjc3IiwidXNlcklkIjoiMzg4NzI3IiwidHlwZUlkIjoiYTIzNzk4MWUtODMzNi00ZGIwLWFhNjYtNDZmMTc3OWNlYjViIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MDg0Mzg5MzUsImV4cCI6NDg2NDE5ODkzNX0.RNjCuBGn7fDO5KYkMOBRPNLYlgCpJktEzk05e5dDFb8'
-    });
+interface ExecutionType {
+    [type: string]: () => any
+}
 
-    const response = await Moralis.EvmApi.transaction.getWalletTransactionsVerbose({
-        "chain": wallet.chain,
-        "limit": 20,
-        "address": wallet.address
-    });
+export const moralisRequest = async (wallet: AssetWallet, type: string) => {
+    if (!Moralis.Core.isStarted) {
+        await Moralis.start({
+            apiKey: process.env.MORALIS_API_KEY
+        });
+    }
+
+    const query = {
+        chain: wallet.chain,
+        limit: 40,
+        address: wallet.address
+    }
+
+    const execute = {
+        ["Transfer"]: async () => await Moralis.EvmApi.token.getWalletTokenTransfers(query),
+        ["Native"]: async () => await Moralis.EvmApi.transaction.getWalletTransactions(query)
+    } as ExecutionType
+
+    const response = await execute[type]()
 
     return response;
 }

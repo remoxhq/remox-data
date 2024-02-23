@@ -2,9 +2,9 @@ import { Request, Response } from 'express'
 import { injectable } from "inversify";
 import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
-import { AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, CovalentAsset, CovalentAssetHold, TxnAsset, TxnData } from '../../models';
+import { AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, TransferDto } from '../../models';
 import { DesiredTokens } from '../../utils/types';
-import { covalentPortfolioRequest, moralisTransactionsRequest } from '../../libs/covalent';
+import { covalentPortfolioRequest, moralisRequest } from '../../libs/covalent';
 import { ethers } from 'ethers';
 
 const tresuryCollection = "OrganizationsHistoricalBalances";
@@ -38,44 +38,64 @@ class TreasuryManager implements ITreasuryService {
         let totalTxs: any[] = []
 
         await Promise.all(wallets.map(async (wallet: AssetWallet) => {
-            const moralisTxns = await moralisTransactionsRequest(wallet);
+            const walletTransfersReq = moralisRequest(wallet, "Transfer");
+            const walletativeTxnsReq = moralisRequest(wallet, "Native");
+            const [walletTransfers, walletativeTxns] = await Promise.all([walletTransfersReq, walletativeTxnsReq])
 
-            const mappedTxns = moralisTxns.raw.result.map(txn => {
-                const tranferLogs = txn.logs.filter(log => log.decoded_event && log.decoded_event.label === "Transfer")
+            const mappedTransfers = Array.from(walletTransfers.raw.result)
+                .map((transferItem: any) => {
+                    const { transaction_hash,
+                        token_symbol,
+                        token_logo,
+                        token_decimals,
+                        value,
+                        from_address,
+                        to_address,
+                        block_timestamp } = transferItem;
 
-                const txnData = {} as TxnData;
-                const txnAssets: TxnAsset = {}
+                    const transfer = {
+                        hash: transaction_hash,
+                        tokens: {
+                            [token_symbol]: {
+                                logo: token_logo ?? ""
+                            }
+                        },
+                        from: from_address,
+                        to: to_address,
+                        direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
+                        count: 1,
+                        amount: +ethers.utils.formatUnits(value, token_decimals),
+                        date: block_timestamp
+                    };
 
-                tranferLogs.map((transferLog, index) => {
-                    const params = transferLog.decoded_event.params;
-                    const amount = params && params[2].value;
-                    const from = params && params[0].value;
-                    const to = params && params[1].value;
-
-
-                    txnAssets[transferLog.address] = txnAssets[transferLog.address] || {
-                        adress: transferLog.address,
-                        amount: amount
-                    }
-
-                    txnAssets[transferLog.address].amount += amount ? amount : 0;
-
-                    if (index === 0) {
-                        txnData.from = from ?? ""
-                        txnData.to = tranferLogs.length === 1 ? to ?? "" : `Transfer (${tranferLogs.length})`
-                        txnData.date = txn.block_timestamp,
-                            txnData.hash = txn.hash
-                    }
+                    return transfer;
                 })
 
-                return {
-                    txnAssets,
-                    txnData
-                }
-            })
+            const mappedNativeTxns = Array.from(walletativeTxns.raw.result)
+                .filter((txn: any) => +txn.value)
+                .map((txn: any) => {
+                    const { hash, value, from_address, to_address, block_timestamp } = txn;
 
-            totalTxs = [...totalTxs, ...mappedTxns]
-        }))
+                    const nativeTxn = {
+                        hash,
+                        tokens: {
+                            [Coins[wallet.chain].symbol]: {
+                                logo: Coins[wallet.chain].logo
+                            }
+                        },
+                        from: from_address,
+                        to: to_address,
+                        direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
+                        count: 1,
+                        amount: +ethers.utils.formatUnits(value, 18),
+                        date: block_timestamp
+                    };
+
+                    return nativeTxn;
+                })
+
+            totalTxs = [...totalTxs, ...mappedTransfers, ...mappedNativeTxns]
+        }));
 
         return {
             txs: totalTxs,

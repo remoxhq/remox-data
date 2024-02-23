@@ -9,8 +9,10 @@ Object.defineProperty(exports, "default", {
     }
 });
 const _inversify = require("inversify");
+const _models = require("../../models");
 const _types = require("../../utils/types");
 const _covalent = require("../../libs/covalent");
+const _ethers = require("ethers");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -41,35 +43,52 @@ class TreasuryManager {
         const wallets = req.body["wallets"];
         let totalTxs = [];
         await Promise.all(wallets.map(async (wallet)=>{
-            const moralisTxns = await (0, _covalent.moralisTransactionsRequest)(wallet);
-            const mappedTxns = moralisTxns.raw.result.map((txn)=>{
-                const tranferLogs = txn.logs.filter((log)=>log.decoded_event && log.decoded_event.label === "Transfer");
-                const txnData = {};
-                const txnAssets = {};
-                tranferLogs.map((transferLog, index)=>{
-                    const params = transferLog.decoded_event.params;
-                    const amount = params && params[2].value;
-                    const from = params && params[0].value;
-                    const to = params && params[1].value;
-                    txnAssets[transferLog.address] = txnAssets[transferLog.address] || {
-                        adress: transferLog.address,
-                        amount: amount
-                    };
-                    txnAssets[transferLog.address].amount += amount ? amount : 0;
-                    if (index === 0) {
-                        txnData.from = from ?? "";
-                        txnData.to = tranferLogs.length === 1 ? to ?? "" : `Transfer (${tranferLogs.length})`;
-                        txnData.date = txn.block_timestamp, txnData.hash = txn.hash;
-                    }
-                });
-                return {
-                    txnAssets,
-                    txnData
+            const walletTransfersReq = (0, _covalent.moralisRequest)(wallet, "Transfer");
+            const walletativeTxnsReq = (0, _covalent.moralisRequest)(wallet, "Native");
+            const [walletTransfers, walletativeTxns] = await Promise.all([
+                walletTransfersReq,
+                walletativeTxnsReq
+            ]);
+            const mappedTransfers = Array.from(walletTransfers.raw.result).map((transferItem)=>{
+                const { transaction_hash, token_symbol, token_logo, token_decimals, value, from_address, to_address, block_timestamp } = transferItem;
+                const transfer = {
+                    hash: transaction_hash,
+                    tokens: {
+                        [token_symbol]: {
+                            logo: token_logo ?? ""
+                        }
+                    },
+                    from: from_address,
+                    to: to_address,
+                    direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
+                    count: 1,
+                    amount: +_ethers.ethers.utils.formatUnits(value, token_decimals),
+                    date: block_timestamp
                 };
+                return transfer;
+            });
+            const mappedNativeTxns = Array.from(walletativeTxns.raw.result).filter((txn)=>+txn.value).map((txn)=>{
+                const { hash, value, from_address, to_address, block_timestamp } = txn;
+                const nativeTxn = {
+                    hash,
+                    tokens: {
+                        [_models.Coins[wallet.chain].symbol]: {
+                            logo: _models.Coins[wallet.chain].logo
+                        }
+                    },
+                    from: from_address,
+                    to: to_address,
+                    direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
+                    count: 1,
+                    amount: +_ethers.ethers.utils.formatUnits(value, 18),
+                    date: block_timestamp
+                };
+                return nativeTxn;
             });
             totalTxs = [
                 ...totalTxs,
-                ...mappedTxns
+                ...mappedTransfers,
+                ...mappedNativeTxns
             ];
         }));
         return {

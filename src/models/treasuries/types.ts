@@ -65,16 +65,57 @@ export interface AssetDto {
 
 // txn DTOs
 
-export interface TxnAsset {
-  [address: string]: {
-    amount: string,
-    adress: string
+export interface TransferDto {
+  [hash: string]: {
+    hash: string;
+    tokens: {
+      [symbol: string]: {
+        logo: string
+      }
+    };
+    from: string;
+    to: string;
+    count: number;
+    direction: string,
+    amount: number,
+    date: string
   }
 }
 
-export interface TxnData {
-  from: string,
-  to: string,
-  date: string,
-  hash: string
+export interface NativeTokenLogos {
+  [chain: string]: {
+    symbol: string,
+    logo: string
+  }
+}
+
+export const Coins: NativeTokenLogos = {
+  ["0x1"]: {
+    symbol: "ETH",
+    logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
+  },
+  ["0xa4b1"]: {
+    symbol: "ETH",
+    logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
+  },
+  ["0x89"]: {
+    symbol: "ETH",
+    logo: "https://assets.coingecko.com/coins/images/4713/small/matic-token-icon.png?1624446912"
+  },
+  ["0xa86a"]: {
+    symbol: "AVAX",
+    logo: "https://assets.coingecko.com/coins/images/12559/small/coin-round-red.png"
+  },
+  ["0xa"]: {
+    symbol: "ETH",
+    logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
+  },
+  ["0x64"]: {
+    symbol: "ETH",
+    logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
+  },
+  ["0x38"]: {
+    symbol: "BNB",
+    logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
+  },
 }

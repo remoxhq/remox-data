@@ -12,8 +12,8 @@ _export(exports, {
     covalentPortfolioRequest: function() {
         return covalentPortfolioRequest;
     },
-    moralisTransactionsRequest: function() {
-        return moralisTransactionsRequest;
+    moralisRequest: function() {
+        return moralisRequest;
     }
 });
 const _axios = /*#__PURE__*/ _interop_require_default(require("axios"));
@@ -44,14 +44,21 @@ function _interop_require_default(obj) {
 const covalentPortfolioRequest = async (wallet)=>{
     return await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}`);
 };
-const moralisTransactionsRequest = async (wallet)=>{
-    await _moralis.default.start({
-        apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjRjMzU4NGVhLTVlNjUtNDkzMS05NTE3LWFmMzE2NTYyNTcyNyIsIm9yZ0lkIjoiMzc4Mjc3IiwidXNlcklkIjoiMzg4NzI3IiwidHlwZUlkIjoiYTIzNzk4MWUtODMzNi00ZGIwLWFhNjYtNDZmMTc3OWNlYjViIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MDg0Mzg5MzUsImV4cCI6NDg2NDE5ODkzNX0.RNjCuBGn7fDO5KYkMOBRPNLYlgCpJktEzk05e5dDFb8'
-    });
-    const response = await _moralis.default.EvmApi.transaction.getWalletTransactionsVerbose({
-        "chain": wallet.chain,
-        "limit": 20,
-        "address": wallet.address
-    });
+const moralisRequest = async (wallet, type)=>{
+    if (!_moralis.default.Core.isStarted) {
+        await _moralis.default.start({
+            apiKey: process.env.MORALIS_API_KEY
+        });
+    }
+    const query = {
+        chain: wallet.chain,
+        limit: 40,
+        address: wallet.address
+    };
+    const execute = {
+        ["Transfer"]: async ()=>await _moralis.default.EvmApi.token.getWalletTokenTransfers(query),
+        ["Native"]: async ()=>await _moralis.default.EvmApi.transaction.getWalletTransactions(query)
+    };
+    const response = await execute[type]();
     return response;
 };
