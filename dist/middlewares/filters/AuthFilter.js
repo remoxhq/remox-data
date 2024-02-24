@@ -22,7 +22,6 @@ _export(exports, {
         return checkUserSignature;
     }
 });
-const _ethsigutil = require("@metamask/eth-sig-util");
 const _ethereumjsutil = require("ethereumjs-util");
 const _types = require("../../utils/types");
 const _jsonwebtoken = /*#__PURE__*/ _interop_require_default(require("jsonwebtoken"));
@@ -33,15 +32,12 @@ function _interop_require_default(obj) {
 }
 const checkUserSignature = ()=>async (req, res, next)=>{
         try {
-            let signature = req.headers.signature?.toString();
-            let signedData = req.headers.signeddata?.toString();
-            let createdBy = req.headers.address;
-            if (!signature || !signedData) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
-            const pk = (0, _ethsigutil.recoverPersonalSignature)({
-                data: signedData,
-                signature: signature
-            });
-            if (createdBy !== (0, _ethereumjsutil.toChecksumAddress)(pk)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+            let accessKey = req.headers.accesskey?.toString();
+            if (!accessKey) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+            const decoded = _jsonwebtoken.default.verify(accessKey, process.env.AUTH_SECRET_KEY);
+            req.user = {
+                publicKey: decoded.address
+            };
             next();
         } catch (err) {
             return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
@@ -56,7 +52,8 @@ const checkUserJwt = ()=>async (req, res, next)=>{
                 if (err || !decoded) return res.status(401).json(_types.ResponseMessage.UnAuthorizedAction);
                 if ((0, _ethereumjsutil.toChecksumAddress)(createdBy) !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
                 req.user = {
-                    role: decoded.role
+                    role: decoded.role,
+                    publicKey: decoded.publicKey
                 };
                 next();
             });

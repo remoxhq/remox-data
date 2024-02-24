@@ -37,7 +37,6 @@
   "dependencies": {
     "@covalenthq/client-sdk": "^0.4.2",
     "@google-cloud/storage": "^7.7.0",
-    "@metamask/eth-sig-util": "^7.0.1",
     "@types/body-parser": "^1.19.5",
     "@types/express-formidable": "^1.2.3",
     "@types/jsonwebtoken": "^9.0.5",

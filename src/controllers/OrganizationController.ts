@@ -1,9 +1,10 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { inject, injectable } from "inversify";
 import { TYPES } from "../utils/types";
 import IOrganizationService from '../services/organizations/IOrganizationService';
 import { OrganizationFilterRequest } from '../middlewares';
 import { AppRequest } from '../models';
+import Jwt from "jsonwebtoken";
 
 @injectable()
 export class OrganizationController {
@@ -13,8 +14,8 @@ export class OrganizationController {
         await this.organizationService.createOrganization(req, res)
     }
 
-    async getByName(req: Request, res: Response) {
-        await this.organizationService.getOrganizationByName(req, res)
+    async getByName(req: AppRequest, res: Response, next: NextFunction) {
+        await this.organizationService.getOrganizationByName(req, res ,next)
     }
 
     async getAll(req: OrganizationFilterRequest, res: Response) {

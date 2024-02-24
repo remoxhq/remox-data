@@ -39,7 +39,8 @@ export default function configureRouter(app: any) {
             organizationController.create.bind(organizationController))
 
     app.route(OrganizationRoute.GetByName)
-        .get(organizationController.getByName.bind(organizationController))
+        .get(authenticateUserOrAllowAnonymous(),
+            organizationController.getByName.bind(organizationController))
 
     app.route(OrganizationRoute.GetAll)
         .get(authenticateUserOrAllowAnonymous(),

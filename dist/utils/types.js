@@ -43,6 +43,7 @@ var ResponseMessage;
     ResponseMessage["UserUpdated"] = "User is updated";
     ResponseMessage["UserPublicKeyRequired"] = "User public key is required";
     ResponseMessage["ForbiddenRequest"] = "Forbidden attempt.";
+    ResponseMessage["WalletsMustBeArray"] = "Wallets must be an array";
 })(ResponseMessage || (ResponseMessage = {}));
 var Roles;
 (function(Roles) {

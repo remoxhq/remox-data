@@ -12,7 +12,6 @@ const _mongodb = require("mongodb");
 const _dotenv = require("dotenv");
 const _cors = /*#__PURE__*/ _interop_require_default(require("cors"));
 const _loadRoutes = /*#__PURE__*/ _interop_require_default(require("./loadRoutes"));
-const _middlewares = require("../middlewares");
 const _bodyparser = /*#__PURE__*/ _interop_require_default(require("body-parser"));
 const _multer = /*#__PURE__*/ _interop_require_default(require("multer"));
 const _socketio = require("socket.io");
@@ -32,16 +31,14 @@ async function startServer(app) {
         loadMiddlewares(app);
         (0, _loadRoutes.default)(app); // loads controler;
         const server = app.listen(port, ()=>{
-            console.log('Server is running on port 3000');
+            console.log('Server is running on port 8080');
         });
         configureWSS(app, server);
-        app.use(_middlewares.errorHandler);
-        // Close the MongoDB connection when the server is shutting down
         process.on('SIGINT', async ()=>{
             closeMongoConnection(client);
         });
     } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
+        console.error('Error connecting to Server:', error);
     }
 }
 function loadMiddlewares(app) {

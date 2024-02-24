@@ -32,6 +32,7 @@ const _types = require("../../utils/types");
 const _models = require("../../models");
 const _AuthManager = require("../auth/AuthManager");
 const _dateandtime = /*#__PURE__*/ _interop_require_default(require("date-and-time"));
+const _responseHandler = require("../../utils/helpers/responseHandler");
 function _define_property(obj, key, value) {
     if (key in obj) {
         Object.defineProperty(obj, key, {
@@ -65,121 +66,155 @@ const organizationCollection = "Organizations";
 const organizationHistoricalBalanceCollection = "OrganizationsHistoricalBalances";
 class OrganizationManager {
     async createOrganization(req, res) {
-        let parsedBody = (0, _utils.parseFormData)("accounts", req);
-        parsedBody.createdDate = new Date().toDateString();
-        await this.attachCommonFields(parsedBody);
-        const db = req.app.locals.db;
-        const io = req.app.locals.io; //socket connection
-        if (parsedBody.isVerified && req.user.role !== _types.Roles.SuperAdmin) return res.status(403).send(_types.ResponseMessage.ForbiddenRequest);
-        const collection = db.collection(organizationCollection);
-        const createdOrg = await collection.insertOne(parsedBody);
-        this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
-        return res.status(200).send(_types.ResponseMessage.OrganizationCreated);
+        try {
+            let parsedBody = (0, _utils.parseFormData)("accounts", req);
+            parsedBody.createdDate = new Date().toDateString();
+            await this.attachCommonFields(parsedBody);
+            const db = req.app.locals.db;
+            const io = req.app.locals.io; //socket connection
+            if (parsedBody.isVerified && req.user.role !== _types.Roles.SuperAdmin) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.UnAuthorized);
+            const collection = db.collection(organizationCollection);
+            const createdOrg = await collection.insertOne(parsedBody);
+            this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, createdOrg.insertedId));
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
     }
-    async getOrganizationByName(req, res) {
-        const orgId = req.params.id;
-        if (!orgId) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        const db = req.app.locals.db;
-        const collection = db.collection(organizationCollection);
-        const response = await collection.findOne({
-            _id: new _mongodb.ObjectId(orgId)
-        });
-        if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        return res.status(200).send(response);
+    async getOrganizationByName(req, res, next) {
+        try {
+            const orgId = req.params.id;
+            const db = req.app.locals.db;
+            const collection = db.collection(organizationCollection);
+            const response = await collection.findOne({
+                _id: new _mongodb.ObjectId(orgId)
+            });
+            if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            if (response.isPrivate && response.createdBy !== req.user?.publicKey) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, response));
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
     }
     async getAllOrganizations(req, res) {
-        const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
-        const pageSize = parseInt(req.query.pageSize, 10) || 20;
-        const aggregationPipeline = req.aggregationPipeline;
-        const db = req.app.locals.db;
-        const collection = db.collection(organizationCollection);
-        let response = await collection.aggregate(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
-        if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        return res.status(200).send(new _models.Pagination(response, await collection.countDocuments({
-            isDeleted: {
-                $ne: true
-            }
-        }), pageIndex, pageSize));
+        try {
+            const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
+            const pageSize = parseInt(req.query.pageSize, 10) || 20;
+            const aggregationPipeline = req.aggregationPipeline;
+            const db = req.app.locals.db;
+            const collection = db.collection(organizationCollection);
+            let response = await collection.aggregate(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, new _models.Pagination(response, await collection.countDocuments({
+                isDeleted: {
+                    $ne: true
+                }
+            }), pageIndex, pageSize)));
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
     }
     async updateOrganization(req, res) {
-        const parsedBody = (0, _utils.parseFormData)("accounts", req);
-        parsedBody.updatedDate = new Date().toDateString();
-        await this.attachCommonFields(parsedBody);
-        const orgId = req.params.id;
-        const publicKey = req.headers.address;
-        if (!orgId) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        const db = req.app.locals.db;
-        const io = req.app.locals.io; //socket connection
-        const collection = db.collection(organizationCollection);
-        const response = await collection.findOne({
-            _id: new _mongodb.ObjectId(orgId)
-        });
-        if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) return res.status(403).send(_types.ResponseMessage.ForbiddenRequest);
-        const result = await collection.updateOne({
-            _id: new _mongodb.ObjectId(orgId)
-        }, {
-            $set: parsedBody
-        });
-        if (!result.acknowledged) return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
-        parsedBody._id = orgId;
-        this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
-        return res.json({
-            message: _types.ResponseMessage.OrganizationUpdated
-        });
+        try {
+            const parsedBody = (0, _utils.parseFormData)("accounts", req);
+            parsedBody.updatedDate = new Date().toDateString();
+            await this.attachCommonFields(parsedBody);
+            const orgId = req.params.id;
+            const publicKey = req.headers.address;
+            const db = req.app.locals.db;
+            const io = req.app.locals.io; //socket connection
+            const collection = db.collection(organizationCollection);
+            const response = await collection.findOne({
+                _id: new _mongodb.ObjectId(orgId)
+            });
+            if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) throw new _models.CustomError(_types.ResponseMessage.ForbiddenRequest, _models.ExceptionType.UnAuthorized);
+            const result = await collection.updateOne({
+                _id: new _mongodb.ObjectId(orgId)
+            }, {
+                $set: parsedBody
+            });
+            parsedBody._id = orgId;
+            this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, result.upsertedId));
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
     }
     async deleteOrganization(req, res) {
-        const orgId = req.params.id;
-        const publicKey = req.headers.address;
-        const db = req.app.locals.db;
-        if (!orgId) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        const collection = db.collection(organizationCollection);
-        const response = await collection.findOne({
-            _id: new _mongodb.ObjectId(orgId)
-        });
-        if (!response) return res.status(404).send(_types.ResponseMessage.OrganizationNotFound);
-        if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) return res.status(403).send(_types.ResponseMessage.ForbiddenRequest);
-        const result = await collection.updateOne({
-            _id: new _mongodb.ObjectId(orgId)
-        }, {
-            $set: {
-                isDeleted: true
-            }
-        });
-        if (!result.acknowledged) return res.status(404).json(_types.ResponseMessage.OrganizationNotFound);
-        return res.status(200).send("");
+        try {
+            const orgId = req.params.id;
+            const publicKey = req.headers.address;
+            const db = req.app.locals.db;
+            const collection = db.collection(organizationCollection);
+            const response = await collection.findOne({
+                _id: new _mongodb.ObjectId(orgId)
+            });
+            if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) throw new _models.CustomError(_types.ResponseMessage.ForbiddenRequest, _models.ExceptionType.UnAuthorized);
+            const result = await collection.updateOne({
+                _id: new _mongodb.ObjectId(orgId)
+            }, {
+                $set: {
+                    isDeleted: true
+                }
+            });
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, result.upsertedId));
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
     }
     async addFavorites(req, res) {
-        const orgId = req.params.organizationId;
-        const publicKey = req.headers.address;
-        if (!orgId || orgId.length > 24) return res.status(422).json({
-            message: _types.ResponseMessage.OrganizationIdRequired
-        });
-        const db = req.app.locals.db;
-        const orgs = db.collection(organizationCollection);
-        const users = db.collection(_AuthManager.usersCollection);
-        let organization = await orgs.findOne({
-            _id: new _mongodb.ObjectId(orgId)
-        });
-        if (!organization) return res.json({
-            message: _types.ResponseMessage.OrganizationNotFound
-        });
-        users.createIndex({
-            publicKey: 1
-        }, {
-            unique: true
-        });
-        const result = await users.updateOne({
-            publicKey: publicKey
-        }, {
-            $set: {
-                [`favoriteOrganizations.${organization._id.toString()}`]: true
-            }
-        });
-        if (result.acknowledged) return res.json({
-            message: _types.ResponseMessage.UserUpdated
-        });
-        return res.status(500).json(_types.ResponseMessage.UnknownServerError);
+        try {
+            const orgId = req.params.organizationId;
+            const publicKey = req.headers.address;
+            if (!orgId || orgId.length > 24) throw new _models.CustomError(_types.ResponseMessage.OrganizationIdRequired, _models.ExceptionType.BadRequest);
+            const db = req.app.locals.db;
+            const orgs = db.collection(organizationCollection);
+            const users = db.collection(_AuthManager.usersCollection);
+            let organization = await orgs.findOne({
+                _id: new _mongodb.ObjectId(orgId)
+            });
+            if (!organization) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            users.createIndex({
+                publicKey: 1
+            }, {
+                unique: true
+            });
+            const aggregation = [
+                {
+                    $match: {
+                        publicKey,
+                        [`favoriteOrganizations.${organization._id.toString()}`]: {
+                            $exists: true
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1
+                    }
+                },
+                {
+                    $limit: 1
+                }
+            ];
+            const update = {};
+            // Check if organization already exists in favorites
+            const existingFavorite = await users.aggregate(aggregation).toArray();
+            if (existingFavorite.length > 0) update.$unset = {
+                [`favoriteOrganizations.${organization._id.toString()}`]: 1
+            };
+            else update.$set = {
+                [`favoriteOrganizations.${organization._id.toString()}`]: 1
+            };
+            const result = await users.updateOne({
+                publicKey
+            }, update);
+            if (result.acknowledged) return res.status(200).send(new _models.AppResponse(200, true, undefined, organization._id));
+            throw new _models.CustomError(_types.ResponseMessage.UnknownServerError, _models.ExceptionType.ServerError);
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
     }
     async attachCommonFields(parsedBody) {
         parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);

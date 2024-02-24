@@ -32,7 +32,7 @@ const organizationShcema = _joi.default.object({
             return helpers.error('File must be an image/jpeg, image/png, image/svg+xml');
         }
         return value;
-    }).required().label("Organization image"),
+    }).label("Organization image"),
     dashboardLink: _joi.default.string().alphanum().min(3).max(30).required().label("Organization dashboard link"),
     website: _joi.default.string().label("Organization website url"),
     github: _joi.default.string().label("Organization github url"),

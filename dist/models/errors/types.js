@@ -35,9 +35,11 @@ var ExceptionType;
     ExceptionType[ExceptionType["UnAuthenticated"] = 401] = "UnAuthenticated";
     ExceptionType[ExceptionType["UnAuthorized"] = 403] = "UnAuthorized";
     ExceptionType[ExceptionType["NotFound"] = 404] = "NotFound";
+    ExceptionType[ExceptionType["ServerError"] = 500] = "ServerError";
 })(ExceptionType || (ExceptionType = {}));
-class CustomError {
+class CustomError extends Error {
     constructor(message, type){
+        super();
         _define_property(this, "statusCode", void 0);
         _define_property(this, "message", void 0);
         this.statusCode = type;

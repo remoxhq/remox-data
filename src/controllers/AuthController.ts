@@ -2,12 +2,13 @@ import { Request, Response } from 'express'
 import { inject, injectable } from "inversify";
 import { TYPES } from "../utils/types";
 import IAuthService from '../services/auth/IAuthService';
+import { AppRequest } from '../models';
 
 @injectable()
 export class AuthController {
     constructor(@inject(TYPES.IAuthService) private authService: IAuthService) { }
 
-    async signIn(req: Request, res: Response) {
+    async signIn(req: AppRequest, res: Response) {
         await this.authService.signIn(req, res)
     }
 

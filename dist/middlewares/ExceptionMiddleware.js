@@ -10,19 +10,22 @@ Object.defineProperty(exports, "errorHandler", {
 });
 const _models = require("../models");
 const errorHandler = (err, req, res, next)=>{
+    console.log("err");
+    console.log(err);
     if (err instanceof _models.CustomError) {
         const { statusCode, message } = err;
-        return res.status(statusCode).send({
+        res.status(statusCode).send({
             message
         });
+    } else {
+        console.error(JSON.stringify(err, null, 2));
+        res.status(500).send({
+            errors: [
+                {
+                    message: "Internal server error"
+                }
+            ]
+        });
     }
-    // Unhandled errors
-    console.error(JSON.stringify(err, null, 2));
-    return res.status(500).send({
-        errors: [
-            {
-                message: "Internal server error"
-            }
-        ]
-    });
+    next();
 };

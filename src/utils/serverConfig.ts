@@ -2,7 +2,6 @@ import { MongoClient } from "mongodb";
 import { config } from "dotenv";
 import cors from "cors";
 import configureRouter from "./loadRoutes";
-import { errorHandler } from "../middlewares";
 import bodyParser from "body-parser";
 import multer from "multer";
 import { Server } from "socket.io"
@@ -20,18 +19,16 @@ export async function startServer(app: any) {
         configureRouter(app);// loads controler;
 
         const server = app.listen(port, () => {
-            console.log('Server is running on port 3000');
+            console.log('Server is running on port 8080');
         });
 
         configureWSS(app, server);
-        app.use(errorHandler);
 
-        // Close the MongoDB connection when the server is shutting down
         process.on('SIGINT', async () => {
             closeMongoConnection(client);
         });
     } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
+        console.error('Error connecting to Server:', error);
     }
 }
 
@@ -49,6 +46,7 @@ function configureWSS(app: any, server: any) {
             methods: ["GET", "POST"]
         }
     });
+    
     app.locals.io = io;
 
     io.on('connection', (socket) => {

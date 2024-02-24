@@ -33,21 +33,26 @@ function _ts_decorate(decorators, target, key, desc) {
 (0, _dotenv.config)();
 class StorageManager {
     async uploadByteArray(file) {
-        const { mimetype, buffer, originalname } = file;
-        const bucketFile = this._storage.bucket(process.env.BUCKET_NAME).file(originalname);
-        const stream = bucketFile.createWriteStream({
-            metadata: {
-                contentType: mimetype || 'application/octet-stream'
-            }
-        });
-        stream.write(Buffer.from(buffer));
-        stream.end();
-        await new Promise((resolve, reject)=>{
-            stream.on('finish', resolve);
-            stream.on('error', reject);
-        });
-        await bucketFile.makePublic();
-        return `https://storage.googleapis.com/${process.env.BUCKET_NAME}/${originalname}`;
+        try {
+            if (!file) return "";
+            const { mimetype, buffer, originalname } = file;
+            const bucketFile = this._storage.bucket(process.env.BUCKET_NAME).file(originalname);
+            const stream = bucketFile.createWriteStream({
+                metadata: {
+                    contentType: mimetype || 'application/octet-stream'
+                }
+            });
+            stream.write(Buffer.from(buffer));
+            stream.end();
+            await new Promise((resolve, reject)=>{
+                stream.on('finish', resolve);
+                stream.on('error', reject);
+            });
+            await bucketFile.makePublic();
+            return `https://storage.googleapis.com/${process.env.BUCKET_NAME}/${originalname}`;
+        } catch (error) {
+            throw error;
+        }
     }
     constructor(){
         _define_property(this, "_storage", void 0);

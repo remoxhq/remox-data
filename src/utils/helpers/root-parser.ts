@@ -1,7 +1,7 @@
-import { CovalentClient, Chain, PortfolioResponse } from "../libs/covalent"
-import { Organization } from "../libs/firebase-db"
+import { CovalentClient, Chain, PortfolioResponse } from "../../libs/covalent"
+import { Organization } from "../../libs/firebase-db"
 import { config } from "dotenv"
-import { TreasuryIndexer } from "../models/treasuries/types";
+import { TreasuryIndexer } from "../../models/treasuries/types";
 import axios from "axios";
 
 config()

@@ -59,7 +59,6 @@ export const organizationShcema = Joi.object<Organization>({
             }
             return value;
         })
-        .required()
         .label("Organization image"),
 
     dashboardLink: Joi.string()

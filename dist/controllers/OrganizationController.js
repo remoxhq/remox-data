@@ -38,8 +38,8 @@ class OrganizationController {
     async create(req, res) {
         await this.organizationService.createOrganization(req, res);
     }
-    async getByName(req, res) {
-        await this.organizationService.getOrganizationByName(req, res);
+    async getByName(req, res, next) {
+        await this.organizationService.getOrganizationByName(req, res, next);
     }
     async getAll(req, res) {
         await this.organizationService.getAllOrganizations(req, res);

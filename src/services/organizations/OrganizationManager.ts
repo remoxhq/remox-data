@@ -1,15 +1,16 @@
 import { inject, injectable } from "inversify";
 import IOrganizationService from "./IOrganizationService";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { parseFormData, rootParser } from "../../utils";
 import { Collection, Db, Document, ObjectId } from "mongodb";
 import { ResponseMessage, Roles, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
-import { AppRequest, Organization, Pagination, TreasuryIndexer } from "../../models";
+import { AppRequest, AppResponse, CustomError, ExceptionType, Organization, Pagination, TreasuryIndexer } from "../../models";
 import { usersCollection } from "../auth/AuthManager";
 import { OrganizationFilterRequest } from "../../middlewares";
 import { Organization as OrgObj } from "../../libs/firebase-db"
 import date from 'date-and-time';
+import { handleError } from "../../utils/helpers/responseHandler";
 
 export const organizationCollection = "Organizations"
 export const organizationHistoricalBalanceCollection = "OrganizationsHistoricalBalances"
@@ -19,148 +20,181 @@ class OrganizationManager implements IOrganizationService {
     constructor(@inject(TYPES.IStorageService) private storageService: IStorageService) { }
 
     async createOrganization(req: AppRequest, res: Response): Promise<Response> {
-        let parsedBody = parseFormData("accounts", req);
-        parsedBody.createdDate = new Date().toDateString();
-        await this.attachCommonFields(parsedBody);
+        try {
+            let parsedBody = parseFormData("accounts", req);
+            parsedBody.createdDate = new Date().toDateString();
+            await this.attachCommonFields(parsedBody);
 
-        const db = req.app.locals.db as Db;
-        const io = req.app.locals.io as any; //socket connection
+            const db = req.app.locals.db as Db;
+            const io = req.app.locals.io as any; //socket connection
 
-        if (parsedBody.isVerified && req.user.role !== Roles.SuperAdmin)
-            return res.status(403).send(ResponseMessage.ForbiddenRequest);
+            if (parsedBody.isVerified && req.user.role !== Roles.SuperAdmin)
+                throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.UnAuthorized);
 
-        const collection = db.collection(organizationCollection);
-        const createdOrg = await collection.insertOne(parsedBody)
+            const collection = db.collection(organizationCollection);
+            const createdOrg = await collection.insertOne(parsedBody)
 
-        this.fetchOrganizationAnnualBalance(
-            collection,
-            parsedBody,
-            db.collection(organizationHistoricalBalanceCollection),
-            io,
-            createdOrg.insertedId)
+            this.fetchOrganizationAnnualBalance(
+                collection,
+                parsedBody,
+                db.collection(organizationHistoricalBalanceCollection),
+                io,
+                createdOrg.insertedId)
 
-        return res.status(200).send(ResponseMessage.OrganizationCreated);
+            return res.status(200).send(new AppResponse(200, true, undefined, createdOrg.insertedId));
+        } catch (error: any) {
+            return handleError(res, error)
+        }
     }
 
-    async getOrganizationByName(req: Request, res: Response): Promise<Response> {
-        const orgId = req.params.id;
-        if (!orgId) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+    async getOrganizationByName(req: AppRequest, res: Response, next: NextFunction): Promise<Response> {
+        try {
+            const orgId = req.params.id;
+            const db = req.app.locals.db as Db;
 
-        const db = req.app.locals.db as Db;
-        const collection = db.collection(organizationCollection);
-        const response = await collection.findOne({ _id: new ObjectId(orgId) });
-        if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+            const collection = db.collection(organizationCollection);
+            const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId) });
+            if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-        return res.status(200).send(response);
+            if (response.isPrivate && response.createdBy !== req.user?.publicKey)
+                throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
+
+            return res.status(200).send(new AppResponse(200, true, undefined, response));
+        } catch (error: any) {
+            return handleError(res, error)
+        }
     }
 
     async getAllOrganizations(req: OrganizationFilterRequest, res: Response): Promise<Response> {
-        const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
-        const pageSize = parseInt(req.query.pageSize as string, 10) || 20;
-        const aggregationPipeline = req.aggregationPipeline;
+        try {
+            const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
+            const pageSize = parseInt(req.query.pageSize as string, 10) || 20;
+            const aggregationPipeline = req.aggregationPipeline;
 
-        const db = req.app.locals.db as Db;
-        const collection = db.collection<Organization>(organizationCollection);
+            const db = req.app.locals.db as Db;
+            const collection = db.collection<Organization>(organizationCollection);
 
-        let response = await collection.aggregate<Organization>(aggregationPipeline)
-            .skip((pageIndex - 1) * pageSize)
-            .limit(pageSize)
-            .toArray();
+            let response = await collection.aggregate<Organization>(aggregationPipeline)
+                .skip((pageIndex - 1) * pageSize)
+                .limit(pageSize)
+                .toArray();
 
-        if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+            return res.status(200).send(new AppResponse(200,
+                true,
+                undefined,
+                new Pagination(response, await collection.countDocuments({ isDeleted: { $ne: true } }), pageIndex, pageSize)));
 
-        return res.status(200).send(new Pagination(response, await collection.countDocuments({ isDeleted: { $ne: true } }), pageIndex, pageSize,));
+        } catch (error) {
+            return handleError(res, error)
+        }
     }
 
     async updateOrganization(req: AppRequest, res: Response): Promise<Response> {
-        const parsedBody = parseFormData("accounts", req);
-        parsedBody.updatedDate = new Date().toDateString();
-        await this.attachCommonFields(parsedBody)
+        try {
+            const parsedBody = parseFormData("accounts", req);
+            parsedBody.updatedDate = new Date().toDateString();
+            await this.attachCommonFields(parsedBody)
 
-        const orgId = req.params.id;
-        const publicKey = req.headers.address;
-        if (!orgId) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+            const orgId = req.params.id;
+            const publicKey = req.headers.address;
 
-        const db = req.app.locals.db as Db;
-        const io = req.app.locals.io as any; //socket connection
-        const collection = db.collection(organizationCollection);
+            const db = req.app.locals.db as Db;
+            const io = req.app.locals.io as any; //socket connection
+            const collection = db.collection(organizationCollection);
 
-        const response = await collection.findOne({ _id: new ObjectId(orgId) });
-        if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+            const response = await collection.findOne({ _id: new ObjectId(orgId) });
+            if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-        if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
-            return res.status(403).send(ResponseMessage.ForbiddenRequest);
+            if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
+                throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);;
 
-        const result = await collection.updateOne(
-            { _id: new ObjectId(orgId) },
-            { $set: parsedBody }
-        );
+            const result = await collection.updateOne(
+                { _id: new ObjectId(orgId) },
+                { $set: parsedBody }
+            );
 
-        if (!result.acknowledged)
-            return res.status(404).json(ResponseMessage.OrganizationNotFound);
+            parsedBody._id = orgId;
+            this.fetchOrganizationAnnualBalance(
+                collection,
+                parsedBody,
+                db.collection(organizationHistoricalBalanceCollection),
+                io,
+                result.upsertedId!)
 
-        parsedBody._id = orgId;
-        this.fetchOrganizationAnnualBalance(
-            collection,
-            parsedBody,
-            db.collection(organizationHistoricalBalanceCollection),
-            io,
-            result.upsertedId!)
-
-        return res.json({ message: ResponseMessage.OrganizationUpdated });
+            return res.status(200).send(new AppResponse(200, true, undefined, result.upsertedId));;
+        } catch (error) {
+            return handleError(res, error)
+        }
     }
 
     async deleteOrganization(req: AppRequest, res: Response): Promise<Response> {
-        const orgId = req.params.id;
-        const publicKey = req.headers.address;
-        const db = req.app.locals.db as Db;
-        if (!orgId) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+        try {
+            const orgId = req.params.id;
+            const publicKey = req.headers.address;
+            const db = req.app.locals.db as Db;
 
-        const collection = db.collection(organizationCollection);
+            const collection = db.collection(organizationCollection);
+            const response = await collection.findOne({ _id: new ObjectId(orgId) });
+            if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-        const response = await collection.findOne({ _id: new ObjectId(orgId) });
-        if (!response) return res.status(404).send(ResponseMessage.OrganizationNotFound);
+            if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
+                throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);;
 
-        if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
-            return res.status(403).send(ResponseMessage.ForbiddenRequest);
+            const result = await collection.updateOne(
+                { _id: new ObjectId(orgId) },
+                { $set: { isDeleted: true } }
+            );
 
-        const result = await collection.updateOne(
-            { _id: new ObjectId(orgId) },
-            { $set: { isDeleted: true } }
-        );
-
-        if (!result.acknowledged)
-            return res.status(404).json(ResponseMessage.OrganizationNotFound);
-
-        return res.status(200).send("");
+            return res.status(200).send(new AppResponse(200, true, undefined, result.upsertedId));;
+        } catch (error) {
+            return handleError(res, error)
+        }
     }
 
     async addFavorites(req: Request, res: Response): Promise<Response> {
-        const orgId = req.params.organizationId;
-        const publicKey = req.headers.address;
-        if (!orgId || orgId.length > 24) return res.status(422).json({ message: ResponseMessage.OrganizationIdRequired });
+        try {
+            const orgId = req.params.organizationId;
+            const publicKey = req.headers.address;
+            if (!orgId || orgId.length > 24)
+                throw new CustomError(ResponseMessage.OrganizationIdRequired, ExceptionType.BadRequest);
 
-        const db = req.app.locals.db as Db;
-        const orgs = db.collection(organizationCollection);
-        const users = db.collection(usersCollection);
+            const db = req.app.locals.db as Db;
+            const orgs = db.collection(organizationCollection);
+            const users = db.collection(usersCollection);
 
-        let organization = await orgs.findOne({ _id: new ObjectId(orgId) });
-        if (!organization) return res.json({ message: ResponseMessage.OrganizationNotFound });
+            let organization = await orgs.findOne({ _id: new ObjectId(orgId) });
+            if (!organization) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-        users.createIndex({ publicKey: 1 }, { unique: true });
-        const result = await users.updateOne(
-            { publicKey: publicKey },
-            {
-                $set: {
-                    [`favoriteOrganizations.${organization._id.toString()}`]: true
-                }
-            }
-        );
+            users.createIndex({ publicKey: 1 }, { unique: true });
 
-        if (result.acknowledged)
-            return res.json({ message: ResponseMessage.UserUpdated });
+            const aggregation = [
+                {
+                    $match: {
+                        publicKey,
+                        [`favoriteOrganizations.${organization._id.toString()}`]: { $exists: true },
+                    },
+                },
+                { $project: { _id: 1 } },
+                { $limit: 1 },
+            ];
+            const update = {} as any
 
-        return res.status(500).json(ResponseMessage.UnknownServerError);
+            // Check if organization already exists in favorites
+            const existingFavorite = await users.aggregate(aggregation).toArray();
+
+            if (existingFavorite.length > 0)
+                update.$unset = { [`favoriteOrganizations.${organization._id.toString()}`]: 1 };
+            else update.$set = { [`favoriteOrganizations.${organization._id.toString()}`]: 1 };
+
+            const result = await users.updateOne({ publicKey }, update);
+
+            if (result.acknowledged)
+                return res.status(200).send(new AppResponse(200, true, undefined, organization._id));
+
+            throw new CustomError(ResponseMessage.UnknownServerError, ExceptionType.ServerError);
+        } catch (error) {
+            return handleError(res, error)
+        }
     }
 
     private async attachCommonFields(parsedBody: any) {

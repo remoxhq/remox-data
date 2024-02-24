@@ -11,7 +11,7 @@ Object.defineProperty(exports, "fetchAndStoreAnnualBalance", {
 const _mongodb = require("mongodb");
 const _dotenv = require("dotenv");
 const _rootparser = require("./root-parser");
-const _firebasedb = require("../libs/firebase-db");
+const _firebasedb = require("../../libs/firebase-db");
 const _dateandtime = /*#__PURE__*/ _interop_require_default(require("date-and-time"));
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {

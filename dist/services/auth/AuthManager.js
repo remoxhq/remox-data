@@ -21,6 +21,7 @@ const _dotenv = require("dotenv");
 const _types = require("../../utils/types");
 const _jsonwebtoken = /*#__PURE__*/ _interop_require_default(require("jsonwebtoken"));
 const _models = require("../../models");
+const _responseHandler = require("../../utils/helpers/responseHandler");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -36,30 +37,34 @@ function _ts_decorate(decorators, target, key, desc) {
 const usersCollection = "Users";
 class AuthManager {
     async signIn(req, res) {
-        const publicKey = req.headers.address;
-        const db = req.app.locals.db;
-        const collection = db.collection(usersCollection);
-        let existingUser = await collection.findOne({
-            publicKey
-        });
-        if (!existingUser) {
-            const newUser = {
-                publicKey: publicKey,
-                role: _types.Roles.User,
-                favoriteOrganizations: new Map()
-            };
-            const createdUser = await collection.insertOne(newUser);
-            if (!createdUser.insertedId) return res.status(500).send(_types.ResponseMessage.UnknownServerError);
-            existingUser = {
-                ...newUser,
-                _id: createdUser.insertedId
-            };
+        try {
+            const publicKey = req.user.publicKey;
+            const db = req.app.locals.db;
+            const collection = db.collection(usersCollection);
+            let existingUser = await collection.findOne({
+                publicKey
+            });
+            if (!existingUser) {
+                const newUser = {
+                    publicKey: publicKey,
+                    role: _types.Roles.User,
+                    favoriteOrganizations: new Map()
+                };
+                const createdUser = await collection.insertOne(newUser);
+                if (!createdUser.insertedId) throw new _models.CustomError(_types.ResponseMessage.UnknownServerError, _models.ExceptionType.ServerError);
+                existingUser = {
+                    ...newUser,
+                    _id: createdUser.insertedId
+                };
+            }
+            const jwtToken = _jsonwebtoken.default.sign({
+                role: existingUser.role,
+                publicKey
+            }, process.env.AUTH_SECRET_KEY);
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, jwtToken));
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
         }
-        const jwtToken = _jsonwebtoken.default.sign({
-            role: existingUser.role,
-            publicKey
-        }, process.env.AUTH_SECRET_KEY);
-        return res.status(200).send(jwtToken);
     }
     async udpateRole(req, res) {
         const publicKey = req.body.to;

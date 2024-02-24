@@ -19,6 +19,7 @@ export const enum ResponseMessage {
     UserUpdated = "User is updated",
     UserPublicKeyRequired = "User public key is required",
     ForbiddenRequest = "Forbidden attempt.",
+    WalletsMustBeArray = "Wallets must be an array",
 };
 
 export const enum Roles {

@@ -5,7 +5,8 @@ import IAuthService from "./IAuthService";
 import { Db, ObjectId } from "mongodb";
 import { ResponseMessage, Roles } from "../../utils/types";
 import Jwt from "jsonwebtoken";
-import { CustomError, ExceptionType, User } from "../../models";
+import { AppRequest, AppResponse, CustomError, ExceptionType, User } from "../../models";
+import { handleError } from "../../utils/helpers/responseHandler";
 config();
 
 export const usersCollection = "Users"
@@ -13,31 +14,36 @@ export const usersCollection = "Users"
 @injectable()
 class AuthManager implements IAuthService {
 
-    async signIn(req: Request, res: Response): Promise<Response> {
-        const publicKey = req.headers.address;
-        const db = req.app.locals.db as Db;
-        const collection = db.collection<User>(usersCollection);
-        let existingUser = await collection.findOne({ publicKey });
+    async signIn(req: AppRequest, res: Response): Promise<Response> {
+        try {
+            const publicKey = req.user.publicKey;
+            const db = req.app.locals.db as Db;
+            const collection = db.collection<User>(usersCollection);
+            let existingUser = await collection.findOne({ publicKey });
 
-        if (!existingUser) {
-            const newUser: User = {
-                publicKey: publicKey as string,
-                role: Roles.User,
-                favoriteOrganizations: new Map<string, boolean>(),
+            if (!existingUser) {
+                const newUser: User = {
+                    publicKey: publicKey as string,
+                    role: Roles.User,
+                    favoriteOrganizations: new Map<string, boolean>(),
+                };
+
+                const createdUser = await collection.insertOne(newUser);
+                if (!createdUser.insertedId)
+                    throw new CustomError(ResponseMessage.UnknownServerError, ExceptionType.ServerError);
+
+                existingUser = {
+                    ...newUser,
+                    _id: createdUser.insertedId
+                };
             };
 
-            const createdUser = await collection.insertOne(newUser);
-            if (!createdUser.insertedId) return res.status(500).send(ResponseMessage.UnknownServerError)
+            const jwtToken = Jwt.sign({ role: existingUser.role, publicKey }, process.env.AUTH_SECRET_KEY!)
 
-            existingUser = {
-                ...newUser,
-                _id: createdUser.insertedId
-            };
-        };
-
-        const jwtToken = Jwt.sign({ role: existingUser.role, publicKey }, process.env.AUTH_SECRET_KEY!)
-
-        return res.status(200).send(jwtToken)
+            return res.status(200).send(new AppResponse(200, true, undefined, jwtToken));
+        } catch (error) {
+            return handleError(res, error)
+        }
     }
 
     async udpateRole(req: Request, res: Response): Promise<Response> {
