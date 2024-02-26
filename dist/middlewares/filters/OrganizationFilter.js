@@ -15,6 +15,8 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
         try {
             const diContainer = (0, _utils.getContainer)();
             const usrPulicKey = req.headers.address;
+            const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
+            const pageSize = parseInt(req.query.pageSize, 10) || Number.MAX_SAFE_INTEGER;
             const aggregationPipeline = [];
             const match = {};
             const field = {};
@@ -52,7 +54,14 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                             $count: "total"
                         }
                     ],
-                    data: []
+                    data: [
+                        {
+                            $skip: pageIndex
+                        },
+                        {
+                            $limit: pageSize
+                        }
+                    ]
                 }
             });
             req.aggregationPipeline = aggregationPipeline;

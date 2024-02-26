@@ -99,11 +99,11 @@ class OrganizationManager {
     async getAllOrganizations(req, res) {
         try {
             const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
-            const pageSize = parseInt(req.query.pageSize, 10) || 20;
+            const pageSize = parseInt(req.query.pageSize, 10);
             const aggregationPipeline = req.aggregationPipeline;
             const db = req.app.locals.db;
             const collection = db.collection(organizationCollection);
-            let response = await collection.aggregate(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
+            let response = await collection.aggregate(aggregationPipeline).toArray();
             return res.status(200).send(new _models.AppResponse(200, true, undefined, new _models.Pagination(response[0].data, response[0].totalRecords[0].total, pageIndex, pageSize)));
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);

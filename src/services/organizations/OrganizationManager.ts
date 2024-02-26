@@ -68,15 +68,13 @@ class OrganizationManager implements IOrganizationService {
     async getAllOrganizations(req: OrganizationFilterRequest, res: Response): Promise<Response> {
         try {
             const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
-            const pageSize = parseInt(req.query.pageSize as string, 10) || 20;
+            const pageSize = parseInt(req.query.pageSize as string, 10);
             const aggregationPipeline = req.aggregationPipeline;
 
             const db = req.app.locals.db as Db;
             const collection = db.collection<Organization>(organizationCollection);
 
             let response = await collection.aggregate(aggregationPipeline)
-                .skip((pageIndex - 1) * pageSize)
-                .limit(pageSize)
                 .toArray();
 
             return res.status(200).send(new AppResponse(200,
