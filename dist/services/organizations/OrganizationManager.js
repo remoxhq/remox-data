@@ -104,7 +104,9 @@ class OrganizationManager {
             const db = req.app.locals.db;
             const collection = db.collection(organizationCollection);
             let response = await collection.aggregate(aggregationPipeline).toArray();
-            return res.status(200).send(new _models.AppResponse(200, true, undefined, new _models.Pagination(response[0].data, response[0].totalRecords[0].total, pageIndex, pageSize)));
+            console.log(response);
+            const total = response[0].totalRecords[0] ? response[0].totalRecords[0].total : 0;
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, new _models.Pagination(response[0].data, total, pageIndex, pageSize)));
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);
         }

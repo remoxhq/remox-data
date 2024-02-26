@@ -74,13 +74,13 @@ class OrganizationManager implements IOrganizationService {
             const db = req.app.locals.db as Db;
             const collection = db.collection<Organization>(organizationCollection);
 
-            let response = await collection.aggregate(aggregationPipeline)
-                .toArray();
+            let response = await collection.aggregate(aggregationPipeline).toArray();
+            const total = response[0].totalRecords[0] ? response[0].totalRecords[0].total : 0
 
             return res.status(200).send(new AppResponse(200,
                 true,
                 undefined,
-                new Pagination(response[0].data, response[0].totalRecords[0].total, pageIndex, pageSize)));
+                new Pagination(response[0].data, total, pageIndex, pageSize)));
 
         } catch (error) {
             return handleError(res, error)
