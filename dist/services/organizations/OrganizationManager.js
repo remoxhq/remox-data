@@ -104,11 +104,7 @@ class OrganizationManager {
             const db = req.app.locals.db;
             const collection = db.collection(organizationCollection);
             let response = await collection.aggregate(aggregationPipeline).skip((pageIndex - 1) * pageSize).limit(pageSize).toArray();
-            return res.status(200).send(new _models.AppResponse(200, true, undefined, new _models.Pagination(response, await collection.countDocuments({
-                isDeleted: {
-                    $ne: true
-                }
-            }), pageIndex, pageSize)));
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, new _models.Pagination(response[0].data, response[0].totalRecords[0].total, pageIndex, pageSize)));
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);
         }

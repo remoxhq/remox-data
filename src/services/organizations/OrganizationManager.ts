@@ -74,7 +74,7 @@ class OrganizationManager implements IOrganizationService {
             const db = req.app.locals.db as Db;
             const collection = db.collection<Organization>(organizationCollection);
 
-            let response = await collection.aggregate<Organization>(aggregationPipeline)
+            let response = await collection.aggregate(aggregationPipeline)
                 .skip((pageIndex - 1) * pageSize)
                 .limit(pageSize)
                 .toArray();
@@ -82,7 +82,7 @@ class OrganizationManager implements IOrganizationService {
             return res.status(200).send(new AppResponse(200,
                 true,
                 undefined,
-                new Pagination(response, await collection.countDocuments({ isDeleted: { $ne: true } }), pageIndex, pageSize)));
+                new Pagination(response[0].data, response[0].totalRecords[0].total, pageIndex, pageSize)));
 
         } catch (error) {
             return handleError(res, error)

@@ -42,6 +42,16 @@ export const addOrganizationFilter = () =>
             match.isDeleted = false;
             aggregationPipeline.push({ $addFields: field });
             aggregationPipeline.push({ $match: match });
+            aggregationPipeline.push({
+                $facet: {
+                    totalRecords: [
+                        {
+                            $count: "total"
+                        }
+                    ],
+                    data: []
+                }
+            });
 
             req.aggregationPipeline = aggregationPipeline
             next();

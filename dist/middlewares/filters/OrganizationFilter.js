@@ -45,6 +45,16 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
             aggregationPipeline.push({
                 $match: match
             });
+            aggregationPipeline.push({
+                $facet: {
+                    totalRecords: [
+                        {
+                            $count: "total"
+                        }
+                    ],
+                    data: []
+                }
+            });
             req.aggregationPipeline = aggregationPipeline;
             next();
         } catch (err) {
