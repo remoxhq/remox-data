@@ -13,7 +13,7 @@ export const addOrganizationFilter = () =>
         try {
             const diContainer = getContainer();
             const usrPulicKey = req.headers.address;
-            const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
+            const pageIndex = parseInt(req.query.pageIndex as string, 10) || 0;
             const pageSize = parseInt(req.query.pageSize as string, 10) || Number.MAX_SAFE_INTEGER;
 
             const aggregationPipeline: any[] = [];

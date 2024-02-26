@@ -76,7 +76,7 @@ class OrganizationManager implements IOrganizationService {
 
             let response = await collection.aggregate(aggregationPipeline).toArray();
             const total = response[0].totalRecords[0] ? response[0].totalRecords[0].total : 0
-
+            
             return res.status(200).send(new AppResponse(200,
                 true,
                 undefined,

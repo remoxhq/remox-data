@@ -15,7 +15,7 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
         try {
             const diContainer = (0, _utils.getContainer)();
             const usrPulicKey = req.headers.address;
-            const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
+            const pageIndex = parseInt(req.query.pageIndex, 10) || 0;
             const pageSize = parseInt(req.query.pageSize, 10) || Number.MAX_SAFE_INTEGER;
             const aggregationPipeline = [];
             const match = {};
