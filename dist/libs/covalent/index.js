@@ -12,6 +12,9 @@ _export(exports, {
     covalentPortfolioRequest: function() {
         return covalentPortfolioRequest;
     },
+    covalentTxnRequest: function() {
+        return covalentTxnRequest;
+    },
     moralisRequest: function() {
         return moralisRequest;
     }
@@ -43,6 +46,9 @@ function _interop_require_default(obj) {
 (0, _dotenv.config)();
 const covalentPortfolioRequest = async (wallet)=>{
     return await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}`);
+};
+const covalentTxnRequest = async (wallet)=>{
+    return await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/transactions_v3/?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`);
 };
 const moralisRequest = async (wallet, type)=>{
     if (!_moralis.default.Core.isStarted) {

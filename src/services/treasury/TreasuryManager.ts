@@ -4,7 +4,7 @@ import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
 import { AppResponse, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, CustomError, ExceptionType, TransferDto } from '../../models';
 import { DesiredTokens, ResponseMessage } from '../../utils/types';
-import { covalentPortfolioRequest, moralisRequest } from '../../libs/covalent';
+import { covalentPortfolioRequest, covalentTxnRequest, moralisRequest } from '../../libs/covalent';
 import { ethers } from 'ethers';
 import { handleError } from '../../utils/helpers/responseHandler';
 
@@ -50,70 +50,18 @@ class TreasuryManager implements ITreasuryService {
 
     private async getTransactionsFromProvider(req: Request) {
         const wallets = req.body["wallets"] as AssetWallet[];
-        
+
         if (!Array.isArray(wallets))
             throw new CustomError(ResponseMessage.WalletsMustBeArray, ExceptionType.BadRequest);
 
         let totalTxs: any[] = []
 
         await Promise.all(wallets.map(async (wallet: AssetWallet) => {
-            const walletTransfersReq = moralisRequest(wallet, "Transfer");
-            const walletativeTxnsReq = moralisRequest(wallet, "Native");
-            const [walletTransfers, walletativeTxns] = await Promise.all([walletTransfersReq, walletativeTxnsReq])
-
-            const mappedTransfers = Array.from(walletTransfers.raw.result)
-                .map((transferItem: any) => {
-                    const { transaction_hash,
-                        token_symbol,
-                        token_logo,
-                        token_decimals,
-                        value,
-                        from_address,
-                        to_address,
-                        block_timestamp } = transferItem;
-
-                    const transfer = {
-                        hash: transaction_hash,
-                        tokens: {
-                            [token_symbol]: {
-                                logo: token_logo ?? ""
-                            }
-                        },
-                        from: from_address,
-                        to: to_address,
-                        direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
-                        count: 1,
-                        amount: +ethers.utils.formatUnits(value, token_decimals),
-                        date: block_timestamp
-                    };
-
-                    return transfer;
-                })
-
-            const mappedNativeTxns = Array.from(walletativeTxns.raw.result)
-                .filter((txn: any) => +txn.value)
-                .map((txn: any) => {
-                    const { hash, value, from_address, to_address, block_timestamp } = txn;
-
-                    const nativeTxn = {
-                        hash,
-                        tokens: {
-                            [Coins[wallet.chain].symbol]: {
-                                logo: Coins[wallet.chain].logo
-                            }
-                        },
-                        from: from_address,
-                        to: to_address,
-                        direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
-                        count: 1,
-                        amount: +ethers.utils.formatUnits(value, 18),
-                        date: block_timestamp
-                    };
-
-                    return nativeTxn;
-                })
-
-            totalTxs = [...totalTxs, ...mappedTransfers, ...mappedNativeTxns]
+            if (wallet.chain === "celo-mainnet") {
+                const txns = await covalentTxnRequest(wallet);
+                totalTxs = [txns.data.data.items]
+            }
+            else this.processEvmTxns(totalTxs, wallet)
         }));
 
         return {
@@ -121,6 +69,61 @@ class TreasuryManager implements ITreasuryService {
         };
     }
 
+
+    //txns
+    private async processEvmTxns(totalTxs: any[], wallet: AssetWallet) {
+        const walletTransfersReq = moralisRequest(wallet, "Transfer");
+        const walletativeTxnsReq = moralisRequest(wallet, "Native");
+        const [walletTransfers, walletativeTxns] = await Promise.all([walletTransfersReq, walletativeTxnsReq])
+
+        const mappedTransfers = this.processTransfers(walletTransfers, wallet)
+
+        const mappedNativeTxns = this.processNativeTxns(walletativeTxns, wallet)
+
+        totalTxs = [...totalTxs, ...mappedTransfers, ...mappedNativeTxns]
+    }
+
+    private processTransfers(walletTransfers: any, wallet: AssetWallet) {
+        const mappedTransfers = Array.from(walletTransfers.raw.result)
+            .map((transferItem: any) => {
+                const transfer = {
+                    hash: transferItem.transaction_hash,
+                    tokens: { [transferItem.token_symbol]: { logo: transferItem.token_logo ?? "" } },
+                    from: transferItem.from_address,
+                    to: transferItem.to_address,
+                    direction: transferItem.from_address === wallet.address.toLowerCase() ? "Out" : "In",
+                    count: 1,
+                    amount: +ethers.utils.formatUnits(transferItem.value, transferItem.token_decimals),
+                    date: transferItem.block_timestamp,
+                };
+
+                return transfer;
+            })
+
+        return mappedTransfers;
+    }
+
+    private processNativeTxns(walletNativeTxns: any, wallet: AssetWallet) {
+        const mappedTransfers = Array.from(walletNativeTxns.raw.result)
+            .map((txn: any) => {
+                const transfer = {
+                    hash: txn.hash,
+                    tokens: { [Coins[wallet.chain].symbol]: { logo: Coins[wallet.chain].logo } },
+                    from: txn.from_address,
+                    to: txn.to_address,
+                    direction: txn.from_address === wallet.address.toLowerCase() ? "Out" : "In",
+                    count: 1,
+                    amount: txn.value ? +ethers.utils.formatUnits(txn.value, 18) : 0,
+                    date: txn.block_timestamp,
+                };
+
+                return transfer;
+            })
+
+        return mappedTransfers;
+    }
+
+    // Assets
     private async getAssetsFromProvider(req: Request) {
         try {
             const wallets = req.body["wallets"] as AssetWallet[];

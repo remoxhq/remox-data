@@ -13,6 +13,11 @@ export const covalentPortfolioRequest = async (wallet: AssetWallet) => {
         .get<{ data: CovalentAssetHold }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}`);
 }
 
+export const covalentTxnRequest = async (wallet: AssetWallet) => {
+    return await axios
+        .get<{ data: any }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/transactions_v3/?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`);
+}
+
 interface ExecutionType {
     [type: string]: () => any
 }
