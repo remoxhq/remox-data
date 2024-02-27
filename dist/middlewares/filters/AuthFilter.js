@@ -25,6 +25,8 @@ _export(exports, {
 const _ethereumjsutil = require("ethereumjs-util");
 const _types = require("../../utils/types");
 const _jsonwebtoken = /*#__PURE__*/ _interop_require_default(require("jsonwebtoken"));
+const _models = require("../../models");
+const _responseHandler = require("../../utils/helpers/responseHandler");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -33,46 +35,46 @@ function _interop_require_default(obj) {
 const checkUserSignature = ()=>async (req, res, next)=>{
         try {
             let accessKey = req.headers.accesskey?.toString();
-            if (!accessKey) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+            if (!accessKey) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
             const decoded = _jsonwebtoken.default.verify(accessKey, process.env.AUTH_SECRET_KEY);
             req.user = {
                 publicKey: decoded.address
             };
             next();
-        } catch (err) {
-            return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
         }
     };
 const checkUserJwt = ()=>async (req, res, next)=>{
         try {
             const token = req.headers.authorization?.toString();
             const createdBy = req.headers.address;
-            if (!token) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+            if (!token) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
             _jsonwebtoken.default.verify(token.split(" ")[1], process.env.AUTH_SECRET_KEY, (err, decoded)=>{
-                if (err || !decoded) return res.status(401).json(_types.ResponseMessage.UnAuthorizedAction);
-                if ((0, _ethereumjsutil.toChecksumAddress)(createdBy) !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+                if (err || !decoded) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
+                if ((0, _ethereumjsutil.toChecksumAddress)(createdBy) !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
                 req.user = {
                     role: decoded.role,
                     publicKey: decoded.publicKey
                 };
                 next();
             });
-        } catch (err) {
-            return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
         }
     };
 const checkUserPermission = (role)=>async (req, res, next)=>{
         try {
             const token = req.headers.authorization?.toString();
             const createdBy = req.headers.address;
-            if (!token) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+            if (!token) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
             _jsonwebtoken.default.verify(token.split(" ")[1], process.env.AUTH_SECRET_KEY, (err, decoded)=>{
-                if (err || !decoded) return res.status(401).json(_types.ResponseMessage.UnAuthorizedAction);
-                if (role !== decoded.role || createdBy !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+                if (err || !decoded) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
+                if (role !== decoded.role || createdBy !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
                 next();
             });
-        } catch (err) {
-            return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
         }
     };
 const authenticateUserOrAllowAnonymous = ()=>async (req, res, next)=>{
@@ -80,7 +82,7 @@ const authenticateUserOrAllowAnonymous = ()=>async (req, res, next)=>{
             const createdBy = req.headers.address;
             if (createdBy) await checkUserJwt()(req, res, next);
             else next();
-        } catch (err) {
-            return res.status(401).send(_types.ResponseMessage.UnAuthorizedAction);
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
         }
     };

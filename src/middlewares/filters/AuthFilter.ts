@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from "express"
 import { toChecksumAddress } from "ethereumjs-util"
 import { ResponseMessage } from "../../utils/types";
 import Jwt, { JwtPayload } from "jsonwebtoken";
-import { AppRequest } from "../../models";
+import { AppRequest, CustomError, ExceptionType } from "../../models";
+import { handleError } from "../../utils/helpers/responseHandler";
 
 export const checkUserSignature = () =>
     async (req: AppRequest, res: Response, next: NextFunction) => {
         try {
             let accessKey = req.headers.accesskey?.toString();
-            if (!accessKey) return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+            if (!accessKey) throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
             const decoded = Jwt.verify(accessKey, process.env.AUTH_SECRET_KEY!) as JwtPayload
 
             req.user = {
@@ -16,8 +17,8 @@ export const checkUserSignature = () =>
             };
 
             next()
-        } catch (err) {
-            return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+        } catch (error) {
+            return handleError(res, error)
         }
     }
 
@@ -27,20 +28,20 @@ export const checkUserJwt = () =>
             const token = req.headers.authorization?.toString();
             const createdBy = req.headers.address as string;
 
-            if (!token) return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+            if (!token) throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
 
             Jwt.verify(token.split(" ")[1], process.env.AUTH_SECRET_KEY!, (err, decoded: any) => {
                 if (err || !decoded)
-                    return res.status(401).json(ResponseMessage.UnAuthorizedAction);
+                    throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
 
                 if (toChecksumAddress(createdBy) !== toChecksumAddress(decoded.publicKey))
-                    return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+                    throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
 
                 req.user = { role: decoded.role, publicKey: decoded.publicKey };
                 next();
             });
-        } catch (err) {
-            return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+        } catch (error) {
+            return handleError(res, error)
         }
     }
 
@@ -49,19 +50,19 @@ export const checkUserPermission = (role: string) =>
         try {
             const token = req.headers.authorization?.toString();
             const createdBy = req.headers.address;
-            if (!token) return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+            if (!token) throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
 
             Jwt.verify(token.split(" ")[1], process.env.AUTH_SECRET_KEY!, (err, decoded: any) => {
                 if (err || !decoded)
-                    return res.status(401).json(ResponseMessage.UnAuthorizedAction);
+                    throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
 
                 if (role !== decoded.role || createdBy !== toChecksumAddress(decoded.publicKey))
-                    return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+                    throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
 
                 next();
             });
-        } catch (err) {
-            return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+        } catch (error) {
+            return handleError(res, error)
         }
     }
 
@@ -71,7 +72,7 @@ export const authenticateUserOrAllowAnonymous = () =>
             const createdBy = req.headers.address;
             if (createdBy) await checkUserJwt()(req, res, next);
             else next()
-        } catch (err) {
-            return res.status(401).send(ResponseMessage.UnAuthorizedAction)
+        } catch (error) {
+            return handleError(res, error)
         }
     }
