@@ -7,6 +7,7 @@ import { DesiredTokens, ResponseMessage } from '../../utils/types';
 import { covalentPortfolioRequest, covalentTxnRequest, moralisRequest } from '../../libs/covalent';
 import { ethers } from 'ethers';
 import { handleError } from '../../utils/helpers/responseHandler';
+import { logos } from '../../utils/logos';
 
 const tresuryCollection = "OrganizationsHistoricalBalances";
 
@@ -62,7 +63,7 @@ class TreasuryManager implements ITreasuryService {
         }));
 
         return {
-            txs: totalTxs.length,
+            txs: totalTxs,
         };
     }
 
@@ -87,17 +88,18 @@ class TreasuryManager implements ITreasuryService {
             if (!logEvent.decoded || logEvent.decoded.name !== "Transfer") continue;
             if (logEvent.decoded.name === "TransferSingle") break;
 
-            const { sender_contract_ticker_symbol, sender_logo_url, sender_contract_decimals, block_signed_at } = logEvent;
+            const { sender_contract_ticker_symbol, sender_contract_decimals, block_signed_at } = logEvent;
             const from = logEvent.decoded.params[0].value;
             const to = logEvent.decoded.params[1].value;
             const amount = logEvent.decoded.params[2].value;
+            const symbol = sender_contract_ticker_symbol.toString().toLowerCase();
 
             mappedTxns.push(
                 {
                     hash: transaction.tx_hash,
                     from: from,
                     to: to,
-                    assetLogo: sender_logo_url,
+                    assetLogo: logos[symbol ? symbol : ""] ? logos[symbol].logoUrl : "",
                     assetName: sender_contract_ticker_symbol,
                     amount: +ethers.utils.formatUnits(amount, sender_contract_decimals),
                     direction: from === wallet.address.toLowerCase() ? "Out" : "In",
@@ -143,7 +145,7 @@ class TreasuryManager implements ITreasuryService {
                 const transfer = {
                     hash: transferItem.transaction_hash,
                     assetName: transferItem.token_symbol,
-                    assetLogo: transferItem.token_logo ?? "",
+                    assetLogo: logos[transferItem.token_symbol.toLowerCase()] ? logos[transferItem.token_symbol.toLowerCase()].logoUrl : "",
                     from: transferItem.from_address,
                     to: transferItem.to_address,
                     direction: transferItem.from_address === wallet.address.toLowerCase() ? "Out" : "In",

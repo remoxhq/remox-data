@@ -14,6 +14,7 @@ const _types = require("../../utils/types");
 const _covalent = require("../../libs/covalent");
 const _ethers = require("ethers");
 const _responseHandler = require("../../utils/helpers/responseHandler");
+const _logos = require("../../utils/logos");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -61,7 +62,7 @@ class TreasuryManager {
             else totalTxs.push(...await this.processEvmTxns(wallet));
         }));
         return {
-            txs: totalTxs.length
+            txs: totalTxs
         };
     }
     //txns
@@ -82,15 +83,16 @@ class TreasuryManager {
         for (const logEvent of transaction.log_events){
             if (!logEvent.decoded || logEvent.decoded.name !== "Transfer") continue;
             if (logEvent.decoded.name === "TransferSingle") break;
-            const { sender_contract_ticker_symbol, sender_logo_url, sender_contract_decimals, block_signed_at } = logEvent;
+            const { sender_contract_ticker_symbol, sender_contract_decimals, block_signed_at } = logEvent;
             const from = logEvent.decoded.params[0].value;
             const to = logEvent.decoded.params[1].value;
             const amount = logEvent.decoded.params[2].value;
+            const symbol = sender_contract_ticker_symbol.toString().toLowerCase();
             mappedTxns.push({
                 hash: transaction.tx_hash,
                 from: from,
                 to: to,
-                assetLogo: sender_logo_url,
+                assetLogo: _logos.logos[symbol ? symbol : ""] ? _logos.logos[symbol].logoUrl : "",
                 assetName: sender_contract_ticker_symbol,
                 amount: +_ethers.ethers.utils.formatUnits(amount, sender_contract_decimals),
                 direction: from === wallet.address.toLowerCase() ? "Out" : "In",
@@ -131,7 +133,7 @@ class TreasuryManager {
             const transfer = {
                 hash: transferItem.transaction_hash,
                 assetName: transferItem.token_symbol,
-                assetLogo: transferItem.token_logo ?? "",
+                assetLogo: _logos.logos[transferItem.token_symbol.toLowerCase()] ? _logos.logos[transferItem.token_symbol.toLowerCase()].logoUrl : "",
                 from: transferItem.from_address,
                 to: transferItem.to_address,
                 direction: transferItem.from_address === wallet.address.toLowerCase() ? "Out" : "In",
