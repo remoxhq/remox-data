@@ -31,7 +31,7 @@ export const moralisRequest = async (wallet: AssetWallet, type: string) => {
 
     const query = {
         chain: wallet.chain,
-        limit: 40,
+        limit: 25,
         address: wallet.address
     }
 

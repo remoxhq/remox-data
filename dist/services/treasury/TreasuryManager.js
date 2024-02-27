@@ -57,19 +57,62 @@ class TreasuryManager {
         if (!Array.isArray(wallets)) throw new _models.CustomError(_types.ResponseMessage.WalletsMustBeArray, _models.ExceptionType.BadRequest);
         let totalTxs = [];
         await Promise.all(wallets.map(async (wallet)=>{
-            if (wallet.chain === "celo-mainnet") {
-                const txns = await (0, _covalent.covalentTxnRequest)(wallet);
-                totalTxs = [
-                    txns.data.data.items
-                ];
-            } else this.processEvmTxns(totalTxs, wallet);
+            if (wallet.chain === "celo-mainnet") totalTxs.push(...await this.processCeloTransactions(wallet));
+            else totalTxs.push(...await this.processEvmTxns(wallet));
         }));
         return {
-            txs: totalTxs
+            txs: totalTxs.length
         };
     }
     //txns
-    async processEvmTxns(totalTxs, wallet) {
+    async processCeloTransactions(wallet) {
+        const response = await (0, _covalent.covalentTxnRequest)(wallet);
+        const items = response.data.data.items;
+        if (!items) return [];
+        const mappedTxns = [];
+        for (const transaction of items){
+            if (transaction.log_events) this.processCeloTransfers(transaction, mappedTxns, wallet);
+            else this.processCeloNativeTxns(transaction, mappedTxns, wallet);
+        }
+        return [
+            ...mappedTxns
+        ];
+    }
+    async processCeloTransfers(transaction, mappedTxns, wallet) {
+        for (const logEvent of transaction.log_events){
+            if (!logEvent.decoded || logEvent.decoded.name !== "Transfer") continue;
+            if (logEvent.decoded.name === "TransferSingle") break;
+            const { sender_contract_ticker_symbol, sender_logo_url, sender_contract_decimals, block_signed_at } = logEvent;
+            const from = logEvent.decoded.params[0].value;
+            const to = logEvent.decoded.params[1].value;
+            const amount = logEvent.decoded.params[2].value;
+            mappedTxns.push({
+                hash: transaction.tx_hash,
+                from: from,
+                to: to,
+                assetLogo: sender_logo_url,
+                assetName: sender_contract_ticker_symbol,
+                amount: +_ethers.ethers.utils.formatUnits(amount, sender_contract_decimals),
+                direction: from === wallet.address.toLowerCase() ? "Out" : "In",
+                date: block_signed_at
+            });
+        }
+    }
+    async processCeloNativeTxns(transaction, mappedTxns, wallet) {
+        if (!transaction.value) return;
+        const { sender_contract_decimals, block_signed_at, from_address, to_address } = transaction;
+        mappedTxns.push({
+            hash: transaction.tx_hash,
+            from: from_address,
+            to: to_address,
+            assetLogo: _models.Coins[wallet.chain].logo,
+            assetName: _models.Coins[wallet.chain].symbol,
+            amount: +_ethers.ethers.utils.formatUnits(transaction.value, sender_contract_decimals),
+            direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
+            date: block_signed_at
+        });
+    }
+    async processEvmTxns(wallet) {
         const walletTransfersReq = (0, _covalent.moralisRequest)(wallet, "Transfer");
         const walletativeTxnsReq = (0, _covalent.moralisRequest)(wallet, "Native");
         const [walletTransfers, walletativeTxns] = await Promise.all([
@@ -78,8 +121,7 @@ class TreasuryManager {
         ]);
         const mappedTransfers = this.processTransfers(walletTransfers, wallet);
         const mappedNativeTxns = this.processNativeTxns(walletativeTxns, wallet);
-        totalTxs = [
-            ...totalTxs,
+        return [
             ...mappedTransfers,
             ...mappedNativeTxns
         ];
@@ -88,11 +130,8 @@ class TreasuryManager {
         const mappedTransfers = Array.from(walletTransfers.raw.result).map((transferItem)=>{
             const transfer = {
                 hash: transferItem.transaction_hash,
-                tokens: {
-                    [transferItem.token_symbol]: {
-                        logo: transferItem.token_logo ?? ""
-                    }
-                },
+                assetName: transferItem.token_symbol,
+                assetLogo: transferItem.token_logo ?? "",
                 from: transferItem.from_address,
                 to: transferItem.to_address,
                 direction: transferItem.from_address === wallet.address.toLowerCase() ? "Out" : "In",
@@ -108,11 +147,8 @@ class TreasuryManager {
         const mappedTransfers = Array.from(walletNativeTxns.raw.result).map((txn)=>{
             const transfer = {
                 hash: txn.hash,
-                tokens: {
-                    [_models.Coins[wallet.chain].symbol]: {
-                        logo: _models.Coins[wallet.chain].logo
-                    }
-                },
+                assetName: _models.Coins[wallet.chain].symbol,
+                assetLogo: _models.Coins[wallet.chain].logo ?? "",
                 from: txn.from_address,
                 to: txn.to_address,
                 direction: txn.from_address === wallet.address.toLowerCase() ? "Out" : "In",

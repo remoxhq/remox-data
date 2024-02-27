@@ -118,4 +118,8 @@ export const Coins: NativeTokenLogos = {
     symbol: "BNB",
     logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
   },
+  ["celo-mainnet"]: {
+    symbol: "Celo",
+    logo: "https://celoscan.io/images/svg/brands/main.svg?v=24.2.3.0"
+  },
 }

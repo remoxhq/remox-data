@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { injectable } from "inversify";
 import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
-import { AppResponse, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, CustomError, ExceptionType, TransferDto } from '../../models';
+import { AppResponse, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, CustomError, ExceptionType } from '../../models';
 import { DesiredTokens, ResponseMessage } from '../../utils/types';
 import { covalentPortfolioRequest, covalentTxnRequest, moralisRequest } from '../../libs/covalent';
 import { ethers } from 'ethers';
@@ -57,30 +57,84 @@ class TreasuryManager implements ITreasuryService {
         let totalTxs: any[] = []
 
         await Promise.all(wallets.map(async (wallet: AssetWallet) => {
-            if (wallet.chain === "celo-mainnet") {
-                const txns = await covalentTxnRequest(wallet);
-                totalTxs = [txns.data.data.items]
-            }
-            else this.processEvmTxns(totalTxs, wallet)
+            if (wallet.chain === "celo-mainnet") totalTxs.push(...await this.processCeloTransactions(wallet))
+            else totalTxs.push(...await this.processEvmTxns(wallet))
         }));
 
         return {
-            txs: totalTxs,
+            txs: totalTxs.length,
         };
     }
 
-
     //txns
-    private async processEvmTxns(totalTxs: any[], wallet: AssetWallet) {
+    private async processCeloTransactions(wallet: AssetWallet) {
+        const response = await covalentTxnRequest(wallet);
+        const items = response.data.data.items;
+        if (!items) return [];
+
+        const mappedTxns: any[] = []
+
+        for (const transaction of items) {
+            if (transaction.log_events) this.processCeloTransfers(transaction, mappedTxns, wallet);
+            else this.processCeloNativeTxns(transaction, mappedTxns, wallet)
+        }
+
+        return [...mappedTxns!]
+    }
+
+    private async processCeloTransfers(transaction: any, mappedTxns: any[], wallet: AssetWallet) {
+        for (const logEvent of transaction.log_events) {
+            if (!logEvent.decoded || logEvent.decoded.name !== "Transfer") continue;
+            if (logEvent.decoded.name === "TransferSingle") break;
+
+            const { sender_contract_ticker_symbol, sender_logo_url, sender_contract_decimals, block_signed_at } = logEvent;
+            const from = logEvent.decoded.params[0].value;
+            const to = logEvent.decoded.params[1].value;
+            const amount = logEvent.decoded.params[2].value;
+
+            mappedTxns.push(
+                {
+                    hash: transaction.tx_hash,
+                    from: from,
+                    to: to,
+                    assetLogo: sender_logo_url,
+                    assetName: sender_contract_ticker_symbol,
+                    amount: +ethers.utils.formatUnits(amount, sender_contract_decimals),
+                    direction: from === wallet.address.toLowerCase() ? "Out" : "In",
+                    date: block_signed_at,
+                }
+            )
+        }
+    }
+
+    private async processCeloNativeTxns(transaction: any, mappedTxns: any[], wallet: AssetWallet) {
+        if (!transaction.value) return;
+        const { sender_contract_decimals, block_signed_at, from_address, to_address } = transaction;
+
+        mappedTxns.push(
+            {
+                hash: transaction.tx_hash,
+                from: from_address,
+                to: to_address,
+                assetLogo: Coins[wallet.chain].logo,
+                assetName: Coins[wallet.chain].symbol,
+                amount: +ethers.utils.formatUnits(transaction.value, sender_contract_decimals),
+                direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
+                date: block_signed_at,
+            }
+        )
+    }
+
+    private async processEvmTxns(wallet: AssetWallet) {
         const walletTransfersReq = moralisRequest(wallet, "Transfer");
         const walletativeTxnsReq = moralisRequest(wallet, "Native");
+
         const [walletTransfers, walletativeTxns] = await Promise.all([walletTransfersReq, walletativeTxnsReq])
 
         const mappedTransfers = this.processTransfers(walletTransfers, wallet)
-
         const mappedNativeTxns = this.processNativeTxns(walletativeTxns, wallet)
 
-        totalTxs = [...totalTxs, ...mappedTransfers, ...mappedNativeTxns]
+        return [...mappedTransfers, ...mappedNativeTxns];
     }
 
     private processTransfers(walletTransfers: any, wallet: AssetWallet) {
@@ -88,7 +142,8 @@ class TreasuryManager implements ITreasuryService {
             .map((transferItem: any) => {
                 const transfer = {
                     hash: transferItem.transaction_hash,
-                    tokens: { [transferItem.token_symbol]: { logo: transferItem.token_logo ?? "" } },
+                    assetName: transferItem.token_symbol,
+                    assetLogo: transferItem.token_logo ?? "",
                     from: transferItem.from_address,
                     to: transferItem.to_address,
                     direction: transferItem.from_address === wallet.address.toLowerCase() ? "Out" : "In",
@@ -108,7 +163,8 @@ class TreasuryManager implements ITreasuryService {
             .map((txn: any) => {
                 const transfer = {
                     hash: txn.hash,
-                    tokens: { [Coins[wallet.chain].symbol]: { logo: Coins[wallet.chain].logo } },
+                    assetName: Coins[wallet.chain].symbol,
+                    assetLogo: Coins[wallet.chain].logo ?? "",
                     from: txn.from_address,
                     to: txn.to_address,
                     direction: txn.from_address === wallet.address.toLowerCase() ? "Out" : "In",
