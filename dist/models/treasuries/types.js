@@ -10,7 +10,7 @@ Object.defineProperty(exports, "Coins", {
     }
 });
 const Coins = {
-    ["0x1"]: {
+    ["eth-mainnet"]: {
         symbol: "ETH",
         logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
     },

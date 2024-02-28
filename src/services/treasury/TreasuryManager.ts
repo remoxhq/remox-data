@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { injectable } from "inversify";
 import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
-import { AppResponse, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, CustomError, ExceptionType } from '../../models';
+import { AppResponse, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, CustomError, ExceptionType, PagingLinks } from '../../models';
 import { DesiredTokens, ResponseMessage } from '../../utils/types';
 import { covalentPortfolioRequest, covalentTxnRequest, moralisRequest } from '../../libs/covalent';
 import { ethers } from 'ethers';
@@ -55,15 +55,25 @@ class TreasuryManager implements ITreasuryService {
         if (!Array.isArray(wallets))
             throw new CustomError(ResponseMessage.WalletsMustBeArray, ExceptionType.BadRequest);
 
+        let links: any = {}
         let totalTxs: any[] = []
 
         await Promise.all(wallets.map(async (wallet: AssetWallet) => {
-            if (wallet.chain === "celo-mainnet") totalTxs.push(...await this.processCeloTransactions(wallet))
-            else totalTxs.push(...await this.processEvmTxns(wallet))
+            if (wallet.chain === "celo-mainnet") {
+                const mappedCeloTxns = await this.processCeloTransactions(wallet)
+                totalTxs.push(...mappedCeloTxns?.txns ?? [])
+                links[wallet.address] = mappedCeloTxns?.links[wallet.address]
+            }
+            else {
+                const mappedEvmTxns = await this.processEvmTxns(wallet)
+                totalTxs.push(...mappedEvmTxns.txns)
+                links[wallet.address] = mappedEvmTxns?.links[wallet.address]
+            }
         }));
 
         return {
             txs: totalTxs,
+            links
         };
     }
 
@@ -71,8 +81,9 @@ class TreasuryManager implements ITreasuryService {
     private async processCeloTransactions(wallet: AssetWallet) {
         const response = await covalentTxnRequest(wallet);
         const items = response.data.data.items;
-        if (!items) return [];
+        if (!items) return null;
 
+        const links: PagingLinks = { next: response.data.data.links.prev ?? "", prev: response.data.data.links.next ?? "" }
         const mappedTxns: any[] = []
 
         for (const transaction of items) {
@@ -80,7 +91,10 @@ class TreasuryManager implements ITreasuryService {
             else this.processCeloNativeTxns(transaction, mappedTxns, wallet)
         }
 
-        return [...mappedTxns!]
+        return {
+            txns: mappedTxns,
+            links: { [wallet.address]: links }
+        }
     }
 
     private async processCeloTransfers(transaction: any, mappedTxns: any[], wallet: AssetWallet) {
@@ -92,14 +106,14 @@ class TreasuryManager implements ITreasuryService {
             const from = logEvent.decoded.params[0].value;
             const to = logEvent.decoded.params[1].value;
             const amount = logEvent.decoded.params[2].value;
-            const symbol = sender_contract_ticker_symbol.toString().toLowerCase();
+            const symbol = sender_contract_ticker_symbol?.toString().toLowerCase();
 
             mappedTxns.push(
                 {
                     hash: transaction.tx_hash,
                     from: from,
                     to: to,
-                    assetLogo: logos[symbol ? symbol : ""] ? logos[symbol].logoUrl : "",
+                    assetLogo: logos[symbol ? symbol : ""] ? logos[symbol]?.logoUrl : "",
                     assetName: sender_contract_ticker_symbol,
                     amount: +ethers.utils.formatUnits(amount, sender_contract_decimals),
                     direction: from === wallet.address.toLowerCase() ? "Out" : "In",
@@ -132,11 +146,15 @@ class TreasuryManager implements ITreasuryService {
         const walletativeTxnsReq = moralisRequest(wallet, "Native");
 
         const [walletTransfers, walletativeTxns] = await Promise.all([walletTransfersReq, walletativeTxnsReq])
+        const links: PagingLinks = { next: walletTransfers.jsonResponse.cursor ?? "", prev: "" }
 
         const mappedTransfers = this.processTransfers(walletTransfers, wallet)
         const mappedNativeTxns = this.processNativeTxns(walletativeTxns, wallet)
 
-        return [...mappedTransfers, ...mappedNativeTxns];
+        return {
+            txns: [...mappedTransfers, ...mappedNativeTxns],
+            links: { [wallet.address]: links }
+        }
     }
 
     private processTransfers(walletTransfers: any, wallet: AssetWallet) {

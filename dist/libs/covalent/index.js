@@ -48,7 +48,7 @@ const covalentPortfolioRequest = async (wallet)=>{
     return await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}`);
 };
 const covalentTxnRequest = async (wallet)=>{
-    return await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/transactions_v3/?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`);
+    return await _axios.default.get(wallet.page ? wallet.page + `?quote-currency=usd&key=${process.env.COVALENT_API_KEY}` : `https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/transactions_v3/?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`);
 };
 const moralisRequest = async (wallet, type)=>{
     if (!_moralis.default.Core.isStarted) {
@@ -59,7 +59,8 @@ const moralisRequest = async (wallet, type)=>{
     const query = {
         chain: wallet.chain,
         limit: 25,
-        address: wallet.address
+        address: wallet.address,
+        cursor: wallet.page
     };
     const execute = {
         ["Transfer"]: async ()=>await _moralis.default.EvmApi.token.getWalletTokenTransfers(query),

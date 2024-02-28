@@ -15,7 +15,9 @@ export const covalentPortfolioRequest = async (wallet: AssetWallet) => {
 
 export const covalentTxnRequest = async (wallet: AssetWallet) => {
     return await axios
-        .get<{ data: any }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/transactions_v3/?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`);
+        .get<{ data: any }>(wallet.page ?
+            wallet.page + `?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`
+            : `https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/transactions_v3/?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`);
 }
 
 interface ExecutionType {
@@ -32,7 +34,8 @@ export const moralisRequest = async (wallet: AssetWallet, type: string) => {
     const query = {
         chain: wallet.chain,
         limit: 25,
-        address: wallet.address
+        address: wallet.address,
+        cursor: wallet.page
     }
 
     const execute = {

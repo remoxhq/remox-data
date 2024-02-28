@@ -17,7 +17,8 @@ export interface DailyTreasuryTokenIndexer {
 
 export interface AssetWallet {
   address: string,
-  chain: string
+  chain: string,
+  page: string
 }
 
 export interface CovalentAssetHold {
@@ -82,6 +83,11 @@ export interface TransferDto {
   }
 }
 
+export interface PagingLinks {
+  prev: string,
+  next: string
+}
+
 export interface NativeTokenLogos {
   [chain: string]: {
     symbol: string,
@@ -90,7 +96,7 @@ export interface NativeTokenLogos {
 }
 
 export const Coins: NativeTokenLogos = {
-  ["0x1"]: {
+  ["eth-mainnet"]: {
     symbol: "ETH",
     logo: "https://community.remox.io/icons/currencies/ethereum_evm.svg"
   },
