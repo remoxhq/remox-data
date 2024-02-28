@@ -20,6 +20,7 @@ _export(exports, {
     }
 });
 const _axios = /*#__PURE__*/ _interop_require_default(require("axios"));
+const _models = require("../../models");
 const _dotenv = require("dotenv");
 const _moralis = /*#__PURE__*/ _interop_require_default(require("moralis"));
 _export_star(require("./covalent-networks"), exports);
@@ -57,7 +58,7 @@ const moralisRequest = async (wallet, type)=>{
         });
     }
     const query = {
-        chain: wallet.chain,
+        chain: _models.Coins[wallet.chain].hexId,
         limit: 25,
         address: wallet.address,
         cursor: wallet.page

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AssetWallet, CovalentAssetHold } from "../../models";
+import { AssetWallet, Coins, CovalentAssetHold } from "../../models";
 import { config } from 'dotenv';
 import Moralis from 'moralis';
 config()
@@ -32,7 +32,7 @@ export const moralisRequest = async (wallet: AssetWallet, type: string) => {
     }
 
     const query = {
-        chain: wallet.chain,
+        chain: Coins[wallet.chain].hexId,
         limit: 25,
         address: wallet.address,
         cursor: wallet.page

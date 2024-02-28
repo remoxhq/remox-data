@@ -107,6 +107,7 @@ class TreasuryManager implements ITreasuryService {
             const to = logEvent.decoded.params[1].value;
             const amount = logEvent.decoded.params[2].value;
             const symbol = sender_contract_ticker_symbol?.toString().toLowerCase();
+            if (from !== wallet.address.toLowerCase() && to !== wallet.address.toLowerCase()) continue;
 
             mappedTxns.push(
                 {
@@ -163,7 +164,7 @@ class TreasuryManager implements ITreasuryService {
                 const transfer = {
                     hash: transferItem.transaction_hash,
                     assetName: transferItem.token_symbol,
-                    assetLogo: logos[transferItem.token_symbol.toLowerCase()] ? logos[transferItem.token_symbol.toLowerCase()].logoUrl : "",
+                    assetLogo: logos[transferItem.token_symbol?.toLowerCase()] ? logos[transferItem.token_symbol.toLowerCase()].logoUrl : "",
                     from: transferItem.from_address,
                     to: transferItem.to_address,
                     direction: transferItem.from_address === wallet.address.toLowerCase() ? "Out" : "In",

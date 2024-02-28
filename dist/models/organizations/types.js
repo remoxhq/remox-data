@@ -15,30 +15,32 @@ function _interop_require_default(obj) {
     };
 }
 const accountSchema = _joi.default.object({
-    name: _joi.default.string().alphanum().required().label("Account name"),
-    address: _joi.default.string().alphanum().required().label("Account address"),
-    chain: _joi.default.string().required().label("Account chain")
+    name: _joi.default.string().regex(/^[a-zA-Z0-9]+$/).min(3).max(10).required().label("Account name"),
+    address: _joi.default.string().regex(/^[a-zA-Z0-9]+$/).max(42).required().label("Account address"),
+    chain: _joi.default.string().min(1).required().label("Account chain")
 });
 const organizationShcema = _joi.default.object({
-    name: _joi.default.string().alphanum().min(3).max(10).required().label("Organization name"),
+    name: _joi.default.string().min(3).max(40).regex(/^(?:[a-zA-Z0-9-_.]|['"](?=[a-zA-Z0-9-_.]+['"]))+$/).required().label("Organization name"),
     image: _joi.default.any().meta({
         accept: 'image/*'
     }).custom((value, helpers)=>{
         if (value && ![
             "image/jpeg",
             "image/png",
-            "image/svg+xml"
+            "image/svg+xml",
+            "image/webp"
         ].some((x)=>x === value.mimetype)) {
             return helpers.error('File must be an image/jpeg, image/png, image/svg+xml');
         }
         return value;
     }).label("Organization image"),
-    dashboardLink: _joi.default.string().alphanum().min(3).max(30).required().label("Organization dashboard link"),
+    dashboardLink: _joi.default.string().min(3).regex(/^[a-z0-9]+$/).required().label("Organization dashboard link"),
     website: _joi.default.string().label("Organization website url"),
     github: _joi.default.string().label("Organization github url"),
     discord: _joi.default.string().label("Organization discord url"),
     twitter: _joi.default.string().label("Organization twitter url"),
     createdBy: _joi.default.string().label("Organization Creator wallet address").required(),
+    governanceSlug: _joi.default.string().label("Governance slug"),
     isPrivate: _joi.default.boolean(),
     isDeleted: _joi.default.boolean(),
     isVerified: _joi.default.boolean(),
