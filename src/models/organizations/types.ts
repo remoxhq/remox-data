@@ -18,6 +18,7 @@ export interface Organization {
     updatedDate: string,
     isDeleted: boolean,
     isActive: boolean,
+    governanceSlug: string,
     accounts: Account[]
 };
 
@@ -29,32 +30,36 @@ export interface Account {
 
 const accountSchema = Joi.object<Account>({
     name: Joi.string()
-        .alphanum()
+        .regex(/^[a-zA-Z0-9]+$/)
+        .min(3)
+        .max(10)
         .required()
         .label("Account name"),
 
     address: Joi.string()
-        .alphanum()
+        .regex(/^[a-zA-Z0-9]+$/)
+        .max(42)
         .required()
         .label("Account address"),
 
     chain: Joi.string()
+        .min(1)
         .required()
         .label("Account chain")
 });
 
 export const organizationShcema = Joi.object<Organization>({
     name: Joi.string()
-        .alphanum()
         .min(3)
-        .max(10)
+        .max(40)
+        .regex(/^(?:[a-zA-Z0-9-_.]|['"](?=[a-zA-Z0-9-_.]+['"]))+$/)
         .required()
         .label("Organization name"),
 
     image: Joi.any()
         .meta({ accept: 'image/*' })
         .custom((value, helpers) => {
-            if (value && !["image/jpeg", "image/png", "image/svg+xml"].some((x) => x === value.mimetype)) {
+            if (value && !["image/jpeg", "image/png", "image/svg+xml", "image/webp"].some((x) => x === value.mimetype)) {
                 return helpers.error('File must be an image/jpeg, image/png, image/svg+xml');
             }
             return value;
@@ -62,9 +67,8 @@ export const organizationShcema = Joi.object<Organization>({
         .label("Organization image"),
 
     dashboardLink: Joi.string()
-        .alphanum()
         .min(3)
-        .max(30)
+        .regex(/^[a-z0-9]+$/)
         .required()
         .label("Organization dashboard link"),
 
@@ -83,6 +87,9 @@ export const organizationShcema = Joi.object<Organization>({
     createdBy: Joi.string()
         .label("Organization Creator wallet address")
         .required(),
+
+    governanceSlug: Joi.string()
+        .label("Governance slug"),
 
     isPrivate: Joi.boolean(),
 
