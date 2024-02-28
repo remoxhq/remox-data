@@ -33,10 +33,10 @@ const TYPES = {
 };
 var ResponseMessage;
 (function(ResponseMessage) {
-    ResponseMessage["OrganizationCreated"] = "Organization is created successfully";
+    ResponseMessage["OrganizationCreated"] = "Organization is created successfully and will be activated in a few seconds.";
     ResponseMessage["OrganizationNotFound"] = "Organization is not found";
     ResponseMessage["OrganizationIdRequired"] = "Organization id is required";
-    ResponseMessage["OrganizationUpdated"] = "Organization is updated successfully";
+    ResponseMessage["OrganizationUpdated"] = "Organization is updated successfully and will be activated in a few seconds.";
     ResponseMessage["UnAuthorizedAction"] = "Signature is invalid";
     ResponseMessage["UnknownServerError"] = "Internal server error";
     ResponseMessage["UserNotFound"] = "User is not found";

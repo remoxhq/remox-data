@@ -5,12 +5,13 @@ import { parseFormData, rootParser } from "../../utils";
 import { Collection, Db, Document, ObjectId } from "mongodb";
 import { ResponseMessage, Roles, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
-import { AppRequest, AppResponse, CustomError, ExceptionType, Organization, Pagination, TreasuryIndexer } from "../../models";
+import { Account, AppRequest, AppResponse, CustomError, ExceptionType, Organization, Pagination, TreasuryIndexer } from "../../models";
 import { usersCollection } from "../auth/AuthManager";
 import { OrganizationFilterRequest } from "../../middlewares";
 import { Organization as OrgObj } from "../../libs/firebase-db"
 import date from 'date-and-time';
 import { handleError } from "../../utils/helpers/responseHandler";
+import { compareEnumerable } from "../../utils/helpers/compareEnumerable";
 
 export const organizationCollection = "Organizations"
 export const organizationHistoricalBalanceCollection = "OrganizationsHistoricalBalances"
@@ -41,7 +42,7 @@ class OrganizationManager implements IOrganizationService {
                 io,
                 createdOrg.insertedId)
 
-            return res.status(200).send(new AppResponse(200, true, undefined, createdOrg.insertedId));
+            return res.status(200).send(new AppResponse(200, true, undefined, ResponseMessage.OrganizationCreated));
         } catch (error: any) {
             return handleError(res, error)
         }
@@ -76,7 +77,7 @@ class OrganizationManager implements IOrganizationService {
 
             let response = await collection.aggregate(aggregationPipeline).toArray();
             const total = response[0].totalRecords[0] ? response[0].totalRecords[0].total : 0
-            
+
             return res.status(200).send(new AppResponse(200,
                 true,
                 undefined,
@@ -100,7 +101,7 @@ class OrganizationManager implements IOrganizationService {
             const io = req.app.locals.io as any; //socket connection
             const collection = db.collection(organizationCollection);
 
-            const response = await collection.findOne({ _id: new ObjectId(orgId) });
+            const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId) });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
             if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
@@ -112,14 +113,17 @@ class OrganizationManager implements IOrganizationService {
             );
 
             parsedBody._id = orgId;
-            this.fetchOrganizationAnnualBalance(
-                collection,
-                parsedBody,
-                db.collection(organizationHistoricalBalanceCollection),
-                io,
-                result.upsertedId!)
 
-            return res.status(200).send(new AppResponse(200, true, undefined, result.upsertedId));;
+            if (!compareEnumerable<Account>(response?.accounts, parsedBody.accounts, "address")) {
+                this.fetchOrganizationAnnualBalance(
+                    collection,
+                    parsedBody,
+                    db.collection(organizationHistoricalBalanceCollection),
+                    io,
+                    result.upsertedId!)
+            }
+
+            return res.status(200).send(new AppResponse(200, true, undefined, ResponseMessage.OrganizationUpdated));;
         } catch (error) {
             return handleError(res, error)
         }
@@ -217,6 +221,8 @@ class OrganizationManager implements IOrganizationService {
         io: any,
         createdOrgId: ObjectId) {
         try {
+            console.log(new Date());
+
             let historicalTreasury: TreasuryIndexer = {}
             let walletAddresses: string[] = []
             const { accounts, name } = newOrganization;
@@ -229,18 +235,16 @@ class OrganizationManager implements IOrganizationService {
                 })
             })
             await rootParser(orgObj, historicalTreasury, walletAddresses, name);
-
-            historicalTreasury = Object.entries(historicalTreasury)
-                .sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1)
-                .reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {})
+            const htValues = Object.entries(historicalTreasury);
 
             let responseObj = {
                 name: name,
                 orgId: newOrganization._id,
                 addresses: walletAddresses,
-                annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury)
+                annual: htValues.length ? htValues
                     .filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365)
-                    .reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a; }, {}) : {},
+                    .sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1)
+                    .reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {}) : {},
             };
 
             await balanceCollection.updateOne(
@@ -251,10 +255,11 @@ class OrganizationManager implements IOrganizationService {
 
             await organizationCollection.updateOne(
                 { _id: createdOrgId },
-                { $set: { isActive: true } }
+                { $set: { isActive: true, balance: htValues.length ? htValues[htValues.length - 1][1].totalTreasury : 0 } }
             );
 
             io.emit('annualBalanceFetched', { message: `Balance fething task completed successfully for organization id ${createdOrgId}` });
+            console.log(new Date());
         } catch (error: any) {
             throw new Error(error);
         }

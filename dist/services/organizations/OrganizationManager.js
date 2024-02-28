@@ -33,6 +33,7 @@ const _models = require("../../models");
 const _AuthManager = require("../auth/AuthManager");
 const _dateandtime = /*#__PURE__*/ _interop_require_default(require("date-and-time"));
 const _responseHandler = require("../../utils/helpers/responseHandler");
+const _compareEnumerable = require("../../utils/helpers/compareEnumerable");
 function _define_property(obj, key, value) {
     if (key in obj) {
         Object.defineProperty(obj, key, {
@@ -76,7 +77,7 @@ class OrganizationManager {
             const collection = db.collection(organizationCollection);
             const createdOrg = await collection.insertOne(parsedBody);
             this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
-            return res.status(200).send(new _models.AppResponse(200, true, undefined, createdOrg.insertedId));
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationCreated));
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);
         }
@@ -131,8 +132,10 @@ class OrganizationManager {
                 $set: parsedBody
             });
             parsedBody._id = orgId;
-            this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
-            return res.status(200).send(new _models.AppResponse(200, true, undefined, result.upsertedId));
+            if (!(0, _compareEnumerable.compareEnumerable)(response?.accounts, parsedBody.accounts, "address")) {
+                this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
+            }
+            return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationUpdated));
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);
         }
@@ -228,6 +231,7 @@ class OrganizationManager {
     }
     async fetchOrganizationAnnualBalance(organizationCollection, newOrganization, balanceCollection, io, createdOrgId) {
         try {
+            console.log(new Date());
             let historicalTreasury = {};
             let walletAddresses = [];
             const { accounts, name } = newOrganization;
@@ -241,15 +245,12 @@ class OrganizationManager {
                 });
             });
             await (0, _utils.rootParser)(orgObj, historicalTreasury, walletAddresses, name);
-            historicalTreasury = Object.entries(historicalTreasury).sort(([key1], [key2])=>new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce((a, c)=>{
-                a[c[0]] = c[1];
-                return a;
-            }, {});
+            const htValues = Object.entries(historicalTreasury);
             let responseObj = {
                 name: name,
                 orgId: newOrganization._id,
                 addresses: walletAddresses,
-                annual: Object.entries(historicalTreasury).length ? Object.entries(historicalTreasury).filter(([time, amount])=>Math.abs(_dateandtime.default.subtract(new Date(), new Date(time)).toDays()) <= 365).reduce((a, c)=>{
+                annual: htValues.length ? htValues.filter(([time, amount])=>Math.abs(_dateandtime.default.subtract(new Date(), new Date(time)).toDays()) <= 365).sort(([key1], [key2])=>new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce((a, c)=>{
                     a[c[0]] = c[1];
                     return a;
                 }, {}) : {}
@@ -265,12 +266,14 @@ class OrganizationManager {
                 _id: createdOrgId
             }, {
                 $set: {
-                    isActive: true
+                    isActive: true,
+                    balance: htValues.length ? htValues[htValues.length - 1][1].totalTreasury : 0
                 }
             });
             io.emit('annualBalanceFetched', {
                 message: `Balance fething task completed successfully for organization id ${createdOrgId}`
             });
+            console.log(new Date());
         } catch (error) {
             throw new Error(error);
         }
