@@ -104,6 +104,9 @@ class OrganizationManager implements IOrganizationService {
             const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId) });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
+            const isAccountsSame = compareEnumerable<Account>(response?.accounts, parsedBody.accounts, "address")
+
+            if (isAccountsSame) parsedBody.isActive = true;
             if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
                 throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);;
 
@@ -114,7 +117,7 @@ class OrganizationManager implements IOrganizationService {
 
             parsedBody._id = orgId;
 
-            if (!compareEnumerable<Account>(response?.accounts, parsedBody.accounts, "address")) {
+            if (!isAccountsSame) {
                 this.fetchOrganizationAnnualBalance(
                     collection,
                     parsedBody,

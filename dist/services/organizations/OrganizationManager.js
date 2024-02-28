@@ -125,6 +125,8 @@ class OrganizationManager {
                 _id: new _mongodb.ObjectId(orgId)
             });
             if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            const isAccountsSame = (0, _compareEnumerable.compareEnumerable)(response?.accounts, parsedBody.accounts, "address");
+            if (isAccountsSame) parsedBody.isActive = true;
             if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) throw new _models.CustomError(_types.ResponseMessage.ForbiddenRequest, _models.ExceptionType.UnAuthorized);
             const result = await collection.updateOne({
                 _id: new _mongodb.ObjectId(orgId)
@@ -132,7 +134,7 @@ class OrganizationManager {
                 $set: parsedBody
             });
             parsedBody._id = orgId;
-            if (!(0, _compareEnumerable.compareEnumerable)(response?.accounts, parsedBody.accounts, "address")) {
+            if (!isAccountsSame) {
                 this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
             }
             return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationUpdated));
