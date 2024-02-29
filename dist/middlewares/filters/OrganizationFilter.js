@@ -38,7 +38,7 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                         Object.keys(user.favoriteOrganizations).map((id)=>new _mongodb.ObjectId(id))
                     ]
                 };
-            }
+            } else field[`isFavorited`] = false;
             if (req.query.favOnly) match.isFavorited = true;
             match.isDeleted = false;
             aggregationPipeline.push({

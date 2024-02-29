@@ -37,7 +37,7 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                     const { contract_ticker_symbol } = token;
                     const network = wallet.network;
                     let treasuryByDate = historicalTreasury[date] || {
-                        totalTreasury: amount,
+                        totalTreasury: 0,
                         tokenBalances: {
                             [contract_ticker_symbol]: {
                                 balanceUsd: 0,

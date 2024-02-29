@@ -36,7 +36,7 @@ export const addOrganizationFilter = () =>
                 field[`isFavorited`] = {
                     $in: ['$_id', Object.keys(user.favoriteOrganizations).map((id) => new ObjectId(id))],
                 }
-            }
+            } else field[`isFavorited`] = false
 
             if (req.query.favOnly)
                 match.isFavorited = true;
