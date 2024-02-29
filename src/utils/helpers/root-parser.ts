@@ -33,7 +33,7 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
 
                     let treasuryByDate = historicalTreasury[date] ||
                     {
-                        totalTreasury: amount,
+                        totalTreasury: 0,
                         tokenBalances: {
                             [contract_ticker_symbol]: {
                                 balanceUsd: 0,
