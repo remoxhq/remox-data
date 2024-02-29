@@ -23,9 +23,11 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
         for await (const wallet of Object.values(dao.wallets)){
             walletAddresses.push(wallet.address);
             const { data: walletAnnualPortfolioBalance } = await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.network}/address/${wallet.address}/portfolio_v2/?key=${covalentApiKey}&quote-currency=usd&days=${365}`);
+            console.log(walletAnnualPortfolioBalance.data.items[0].holdings.length);
+            console.log(walletAnnualPortfolioBalance.data.items[1].holdings.length);
             walletAnnualPortfolioBalance.data.items?.map((token)=>{
                 token.holdings.forEach((holding, index)=>{
-                    if (!holding.close.pretty_quote || index === 0) return; // skip if there's no pretty_quote value
+                    if (!holding.close.pretty_quote) return; // skip if there's no pretty_quote value
                     //split date and parse amount
                     const date = holding.timestamp.toString().split("T")[0];
                     const originAmount = holding.close?.quote ?? 0;
@@ -38,8 +40,8 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                         totalTreasury: amount,
                         tokenBalances: {
                             [contract_ticker_symbol]: {
-                                balanceUsd: amount,
-                                tokenCount: +tokenBalance,
+                                balanceUsd: 0,
+                                tokenCount: 0,
                                 tokenUsdValue
                             }
                         },
@@ -48,8 +50,8 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                         }
                     };
                     treasuryByDate.tokenBalances[contract_ticker_symbol] = treasuryByDate.tokenBalances[contract_ticker_symbol] || {
-                        balanceUsd: amount,
-                        tokenCount: +tokenBalance,
+                        balanceUsd: 0,
+                        tokenCount: 0,
                         tokenUsdValue
                     };
                     treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || amount;
