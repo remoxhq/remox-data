@@ -269,7 +269,7 @@ class OrganizationManager {
             }, {
                 $set: {
                     isActive: true,
-                    balance: htValues.length ? htValues[htValues.length - 1][1].totalTreasury : 0
+                    balance: htValues.length ? htValues[0][1].totalTreasury : 0
                 }
             });
             io.emit('annualBalanceFetched', {

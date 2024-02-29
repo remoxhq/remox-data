@@ -5,12 +5,20 @@ export interface TreasuryIndexer {
 
 export interface DailyTreasury {
   totalTreasury: number,
-  tokenBalances: DailyTreasuryTokenIndexer
+  tokenBalances: DailyTokenIndexer
   networkBalances: DailyTreasuryTokenIndexer
 }
 
 export interface DailyTreasuryTokenIndexer {
   [symbol: string]: number
+}
+
+export interface DailyTokenIndexer {
+  [symbol: string]: {
+    balanceUsd: number,
+    tokenCount: number,
+    tokenUsdValue: number
+  }
 }
 
 //asset DTOs

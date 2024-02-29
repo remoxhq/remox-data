@@ -258,7 +258,7 @@ class OrganizationManager implements IOrganizationService {
 
             await organizationCollection.updateOne(
                 { _id: createdOrgId },
-                { $set: { isActive: true, balance: htValues.length ? htValues[htValues.length - 1][1].totalTreasury : 0 } }
+                { $set: { isActive: true, balance: htValues.length ? htValues[0][1].totalTreasury : 0 } }
             );
 
             io.emit('annualBalanceFetched', { message: `Balance fething task completed successfully for organization id ${createdOrgId}` });

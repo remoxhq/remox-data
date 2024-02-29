@@ -10,6 +10,7 @@ Object.defineProperty(exports, "rootParser", {
 });
 const _dotenv = require("dotenv");
 const _axios = /*#__PURE__*/ _interop_require_default(require("axios"));
+const _ethers = require("ethers");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -28,25 +29,34 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                     //split date and parse amount
                     const date = holding.timestamp.toString().split("T")[0];
                     const originAmount = holding.close?.quote ?? 0;
+                    const tokenBalance = _ethers.ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals);
+                    const tokenUsdValue = holding.quote_rate;
                     const amount = originAmount < 0 ? 0 : originAmount;
                     const { contract_ticker_symbol } = token;
                     const network = wallet.network;
-                    let treasuryByDate = historicalTreasury[date];
-                    if (!treasuryByDate) {
-                        treasuryByDate = {
-                            totalTreasury: amount,
-                            tokenBalances: {
-                                [contract_ticker_symbol]: amount
-                            },
-                            networkBalances: {
-                                [network]: amount
+                    let treasuryByDate = historicalTreasury[date] || {
+                        totalTreasury: amount,
+                        tokenBalances: {
+                            [contract_ticker_symbol]: {
+                                balanceUsd: amount,
+                                tokenCount: +tokenBalance,
+                                tokenUsdValue
                             }
-                        };
-                    } else {
-                        treasuryByDate.totalTreasury += amount;
-                        treasuryByDate.tokenBalances[contract_ticker_symbol] = (historicalTreasury[date].tokenBalances[contract_ticker_symbol] || 0) + amount;
-                        treasuryByDate.networkBalances[network] = (historicalTreasury[date].networkBalances[network] || 0) + amount;
-                    }
+                        },
+                        networkBalances: {
+                            [network]: amount
+                        }
+                    };
+                    treasuryByDate.tokenBalances[contract_ticker_symbol] = treasuryByDate.tokenBalances[contract_ticker_symbol] || {
+                        balanceUsd: amount,
+                        tokenCount: +tokenBalance,
+                        tokenUsdValue
+                    };
+                    treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || amount;
+                    treasuryByDate.tokenBalances[contract_ticker_symbol].balanceUsd += amount;
+                    treasuryByDate.tokenBalances[contract_ticker_symbol].tokenCount += +tokenBalance;
+                    treasuryByDate.totalTreasury += amount;
+                    treasuryByDate.networkBalances[network] += amount;
                     historicalTreasury[date] = treasuryByDate;
                 });
             });
