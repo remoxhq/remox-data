@@ -35,6 +35,7 @@ var ResponseMessage;
 (function(ResponseMessage) {
     ResponseMessage["OrganizationCreated"] = "Organization is created successfully and will be activated in a few seconds.";
     ResponseMessage["OrganizationNotFound"] = "Organization is not found";
+    ResponseMessage["OrganizationAlreadyExist"] = "Dashboard link is already in use.";
     ResponseMessage["OrganizationIdRequired"] = "Organization id is required";
     ResponseMessage["OrganizationUpdated"] = "Organization is updated successfully and will be activated in a few seconds.";
     ResponseMessage["UnAuthorizedAction"] = "Signature is invalid";

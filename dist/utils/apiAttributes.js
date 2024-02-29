@@ -34,6 +34,7 @@ var OrganizationRoute;
     OrganizationRoute[OrganizationRoute["Update"] = base + "/organization/update/:id"] = "Update";
     OrganizationRoute[OrganizationRoute["Delete"] = base + "/organization/:id"] = "Delete";
     OrganizationRoute[OrganizationRoute["AddFavorites"] = base + "/organization/favorite/:organizationId"] = "AddFavorites";
+    OrganizationRoute[OrganizationRoute["GetAllForUpdate"] = base + "/organizations/all"] = "GetAllForUpdate";
 })(OrganizationRoute || (OrganizationRoute = {}));
 var AuthRoute;
 (function(AuthRoute) {

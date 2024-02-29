@@ -66,6 +66,17 @@ export const checkUserPermission = (role: string) =>
         }
     }
 
+export const checkAccessKey = () =>
+    async (req: AppRequest, res: Response, next: NextFunction) => {
+        try {
+            const accessKey = req.headers.accesskey;
+            if (!accessKey || accessKey !== process.env.API_ACCESS_KEY) throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized)
+            else next()
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
+
 export const authenticateUserOrAllowAnonymous = () =>
     async (req: AppRequest, res: Response, next: NextFunction) => {
         try {

@@ -13,6 +13,7 @@ export const enum OrganizationRoute {
     Update = base + "/organization/update/:id",
     Delete = base + "/organization/:id",
     AddFavorites = base + "/organization/favorite/:organizationId",
+    GetAllForUpdate = base + "/organizations/all"
 }
 
 export const enum AuthRoute {

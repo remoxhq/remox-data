@@ -2,7 +2,7 @@ import { Roles, TYPES } from "./types";
 import { AuthRoute, OrganizationRoute, TreasuryRoute } from "./apiAttributes";
 import { AuthController, OrganizationController, TreasuryController } from "../controllers";
 import { configureContainer } from "./serviceProvider";
-import { authenticateUserOrAllowAnonymous, checkUserJwt, checkUserPermission, checkUserSignature, validateBody } from "../middlewares";
+import { authenticateUserOrAllowAnonymous, checkAccessKey, checkUserJwt, checkUserPermission, checkUserSignature, validateBody } from "../middlewares";
 import { organizationShcema } from "../models";
 import { addOrganizationFilter } from "../middlewares/filters/OrganizationFilter";
 import { Container } from "inversify";
@@ -46,6 +46,10 @@ export default function configureRouter(app: any) {
         .get(authenticateUserOrAllowAnonymous(),
             addOrganizationFilter(),
             organizationController.getAll.bind(organizationController))
+
+    app.route(OrganizationRoute.GetAllForUpdate)
+        .get(checkAccessKey(),
+            organizationController.getAllForUpdate.bind(organizationController))
 
     app.route(OrganizationRoute.Update)
         .put(checkUserJwt(),

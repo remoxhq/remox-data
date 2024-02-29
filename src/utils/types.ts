@@ -11,6 +11,7 @@ export const TYPES = {
 export const enum ResponseMessage {
     OrganizationCreated = "Organization is created successfully and will be activated in a few seconds.",
     OrganizationNotFound = "Organization is not found",
+    OrganizationAlreadyExist = "Dashboard link is already in use.",
     OrganizationIdRequired = "Organization id is required",
     OrganizationUpdated = "Organization is updated successfully and will be activated in a few seconds.",
     UnAuthorizedAction = "Signature is invalid",

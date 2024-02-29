@@ -12,6 +12,9 @@ _export(exports, {
     authenticateUserOrAllowAnonymous: function() {
         return authenticateUserOrAllowAnonymous;
     },
+    checkAccessKey: function() {
+        return checkAccessKey;
+    },
     checkUserJwt: function() {
         return checkUserJwt;
     },
@@ -73,6 +76,15 @@ const checkUserPermission = (role)=>async (req, res, next)=>{
                 if (role !== decoded.role || createdBy !== (0, _ethereumjsutil.toChecksumAddress)(decoded.publicKey)) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
                 next();
             });
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
+    };
+const checkAccessKey = ()=>async (req, res, next)=>{
+        try {
+            const accessKey = req.headers.accesskey;
+            if (!accessKey || accessKey !== process.env.API_ACCESS_KEY) throw new _models.CustomError(_types.ResponseMessage.ForbiddenRequest, _models.ExceptionType.UnAuthorized);
+            else next();
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);
         }

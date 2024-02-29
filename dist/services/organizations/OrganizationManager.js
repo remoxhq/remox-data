@@ -10,13 +10,7 @@ function _export(target, all) {
 }
 _export(exports, {
     default: function() {
-        return _default // const user = await this.authService.getUserByPublicKey(req, res)
-         // const favoriteOrganizationsMap = new Map(Object.entries(user.favoriteOrganizations));
-         // response = response.map((org) => ({
-         //     ...org,
-         //     isFavorited: favoriteOrganizationsMap.has(org._id.toString()),
-         // }));
-        ;
+        return _default;
     },
     organizationCollection: function() {
         return organizationCollection;
@@ -68,13 +62,17 @@ const organizationHistoricalBalanceCollection = "OrganizationsHistoricalBalances
 class OrganizationManager {
     async createOrganization(req, res) {
         try {
+            const db = req.app.locals.db;
+            const io = req.app.locals.io; //socket connection
+            const collection = db.collection(organizationCollection);
+            const isExist = await collection.findOne({
+                dashboardLink: req.body.dashboardLink
+            });
+            if (isExist) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             let parsedBody = (0, _utils.parseFormData)("accounts", req);
             parsedBody.createdDate = new Date().toDateString();
             await this.attachCommonFields(parsedBody);
-            const db = req.app.locals.db;
-            const io = req.app.locals.io; //socket connection
             if (parsedBody.isVerified && req.user.role !== _types.Roles.SuperAdmin) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.UnAuthorized);
-            const collection = db.collection(organizationCollection);
             const createdOrg = await collection.insertOne(parsedBody);
             this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
             return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationCreated));
@@ -111,16 +109,46 @@ class OrganizationManager {
             return (0, _responseHandler.handleError)(res, error);
         }
     }
+    async getAllOrgsForDailyUpdate(req, res) {
+        try {
+            const db = req.app.locals.db;
+            const collection = db.collection(organizationCollection);
+            let response = await collection.aggregate([
+                {
+                    $project: {
+                        dashboardLink: 1,
+                        accounts: 1
+                    }
+                }
+            ]).toArray();
+            const mappedOrgs = response?.reduce((mappedOrgs, item)=>{
+                mappedOrgs[item.dashboardLink] = mappedOrgs[item.dashboardLink] || {
+                    wallets: item.accounts.map((item)=>({
+                            address: item.address,
+                            network: item.chain
+                        }))
+                };
+                return mappedOrgs;
+            }, {});
+            return res.status(200).send(mappedOrgs);
+        } catch (error) {
+            return (0, _responseHandler.handleError)(res, error);
+        }
+    }
     async updateOrganization(req, res) {
         try {
+            const db = req.app.locals.db;
+            const io = req.app.locals.io; //socket connection
+            const collection = db.collection(organizationCollection);
+            const isExist = await collection.findOne({
+                dashboardLink: req.body.dashboardLink
+            });
+            if (isExist) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             const parsedBody = (0, _utils.parseFormData)("accounts", req);
             parsedBody.updatedDate = new Date().toDateString();
             await this.attachCommonFields(parsedBody);
             const orgId = req.params.id;
             const publicKey = req.headers.address;
-            const db = req.app.locals.db;
-            const io = req.app.locals.io; //socket connection
-            const collection = db.collection(organizationCollection);
             const response = await collection.findOne({
                 _id: new _mongodb.ObjectId(orgId)
             });
@@ -236,7 +264,7 @@ class OrganizationManager {
             console.log(new Date());
             let historicalTreasury = {};
             let walletAddresses = [];
-            const { accounts, name } = newOrganization;
+            const { accounts, dashboardLink } = newOrganization;
             const orgObj = {
                 wallets: []
             };
@@ -246,10 +274,10 @@ class OrganizationManager {
                     network: account.chain
                 });
             });
-            await (0, _utils.rootParser)(orgObj, historicalTreasury, walletAddresses, name);
+            await (0, _utils.rootParser)(orgObj, historicalTreasury, walletAddresses, dashboardLink);
             const htValues = Object.entries(historicalTreasury);
             let responseObj = {
-                name: name,
+                name: dashboardLink,
                 orgId: newOrganization._id,
                 addresses: walletAddresses,
                 annual: htValues.length ? htValues.filter(([time, amount])=>Math.abs(_dateandtime.default.subtract(new Date(), new Date(time)).toDays()) <= 365).sort(([key1], [key2])=>new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce((a, c)=>{

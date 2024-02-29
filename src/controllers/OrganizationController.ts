@@ -33,4 +33,8 @@ export class OrganizationController {
     async addFavorites(req: Request, res: Response) {
         await this.organizationService.addFavorites(req, res)
     }
+
+    async getAllForUpdate(req: AppRequest, res: Response) {
+        await this.organizationService.getAllOrgsForDailyUpdate(req, res)
+    }
 }

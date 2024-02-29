@@ -9,6 +9,7 @@ interface IOrganizationService {
     updateOrganization(req: AppRequest, res: Response): Promise<Response>;
     deleteOrganization(req: AppRequest, res: Response): Promise<Response>;
     addFavorites(req: Request, res: Response): Promise<Response>;
+    getAllOrgsForDailyUpdate(req: OrganizationFilterRequest, res: Response): Promise<Response>
 }
 
 export default IOrganizationService;

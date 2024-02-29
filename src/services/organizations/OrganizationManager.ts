@@ -22,17 +22,20 @@ class OrganizationManager implements IOrganizationService {
 
     async createOrganization(req: AppRequest, res: Response): Promise<Response> {
         try {
+            const db = req.app.locals.db as Db;
+            const io = req.app.locals.io as any; //socket connection
+            const collection = db.collection(organizationCollection);
+
+            const isExist = await collection.findOne<Organization>({ dashboardLink: req.body.dashboardLink })
+            if (isExist) throw new CustomError(ResponseMessage.OrganizationAlreadyExist, ExceptionType.BadRequest);
+
             let parsedBody = parseFormData("accounts", req);
             parsedBody.createdDate = new Date().toDateString();
             await this.attachCommonFields(parsedBody);
 
-            const db = req.app.locals.db as Db;
-            const io = req.app.locals.io as any; //socket connection
-
             if (parsedBody.isVerified && req.user.role !== Roles.SuperAdmin)
                 throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.UnAuthorized);
 
-            const collection = db.collection(organizationCollection);
             const createdOrg = await collection.insertOne(parsedBody)
 
             this.fetchOrganizationAnnualBalance(
@@ -88,18 +91,44 @@ class OrganizationManager implements IOrganizationService {
         }
     }
 
+    async getAllOrgsForDailyUpdate(req: OrganizationFilterRequest, res: Response): Promise<Response> {
+        try {
+            const db = req.app.locals.db as Db;
+            const collection = db.collection<Organization>(organizationCollection);
+
+            let response = await collection.aggregate<Organization>([{ $project: { dashboardLink: 1, accounts: 1 } }]).toArray();
+
+            const mappedOrgs = response?.reduce((mappedOrgs: any, item: Organization) => {
+
+                mappedOrgs[item.dashboardLink] = mappedOrgs[item.dashboardLink] ||
+                {
+                    wallets: item.accounts.map(item => ({ address: item.address, network: item.chain }))
+                }
+
+                return mappedOrgs;
+            }, {})
+
+            return res.status(200).send(mappedOrgs)
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
+
     async updateOrganization(req: AppRequest, res: Response): Promise<Response> {
         try {
+            const db = req.app.locals.db as Db;
+            const io = req.app.locals.io as any; //socket connection
+            const collection = db.collection(organizationCollection);
+
+            const isExist = await collection.findOne<Organization>({ dashboardLink: req.body.dashboardLink })
+            if (isExist) throw new CustomError(ResponseMessage.OrganizationAlreadyExist, ExceptionType.BadRequest);
+
             const parsedBody = parseFormData("accounts", req);
             parsedBody.updatedDate = new Date().toDateString();
             await this.attachCommonFields(parsedBody)
 
             const orgId = req.params.id;
             const publicKey = req.headers.address;
-
-            const db = req.app.locals.db as Db;
-            const io = req.app.locals.io as any; //socket connection
-            const collection = db.collection(organizationCollection);
 
             const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId) });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
@@ -228,7 +257,7 @@ class OrganizationManager implements IOrganizationService {
 
             let historicalTreasury: TreasuryIndexer = {}
             let walletAddresses: string[] = []
-            const { accounts, name } = newOrganization;
+            const { accounts, dashboardLink } = newOrganization;
             const orgObj: OrgObj = { wallets: [] }
 
             accounts.forEach(account => {
@@ -237,11 +266,11 @@ class OrganizationManager implements IOrganizationService {
                     network: account.chain
                 })
             })
-            await rootParser(orgObj, historicalTreasury, walletAddresses, name);
+            await rootParser(orgObj, historicalTreasury, walletAddresses, dashboardLink);
             const htValues = Object.entries(historicalTreasury);
 
             let responseObj = {
-                name: name,
+                name: dashboardLink,
                 orgId: newOrganization._id,
                 addresses: walletAddresses,
                 annual: htValues.length ? htValues
@@ -270,12 +299,3 @@ class OrganizationManager implements IOrganizationService {
 }
 
 export default OrganizationManager;
-
-
-// const user = await this.authService.getUserByPublicKey(req, res)
-// const favoriteOrganizationsMap = new Map(Object.entries(user.favoriteOrganizations));
-
-// response = response.map((org) => ({
-//     ...org,
-//     isFavorited: favoriteOrganizationsMap.has(org._id.toString()),
-// }));
