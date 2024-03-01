@@ -71,7 +71,7 @@ class OrganizationManager {
             if (isExist) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             let parsedBody = (0, _utils.parseFormData)("accounts", req);
             parsedBody.createdDate = new Date().toDateString();
-            await this.attachCommonFields(parsedBody);
+            await this.attachCommonFields(parsedBody, req);
             if (parsedBody.isVerified && req.user.role !== _types.Roles.SuperAdmin) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.UnAuthorized);
             const createdOrg = await collection.insertOne(parsedBody);
             this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
@@ -146,7 +146,7 @@ class OrganizationManager {
             if (isExist) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             const parsedBody = (0, _utils.parseFormData)("accounts", req);
             parsedBody.updatedDate = new Date().toDateString();
-            await this.attachCommonFields(parsedBody);
+            await this.attachCommonFields(parsedBody, req);
             const orgId = req.params.id;
             const publicKey = req.headers.address;
             const response = await collection.findOne({
@@ -246,13 +246,14 @@ class OrganizationManager {
             return (0, _responseHandler.handleError)(res, error);
         }
     }
-    async attachCommonFields(parsedBody) {
+    async attachCommonFields(parsedBody, req) {
         parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
         parsedBody.networks = {};
         parsedBody.isPrivate = parsedBody.isPrivate.toLowerCase() === 'true';
         parsedBody.isVerified = parsedBody.isVerified.toLowerCase() === 'true';
         parsedBody.isActive = false;
         parsedBody.isDeleted = false;
+        parsedBody.createdBy = req.headers.address;
         Array.from(parsedBody.accounts).forEach((account)=>{
             if (!parsedBody.networks[account.chain]) {
                 parsedBody.networks[account.chain] = account.chain;

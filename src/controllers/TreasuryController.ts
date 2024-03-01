@@ -8,8 +8,7 @@ export class TreasuryController {
     constructor(@inject(TYPES.ITreasuryService) private treasuryService: ITreasuryService) { }
 
     async getAnnualTreasury(req: Request, res: Response) {
-        const response = await this.treasuryService.getAnnualTreasury(req, res);
-        res.send(response);
+        await this.treasuryService.getAnnualTreasury(req, res);
     }
 
     async getAssets(req: Request, res: Response) {

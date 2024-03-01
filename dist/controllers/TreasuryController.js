@@ -36,8 +36,7 @@ function _ts_param(paramIndex, decorator) {
 }
 class TreasuryController {
     async getAnnualTreasury(req, res) {
-        const response = await this.treasuryService.getAnnualTreasury(req, res);
-        res.send(response);
+        await this.treasuryService.getAnnualTreasury(req, res);
     }
     async getAssets(req, res) {
         await this.treasuryService.getAssets(req, res);
