@@ -31,7 +31,7 @@ class OrganizationManager implements IOrganizationService {
 
             let parsedBody = parseFormData("accounts", req);
             parsedBody.createdDate = new Date().toDateString();
-            await this.attachCommonFields(parsedBody);
+            await this.attachCommonFields(parsedBody, req);
 
             if (parsedBody.isVerified && req.user.role !== Roles.SuperAdmin)
                 throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.UnAuthorized);
@@ -125,7 +125,7 @@ class OrganizationManager implements IOrganizationService {
 
             const parsedBody = parseFormData("accounts", req);
             parsedBody.updatedDate = new Date().toDateString();
-            await this.attachCommonFields(parsedBody)
+            await this.attachCommonFields(parsedBody, req)
 
             const orgId = req.params.id;
             const publicKey = req.headers.address;
@@ -231,13 +231,14 @@ class OrganizationManager implements IOrganizationService {
         }
     }
 
-    private async attachCommonFields(parsedBody: any) {
+    private async attachCommonFields(parsedBody: any, req: Request) {
         parsedBody.image = await this.storageService.uploadByteArray(parsedBody.image);
         parsedBody.networks = {};
         parsedBody.isPrivate = parsedBody.isPrivate.toLowerCase() === 'true';
         parsedBody.isVerified = parsedBody.isVerified.toLowerCase() === 'true';
         parsedBody.isActive = false;
         parsedBody.isDeleted = false;
+        parsedBody.createdBy = req.headers.address;
 
         Array.from(parsedBody.accounts).forEach((account: any) => {
             if (!parsedBody.networks[account.chain]) {
