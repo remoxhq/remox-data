@@ -85,8 +85,7 @@ export const organizationShcema = Joi.object<Organization>({
         .label("Organization twitter url"),
 
     createdBy: Joi.string()
-        .label("Organization Creator wallet address")
-        .required(),
+        .label("Organization Creator wallet address"),
 
     governanceSlug: Joi.string()
         .label("Governance slug"),
