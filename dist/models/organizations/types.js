@@ -21,7 +21,7 @@ const accountSchema = _joi.default.object({
 });
 const organizationShcema = _joi.default.object({
     name: _joi.default.string().min(3).max(40).regex(/^(?:[a-zA-Z0-9-_.]|['"](?=[a-zA-Z0-9-_.]+['"]))+$/).required().label("Organization name"),
-    image: _joi.default.any().meta({
+    image: _joi.default.optional().meta({
         accept: 'image/*'
     }).custom((value, helpers)=>{
         if (value && ![

@@ -66,7 +66,8 @@ class OrganizationManager {
             const io = req.app.locals.io; //socket connection
             const collection = db.collection(organizationCollection);
             const isExist = await collection.findOne({
-                dashboardLink: req.body.dashboardLink
+                dashboardLink: req.body.dashboardLink,
+                isDeleted: false
             });
             if (isExist) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             let parsedBody = (0, _utils.parseFormData)("accounts", req);
@@ -74,7 +75,9 @@ class OrganizationManager {
             await this.attachCommonFields(parsedBody, req);
             if (parsedBody.isVerified && req.user.role !== _types.Roles.SuperAdmin) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.UnAuthorized);
             const createdOrg = await collection.insertOne(parsedBody);
-            this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
+            if (!req.query.removeAnnual) {
+                this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
+            }
             return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationCreated));
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);
@@ -86,7 +89,8 @@ class OrganizationManager {
             const db = req.app.locals.db;
             const collection = db.collection(organizationCollection);
             const response = await collection.findOne({
-                _id: new _mongodb.ObjectId(orgId)
+                _id: new _mongodb.ObjectId(orgId),
+                isDeleted: false
             });
             if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
             if (response.isPrivate && response.createdBy !== req.user?.publicKey) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
@@ -118,6 +122,9 @@ class OrganizationManager {
                     $project: {
                         dashboardLink: 1,
                         accounts: 1
+                    },
+                    $match: {
+                        isDeleted: false
                     }
                 }
             ]).toArray();
@@ -140,10 +147,6 @@ class OrganizationManager {
             const db = req.app.locals.db;
             const io = req.app.locals.io; //socket connection
             const collection = db.collection(organizationCollection);
-            const isExist = await collection.findOne({
-                dashboardLink: req.body.dashboardLink
-            });
-            if (isExist) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             const parsedBody = (0, _utils.parseFormData)("accounts", req);
             parsedBody.updatedDate = new Date().toDateString();
             await this.attachCommonFields(parsedBody, req);
@@ -153,8 +156,14 @@ class OrganizationManager {
                 _id: new _mongodb.ObjectId(orgId)
             });
             if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            const isExist = await collection.findOne({
+                dashboardLink: parsedBody.dashboardLink,
+                isDeleted: false
+            });
+            if (isExist && !response._id.equals(isExist?._id)) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             const isAccountsSame = (0, _compareEnumerable.compareEnumerable)(response?.accounts, parsedBody.accounts, "address");
             if (isAccountsSame) parsedBody.isActive = true;
+            if (!parsedBody.image) parsedBody.image = response.image;
             if (!(req.user.role === _types.Roles.SuperAdmin || response.createdBy === publicKey)) throw new _models.CustomError(_types.ResponseMessage.ForbiddenRequest, _models.ExceptionType.UnAuthorized);
             const result = await collection.updateOne({
                 _id: new _mongodb.ObjectId(orgId)
@@ -162,7 +171,7 @@ class OrganizationManager {
                 $set: parsedBody
             });
             parsedBody._id = orgId;
-            if (!isAccountsSame) {
+            if (!isAccountsSame && !req.query.removeAnnual) {
                 this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
             }
             return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationUpdated));

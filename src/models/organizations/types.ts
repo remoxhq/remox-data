@@ -56,7 +56,7 @@ export const organizationShcema = Joi.object<Organization>({
         .required()
         .label("Organization name"),
 
-    image: Joi.any()
+    image: Joi.optional()
         .meta({ accept: 'image/*' })
         .custom((value, helpers) => {
             if (value && !["image/jpeg", "image/png", "image/svg+xml", "image/webp"].some((x) => x === value.mimetype)) {

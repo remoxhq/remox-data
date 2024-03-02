@@ -26,7 +26,7 @@ class OrganizationManager implements IOrganizationService {
             const io = req.app.locals.io as any; //socket connection
             const collection = db.collection(organizationCollection);
 
-            const isExist = await collection.findOne<Organization>({ dashboardLink: req.body.dashboardLink })
+            const isExist = await collection.findOne<Organization>({ dashboardLink: req.body.dashboardLink, isDeleted: false })
             if (isExist) throw new CustomError(ResponseMessage.OrganizationAlreadyExist, ExceptionType.BadRequest);
 
             let parsedBody = parseFormData("accounts", req);
@@ -38,12 +38,14 @@ class OrganizationManager implements IOrganizationService {
 
             const createdOrg = await collection.insertOne(parsedBody)
 
-            this.fetchOrganizationAnnualBalance(
-                collection,
-                parsedBody,
-                db.collection(organizationHistoricalBalanceCollection),
-                io,
-                createdOrg.insertedId)
+            if (!req.query.removeAnnual) {
+                this.fetchOrganizationAnnualBalance(
+                    collection,
+                    parsedBody,
+                    db.collection(organizationHistoricalBalanceCollection),
+                    io,
+                    createdOrg.insertedId)
+            }
 
             return res.status(200).send(new AppResponse(200, true, undefined, ResponseMessage.OrganizationCreated));
         } catch (error: any) {
@@ -57,7 +59,7 @@ class OrganizationManager implements IOrganizationService {
             const db = req.app.locals.db as Db;
 
             const collection = db.collection(organizationCollection);
-            const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId) });
+            const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId), isDeleted: false });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
             if (response.isPrivate && response.createdBy !== req.user?.publicKey)
@@ -96,7 +98,7 @@ class OrganizationManager implements IOrganizationService {
             const db = req.app.locals.db as Db;
             const collection = db.collection<Organization>(organizationCollection);
 
-            let response = await collection.aggregate<Organization>([{ $project: { dashboardLink: 1, accounts: 1 } }]).toArray();
+            let response = await collection.aggregate<Organization>([{ $project: { dashboardLink: 1, accounts: 1 }, $match: { isDeleted: false } }]).toArray();
 
             const mappedOrgs = response?.reduce((mappedOrgs: any, item: Organization) => {
 
@@ -120,9 +122,6 @@ class OrganizationManager implements IOrganizationService {
             const io = req.app.locals.io as any; //socket connection
             const collection = db.collection(organizationCollection);
 
-            const isExist = await collection.findOne<Organization>({ dashboardLink: req.body.dashboardLink })
-            if (isExist) throw new CustomError(ResponseMessage.OrganizationAlreadyExist, ExceptionType.BadRequest);
-
             const parsedBody = parseFormData("accounts", req);
             parsedBody.updatedDate = new Date().toDateString();
             await this.attachCommonFields(parsedBody, req)
@@ -133,11 +132,15 @@ class OrganizationManager implements IOrganizationService {
             const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId) });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
+            const isExist = await collection.findOne<Organization>({ dashboardLink: parsedBody.dashboardLink, isDeleted: false })
+            if (isExist && !response._id.equals(isExist?._id)) throw new CustomError(ResponseMessage.OrganizationAlreadyExist, ExceptionType.BadRequest);
+
             const isAccountsSame = compareEnumerable<Account>(response?.accounts, parsedBody.accounts, "address")
 
             if (isAccountsSame) parsedBody.isActive = true;
+            if (!parsedBody.image) parsedBody.image = response.image;
             if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
-                throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);;
+                throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);
 
             const result = await collection.updateOne(
                 { _id: new ObjectId(orgId) },
@@ -146,7 +149,7 @@ class OrganizationManager implements IOrganizationService {
 
             parsedBody._id = orgId;
 
-            if (!isAccountsSame) {
+            if (!isAccountsSame && !req.query.removeAnnual) {
                 this.fetchOrganizationAnnualBalance(
                     collection,
                     parsedBody,

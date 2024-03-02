@@ -10,7 +10,8 @@ export interface AppRequest extends Request {
     user: {
         role?: string,
         publicKey: string
-    }
+    },
+    annual?: boolean
 }
 
 export class AppResponse {
