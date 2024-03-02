@@ -72,6 +72,7 @@ class OrganizationManager {
             if (isExist) throw new _models.CustomError(_types.ResponseMessage.OrganizationAlreadyExist, _models.ExceptionType.BadRequest);
             let parsedBody = (0, _utils.parseFormData)("accounts", req);
             parsedBody.createdDate = new Date().toDateString();
+            parsedBody.createdBy = req.headers.address;
             await this.attachCommonFields(parsedBody, req);
             if (parsedBody.isVerified && req.user.role !== _types.Roles.SuperAdmin) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.UnAuthorized);
             const createdOrg = await collection.insertOne(parsedBody);
@@ -93,7 +94,7 @@ class OrganizationManager {
                 isDeleted: false
             });
             if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
-            if (response.isPrivate && response.createdBy !== req.user?.publicKey) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
+            if (response.isPrivate && response.createdBy !== req.user?.publicKey && req.user.role !== _types.Roles.SuperAdmin) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
             return res.status(200).send(new _models.AppResponse(200, true, undefined, response));
         } catch (error) {
             return (0, _responseHandler.handleError)(res, error);
@@ -262,7 +263,6 @@ class OrganizationManager {
         parsedBody.isVerified = parsedBody.isVerified.toLowerCase() === 'true';
         parsedBody.isActive = false;
         parsedBody.isDeleted = false;
-        parsedBody.createdBy = req.headers.address;
         Array.from(parsedBody.accounts).forEach((account)=>{
             if (!parsedBody.networks[account.chain]) {
                 parsedBody.networks[account.chain] = account.chain;

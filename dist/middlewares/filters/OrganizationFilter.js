@@ -18,7 +18,7 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
             const pageIndex = parseInt(req.query.pageIndex, 10) || 0;
             const pageSize = parseInt(req.query.pageSize, 10) || Number.MAX_SAFE_INTEGER;
             const aggregationPipeline = [];
-            const match = {};
+            let match = {};
             const field = {};
             if (req.query.chain) match[`networks.${req.query.chain}`] = {
                 $exists: true
@@ -27,8 +27,8 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                 $regex: req.query.searchParam,
                 $options: 'i'
             };
-            if (req.query.mine && usrPulicKey) match.createdBy = usrPulicKey;
-            else match.isPrivate = false;
+            if (req.query.mine) match.createdBy = usrPulicKey;
+            else if (req.user && req.user?.role !== _types.Roles.SuperAdmin) match.isPrivate = false;
             if (usrPulicKey) {
                 const authService = diContainer.get(_types.TYPES.IAuthService);
                 const user = await authService.getUserByPublicKey(req, res);
@@ -60,6 +60,11 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                         },
                         {
                             $limit: pageSize
+                        },
+                        {
+                            $sort: {
+                                balance: -1
+                            }
                         }
                     ]
                 }

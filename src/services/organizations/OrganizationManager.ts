@@ -31,6 +31,7 @@ class OrganizationManager implements IOrganizationService {
 
             let parsedBody = parseFormData("accounts", req);
             parsedBody.createdDate = new Date().toDateString();
+            parsedBody.createdBy = req.headers.address;
             await this.attachCommonFields(parsedBody, req);
 
             if (parsedBody.isVerified && req.user.role !== Roles.SuperAdmin)
@@ -62,7 +63,7 @@ class OrganizationManager implements IOrganizationService {
             const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId), isDeleted: false });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-            if (response.isPrivate && response.createdBy !== req.user?.publicKey)
+            if ((response.isPrivate && response.createdBy !== req.user?.publicKey) && req.user.role !== Roles.SuperAdmin)
                 throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
             return res.status(200).send(new AppResponse(200, true, undefined, response));
@@ -241,7 +242,6 @@ class OrganizationManager implements IOrganizationService {
         parsedBody.isVerified = parsedBody.isVerified.toLowerCase() === 'true';
         parsedBody.isActive = false;
         parsedBody.isDeleted = false;
-        parsedBody.createdBy = req.headers.address;
 
         Array.from(parsedBody.accounts).forEach((account: any) => {
             if (!parsedBody.networks[account.chain]) {

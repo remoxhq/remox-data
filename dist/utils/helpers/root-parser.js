@@ -23,8 +23,6 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
         for await (const wallet of Object.values(dao.wallets)){
             walletAddresses.push(wallet.address);
             const { data: walletAnnualPortfolioBalance } = await _axios.default.get(`https://api.covalenthq.com/v1/${wallet.network}/address/${wallet.address}/portfolio_v2/?key=${covalentApiKey}&quote-currency=usd&days=${365}`);
-            console.log(walletAnnualPortfolioBalance.data.items[0].holdings.length);
-            console.log(walletAnnualPortfolioBalance.data.items[1].holdings.length);
             walletAnnualPortfolioBalance.data.items?.map((token)=>{
                 token.holdings.forEach((holding, index)=>{
                     if (!holding.close.pretty_quote) return; // skip if there's no pretty_quote value

@@ -72,22 +72,22 @@ export const organizationShcema = Joi.object<Organization>({
         .required()
         .label("Organization dashboard link"),
 
-    website: Joi.optional()
+    website: Joi.string()
         .label("Organization website url"),
 
-    github: Joi.optional()
+    github: Joi.string()
         .label("Organization github url"),
 
-    discord: Joi.optional()
+    discord: Joi.string()
         .label("Organization discord url"),
 
-    twitter: Joi.optional()
+    twitter: Joi.string()
         .label("Organization twitter url"),
 
     createdBy: Joi.string()
         .label("Organization Creator wallet address"),
 
-    governanceSlug: Joi.optional()
+    governanceSlug: Joi.string()
         .label("Governance slug"),
 
     isPrivate: Joi.boolean(),

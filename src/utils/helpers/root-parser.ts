@@ -16,8 +16,6 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
             const { data: walletAnnualPortfolioBalance } = await axios
                 .get<{ data: PortfolioResponse }>(`https://api.covalenthq.com/v1/${wallet.network as Chain}/address/${wallet.address}/portfolio_v2/?key=${covalentApiKey}&quote-currency=usd&days=${365}`,)
 
-            console.log(walletAnnualPortfolioBalance.data.items[0].holdings.length);
-            console.log(walletAnnualPortfolioBalance.data.items[1].holdings.length);
             walletAnnualPortfolioBalance.data.items?.map((token) => {
                 token.holdings.forEach((holding, index) => {
                     if (!holding.close.pretty_quote) return;  // skip if there's no pretty_quote value
