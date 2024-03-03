@@ -56,7 +56,7 @@ export const organizationShcema = Joi.object<Organization>({
         .required()
         .label("Organization name"),
 
-    image: Joi.optional()
+    image: Joi.any()
         .meta({ accept: 'image/*' })
         .custom((value, helpers) => {
             if (value && !["image/jpeg", "image/png", "image/svg+xml", "image/webp"].some((x) => x === value.mimetype)) {
@@ -72,22 +72,22 @@ export const organizationShcema = Joi.object<Organization>({
         .required()
         .label("Organization dashboard link"),
 
-    website: Joi.string()
+    website: Joi.optional()
         .label("Organization website url"),
 
-    github: Joi.string()
+    github: Joi.optional()
         .label("Organization github url"),
 
-    discord: Joi.string()
+    discord: Joi.optional()
         .label("Organization discord url"),
 
-    twitter: Joi.string()
+    twitter: Joi.optional()
         .label("Organization twitter url"),
 
     createdBy: Joi.string()
         .label("Organization Creator wallet address"),
 
-    governanceSlug: Joi.string()
+    governanceSlug: Joi.optional()
         .label("Governance slug"),
 
     isPrivate: Joi.boolean(),

@@ -21,7 +21,7 @@ const accountSchema = _joi.default.object({
 });
 const organizationShcema = _joi.default.object({
     name: _joi.default.string().min(3).max(40).regex(/^(?:[a-zA-Z0-9-_.]|['"](?=[a-zA-Z0-9-_.]+['"]))+$/).required().label("Organization name"),
-    image: _joi.default.optional().meta({
+    image: _joi.default.any().meta({
         accept: 'image/*'
     }).custom((value, helpers)=>{
         if (value && ![
@@ -35,12 +35,12 @@ const organizationShcema = _joi.default.object({
         return value;
     }).label("Organization image"),
     dashboardLink: _joi.default.string().min(3).regex(/^[a-z0-9]+$/).required().label("Organization dashboard link"),
-    website: _joi.default.string().label("Organization website url"),
-    github: _joi.default.string().label("Organization github url"),
-    discord: _joi.default.string().label("Organization discord url"),
-    twitter: _joi.default.string().label("Organization twitter url"),
+    website: _joi.default.optional().label("Organization website url"),
+    github: _joi.default.optional().label("Organization github url"),
+    discord: _joi.default.optional().label("Organization discord url"),
+    twitter: _joi.default.optional().label("Organization twitter url"),
     createdBy: _joi.default.string().label("Organization Creator wallet address"),
-    governanceSlug: _joi.default.string().label("Governance slug"),
+    governanceSlug: _joi.default.optional().label("Governance slug"),
     isPrivate: _joi.default.boolean(),
     isDeleted: _joi.default.boolean(),
     isVerified: _joi.default.boolean(),
