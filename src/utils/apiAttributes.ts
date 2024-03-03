@@ -8,7 +8,7 @@ export const enum TreasuryRoute {
 
 export const enum OrganizationRoute {
     Create = base + "/organization/create",
-    GetByName = base + "/organization/:id",
+    GetByName = base + "/organization/:slug",
     GetAll = base + "/organization",
     Update = base + "/organization/update/:id",
     Delete = base + "/organization/:id",

@@ -86,11 +86,11 @@ class OrganizationManager {
     }
     async getOrganizationByName(req, res, next) {
         try {
-            const orgId = req.params.id;
+            const orgSlug = req.params.slug;
             const db = req.app.locals.db;
             const collection = db.collection(organizationCollection);
             const response = await collection.findOne({
-                _id: new _mongodb.ObjectId(orgId),
+                dashboardLink: orgSlug,
                 isDeleted: false
             });
             if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);

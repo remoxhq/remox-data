@@ -56,11 +56,11 @@ class OrganizationManager implements IOrganizationService {
 
     async getOrganizationByName(req: AppRequest, res: Response, next: NextFunction): Promise<Response> {
         try {
-            const orgId = req.params.id;
+            const orgSlug = req.params.slug;
             const db = req.app.locals.db as Db;
 
             const collection = db.collection(organizationCollection);
-            const response = await collection.findOne<Organization>({ _id: new ObjectId(orgId), isDeleted: false });
+            const response = await collection.findOne<Organization>({ dashboardLink: orgSlug, isDeleted: false });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
             if ((response.isPrivate && response.createdBy !== req.user?.publicKey) && req.user.role !== Roles.SuperAdmin)
