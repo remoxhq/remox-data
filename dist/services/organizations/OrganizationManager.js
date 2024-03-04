@@ -282,6 +282,7 @@ class OrganizationManager {
             });
             await (0, _utils.rootParser)(orgObj, historicalTreasury, walletAddresses, dashboardLink);
             const htValues = Object.entries(historicalTreasury);
+            console.log(htValues);
             let responseObj = {
                 name: dashboardLink,
                 orgId: newOrganization._id,
@@ -303,7 +304,8 @@ class OrganizationManager {
             }, {
                 $set: {
                     isActive: true,
-                    balance: htValues.length ? htValues[0][1].totalTreasury : 0
+                    balance: htValues.length ? htValues[0][1].totalTreasury : 0,
+                    lastDayBalance: htValues.length ? htValues[1][1].totalTreasury : 0
                 }
             });
             io.emit('annualBalanceFetched', {

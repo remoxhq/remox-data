@@ -272,6 +272,7 @@ class OrganizationManager implements IOrganizationService {
             })
             await rootParser(orgObj, historicalTreasury, walletAddresses, dashboardLink);
             const htValues = Object.entries(historicalTreasury);
+            console.log(htValues);
 
             let responseObj = {
                 name: dashboardLink,
@@ -291,7 +292,13 @@ class OrganizationManager implements IOrganizationService {
 
             await organizationCollection.updateOne(
                 { _id: createdOrgId },
-                { $set: { isActive: true, balance: htValues.length ? htValues[0][1].totalTreasury : 0 } }
+                {
+                    $set: {
+                        isActive: true,
+                        balance: htValues.length ? htValues[0][1].totalTreasury : 0,
+                        lastDayBalance: htValues.length ? htValues[1][1].totalTreasury : 0
+                    }
+                }
             );
 
             io.emit('annualBalanceFetched', { message: `Balance fething task completed successfully for organization id ${createdOrgId}` });
