@@ -99,7 +99,7 @@ class OrganizationManager implements IOrganizationService {
             const db = req.app.locals.db as Db;
             const collection = db.collection<Organization>(organizationCollection);
 
-            let response = await collection.aggregate<Organization>([{ $project: { dashboardLink: 1, accounts: 1 }, $match: { isDeleted: false } }]).toArray();
+            let response = await collection.aggregate<Organization>([{ $match: { isDeleted: false } }]).toArray();
 
             const mappedOrgs = response?.reduce((mappedOrgs: any, item: Organization) => {
 

@@ -120,10 +120,6 @@ class OrganizationManager {
             const collection = db.collection(organizationCollection);
             let response = await collection.aggregate([
                 {
-                    $project: {
-                        dashboardLink: 1,
-                        accounts: 1
-                    },
                     $match: {
                         isDeleted: false
                     }
