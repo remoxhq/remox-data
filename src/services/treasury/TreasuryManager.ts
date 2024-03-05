@@ -119,6 +119,7 @@ class TreasuryManager implements ITreasuryService {
                     amount: +ethers.utils.formatUnits(amount, sender_contract_decimals),
                     direction: from === wallet.address.toLowerCase() ? "Out" : "In",
                     date: block_signed_at,
+                    chain: wallet.chain
                 }
             )
         }
@@ -138,6 +139,7 @@ class TreasuryManager implements ITreasuryService {
                 amount: +ethers.utils.formatUnits(transaction.value, sender_contract_decimals),
                 direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
                 date: block_signed_at,
+                chain: wallet.chain
             }
         )
     }
@@ -171,6 +173,7 @@ class TreasuryManager implements ITreasuryService {
                     count: 1,
                     amount: +ethers.utils.formatUnits(transferItem.value, transferItem.token_decimals),
                     date: transferItem.block_timestamp,
+                    chain: wallet.chain
                 };
 
                 return transfer;
@@ -192,6 +195,7 @@ class TreasuryManager implements ITreasuryService {
                     count: 1,
                     amount: txn.value ? +ethers.utils.formatUnits(txn.value, 18) : 0,
                     date: txn.block_timestamp,
+                    chain: wallet.chain
                 };
 
                 return transfer;
