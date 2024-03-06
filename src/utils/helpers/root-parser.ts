@@ -1,14 +1,15 @@
 import { Chain, PortfolioResponse } from "../../libs/covalent"
 import { Organization } from "../../libs/firebase-db"
 import { config } from "dotenv"
-import { TreasuryIndexer } from "../../models/treasuries/types";
+import { Portfolio, TreasuryIndexer } from "../../models/treasuries/types";
 import axios from "axios";
 import { ethers } from "ethers";
+import { logos } from "../logos";
 
 config()
 const covalentApiKey = process.env.COVALENT_API_KEY || "";
 
-export const rootParser = async (dao: Organization, historicalTreasury: TreasuryIndexer, walletAddresses: string[], name?: string) => {
+export const rootParser = async (dao: Organization, historicalTreasury: Portfolio, walletAddresses: string[], name?: string) => {
     try {
         for await (const wallet of Object.values(dao.wallets)) {
             walletAddresses.push(wallet.address)
@@ -29,7 +30,7 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     const { contract_ticker_symbol, contract_address } = token;
                     const network = wallet.network;
 
-                    let treasuryByDate = historicalTreasury[date] ||
+                    let treasuryByDate = historicalTreasury.annual[date] ||
                     {
                         totalTreasury: 0,
                         tokenBalances: {
@@ -42,20 +43,22 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                         networkBalances: { [network]: amount }
                     };
 
+                    historicalTreasury.existingTokenLogos[contract_ticker_symbol] = historicalTreasury.existingTokenLogos[contract_ticker_symbol]
+                        || (logos[contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "")
+
                     treasuryByDate.tokenBalances[contract_address] = treasuryByDate.tokenBalances[contract_address] ||
                     {
                         balanceUsd: 0,
                         tokenCount: 0,
                         tokenUsdValue
                     }
-
                     treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || amount
                     treasuryByDate.tokenBalances[contract_address].balanceUsd += amount
                     treasuryByDate.tokenBalances[contract_address].tokenCount += + tokenBalance
                     treasuryByDate.totalTreasury += amount;
                     treasuryByDate.networkBalances[network] += amount;
 
-                    historicalTreasury[date] = treasuryByDate;
+                    historicalTreasury.annual[date] = treasuryByDate;
                 });
             })
         }

@@ -268,7 +268,10 @@ class OrganizationManager {
     async fetchOrganizationAnnualBalance(organizationCollection, newOrganization, balanceCollection, io, createdOrgId) {
         try {
             console.log(new Date());
+            let portfolio = {};
             let historicalTreasury = {};
+            portfolio.annual = historicalTreasury;
+            portfolio.existingTokenLogos = {};
             let walletAddresses = [];
             const { accounts, dashboardLink } = newOrganization;
             const orgObj = {
@@ -280,12 +283,13 @@ class OrganizationManager {
                     network: account.chain
                 });
             });
-            await (0, _utils.rootParser)(orgObj, historicalTreasury, walletAddresses, dashboardLink);
-            const htValues = Object.entries(historicalTreasury);
+            await (0, _utils.rootParser)(orgObj, portfolio, walletAddresses, dashboardLink);
+            const htValues = Object.entries(portfolio.annual);
             let responseObj = {
                 name: dashboardLink,
                 orgId: newOrganization._id,
                 addresses: walletAddresses,
+                existingTokens: portfolio.existingTokenLogos,
                 annual: htValues.length ? htValues.filter(([time, amount])=>Math.abs(_dateandtime.default.subtract(new Date(), new Date(time)).toDays()) <= 365).sort(([key1], [key2])=>new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce((a, c)=>{
                     a[c[0]] = c[1];
                     return a;

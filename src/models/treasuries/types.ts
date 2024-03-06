@@ -1,6 +1,12 @@
 //portfolio DTOs
+
+export interface Portfolio {
+  annual: TreasuryIndexer,
+  existingTokenLogos: { [symbol: string]: string }
+}
+
 export interface TreasuryIndexer {
-  [date: string]: DailyTreasury
+  [date: string]: DailyTreasury,
 }
 
 export interface DailyTreasury {

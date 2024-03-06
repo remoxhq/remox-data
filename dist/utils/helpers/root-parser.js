@@ -11,6 +11,7 @@ Object.defineProperty(exports, "rootParser", {
 const _dotenv = require("dotenv");
 const _axios = /*#__PURE__*/ _interop_require_default(require("axios"));
 const _ethers = require("ethers");
+const _logos = require("../logos");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -34,7 +35,7 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                     const amount = originAmount < 0 ? 0 : originAmount;
                     const { contract_ticker_symbol, contract_address } = token;
                     const network = wallet.network;
-                    let treasuryByDate = historicalTreasury[date] || {
+                    let treasuryByDate = historicalTreasury.annual[date] || {
                         totalTreasury: 0,
                         tokenBalances: {
                             [contract_address]: {
@@ -47,6 +48,7 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                             [network]: amount
                         }
                     };
+                    historicalTreasury.existingTokenLogos[contract_ticker_symbol] = historicalTreasury.existingTokenLogos[contract_ticker_symbol] || (_logos.logos[contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "");
                     treasuryByDate.tokenBalances[contract_address] = treasuryByDate.tokenBalances[contract_address] || {
                         balanceUsd: 0,
                         tokenCount: 0,
@@ -57,7 +59,7 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                     treasuryByDate.tokenBalances[contract_address].tokenCount += +tokenBalance;
                     treasuryByDate.totalTreasury += amount;
                     treasuryByDate.networkBalances[network] += amount;
-                    historicalTreasury[date] = treasuryByDate;
+                    historicalTreasury.annual[date] = treasuryByDate;
                 });
             });
         }

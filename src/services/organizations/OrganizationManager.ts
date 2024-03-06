@@ -5,7 +5,7 @@ import { parseFormData, rootParser } from "../../utils";
 import { Collection, Db, Document, ObjectId } from "mongodb";
 import { ResponseMessage, Roles, TYPES } from "../../utils/types";
 import IStorageService from "../storage/IStorageService";
-import { Account, AppRequest, AppResponse, CustomError, ExceptionType, Organization, Pagination, TreasuryIndexer } from "../../models";
+import { Account, AppRequest, AppResponse, CustomError, ExceptionType, Organization, Pagination, Portfolio, TreasuryIndexer } from "../../models";
 import { usersCollection } from "../auth/AuthManager";
 import { OrganizationFilterRequest } from "../../middlewares";
 import { Organization as OrgObj } from "../../libs/firebase-db"
@@ -259,7 +259,11 @@ class OrganizationManager implements IOrganizationService {
         try {
             console.log(new Date());
 
+            let portfolio: Portfolio = {} as any
             let historicalTreasury: TreasuryIndexer = {}
+            portfolio.annual = historicalTreasury;
+            portfolio.existingTokenLogos = {}
+
             let walletAddresses: string[] = []
             const { accounts, dashboardLink } = newOrganization;
             const orgObj: OrgObj = { wallets: [] }
@@ -270,13 +274,15 @@ class OrganizationManager implements IOrganizationService {
                     network: account.chain
                 })
             })
-            await rootParser(orgObj, historicalTreasury, walletAddresses, dashboardLink);
-            const htValues = Object.entries(historicalTreasury);
+            await rootParser(orgObj, portfolio, walletAddresses, dashboardLink);
+
+            const htValues = Object.entries(portfolio.annual);
 
             let responseObj = {
                 name: dashboardLink,
                 orgId: newOrganization._id,
                 addresses: walletAddresses,
+                existingTokens: portfolio.existingTokenLogos,
                 annual: htValues.length ? htValues
                     .filter(([time, amount]) => Math.abs(date.subtract(new Date(), new Date(time)).toDays()) <= 365)
                     .sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1)

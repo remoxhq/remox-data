@@ -69,29 +69,7 @@ class TreasuryManager {
             return (0, _responseHandler.handleError)(res, error);
         }
     }
-    // private async getTransactionsFromProvider(req: Request) {
-    //     const wallets = req.body["wallets"] as AssetWallet[];
-    //     if (!Array.isArray(wallets))
-    //         throw new CustomError(ResponseMessage.WalletsMustBeArray, ExceptionType.BadRequest);
-    //     let links: any = {}
-    //     let totalTxs: any[] = []
-    //     await Promise.all(wallets.map(async (wallet: AssetWallet) => {
-    //         if (wallet.chain === "celo-mainnet") {
-    //             const mappedCeloTxns = await this.processCeloTransactions(wallet)
-    //             totalTxs.push(...mappedCeloTxns?.txns ?? [])
-    //             links[wallet.address] = mappedCeloTxns?.links[wallet.address]
-    //         }
-    //         else {
-    //             const mappedEvmTxns = await this.processEvmTxns(wallet)
-    //             totalTxs.push(...mappedEvmTxns.txns)
-    //             links[wallet.address] = mappedEvmTxns?.links[wallet.address]
-    //         }
-    //     }));
-    //     return {
-    //         txs: totalTxs,
-    //         links
-    //     };
-    // }
+    //txns
     async getTransactionsFromProvider(req) {
         const slug = req.params.slug;
         const db = req.app.locals.db;
@@ -242,114 +220,6 @@ class TreasuryManager {
         });
         return mappedTransfers;
     }
-    //txns
-    // private async processCeloTransactions(wallet: AssetWallet) {
-    //     const response = await covalentTxnRequest(wallet);
-    //     const items = response.data.data.items;
-    //     if (!items) return null;
-    //     const links: PagingLinks = { next: response.data.data.links.prev ?? "", prev: response.data.data.links.next ?? "" }
-    //     const mappedTxns: any[] = []
-    //     for (const transaction of items) {
-    //         if (transaction.log_events) this.processCeloTransfers(transaction, mappedTxns, wallet);
-    //         else this.processCeloNativeTxns(transaction, mappedTxns, wallet)
-    //     }
-    //     return {
-    //         txns: mappedTxns,
-    //         links: { [wallet.address]: links }
-    //     }
-    // }
-    // private async processCeloTransfers(transaction: any, mappedTxns: any[], wallet: AssetWallet) {
-    //     for (const logEvent of transaction.log_events) {
-    //         if (!logEvent.decoded || logEvent.decoded.name !== "Transfer") continue;
-    //         if (logEvent.decoded.name === "TransferSingle") break;
-    //         const { sender_contract_ticker_symbol, sender_contract_decimals, block_signed_at } = logEvent;
-    //         const from = logEvent.decoded.params[0].value;
-    //         const to = logEvent.decoded.params[1].value;
-    //         const amount = logEvent.decoded.params[2].value;
-    //         const symbol = sender_contract_ticker_symbol?.toString().toLowerCase();
-    //         if (from !== wallet.address.toLowerCase() && to !== wallet.address.toLowerCase()) continue;
-    //         mappedTxns.push(
-    //             {
-    //                 hash: transaction.tx_hash,
-    //                 from: from,
-    //                 to: to,
-    //                 assetLogo: logos[symbol ? symbol : ""] ? logos[symbol]?.logoUrl : "",
-    //                 assetName: sender_contract_ticker_symbol,
-    //                 amount: +ethers.utils.formatUnits(amount, sender_contract_decimals),
-    //                 direction: from === wallet.address.toLowerCase() ? "Out" : "In",
-    //                 date: block_signed_at,
-    //                 chain: wallet.chain
-    //             }
-    //         )
-    //     }
-    // }
-    // private async processCeloNativeTxns(transaction: any, mappedTxns: any[], wallet: AssetWallet) {
-    //     if (!transaction.value) return;
-    //     const { sender_contract_decimals, block_signed_at, from_address, to_address } = transaction;
-    //     mappedTxns.push(
-    //         {
-    //             hash: transaction.tx_hash,
-    //             from: from_address,
-    //             to: to_address,
-    //             assetLogo: Coins[wallet.chain].logo,
-    //             assetName: Coins[wallet.chain].symbol,
-    //             amount: +ethers.utils.formatUnits(transaction.value, sender_contract_decimals),
-    //             direction: from_address === wallet.address.toLowerCase() ? "Out" : "In",
-    //             date: block_signed_at,
-    //             chain: wallet.chain
-    //         }
-    //     )
-    // }
-    // private async processEvmTxns(wallet: AssetWallet) {
-    //     const walletTransfersReq = moralisRequest(wallet, "Transfer");
-    //     const walletativeTxnsReq = moralisRequest(wallet, "Native");
-    //     const [walletTransfers, walletativeTxns] = await Promise.all([walletTransfersReq, walletativeTxnsReq])
-    //     const links: PagingLinks = { next: walletTransfers.jsonResponse.cursor ?? "", prev: "" }
-    //     const mappedTransfers = this.processTransfers(walletTransfers, wallet)
-    //     const mappedNativeTxns = this.processNativeTxns(walletativeTxns, wallet)
-    //     return {
-    //         txns: [...mappedTransfers, ...mappedNativeTxns],
-    //         links: { [wallet.address]: links }
-    //     }
-    // }
-    // private processTransfers(walletTransfers: any, wallet: AssetWallet) {
-    //     const mappedTransfers = Array.from(walletTransfers.raw.result)
-    //         .map((transferItem: any) => {
-    //             const transfer = {
-    //                 hash: transferItem.transaction_hash,
-    //                 assetName: transferItem.token_symbol,
-    //                 assetLogo: logos[transferItem.token_symbol?.toLowerCase()] ? logos[transferItem.token_symbol.toLowerCase()].logoUrl : "",
-    //                 from: transferItem.from_address,
-    //                 to: transferItem.to_address,
-    //                 direction: transferItem.from_address === wallet.address.toLowerCase() ? "Out" : "In",
-    //                 count: 1,
-    //                 amount: +ethers.utils.formatUnits(transferItem.value, transferItem.token_decimals),
-    //                 date: transferItem.block_timestamp,
-    //                 chain: wallet.chain
-    //             };
-    //             return transfer;
-    //         })
-    //     return mappedTransfers;
-    // }
-    // private processNativeTxns(walletNativeTxns: any, wallet: AssetWallet) {
-    //     const mappedTransfers = Array.from(walletNativeTxns.raw.result)
-    //         .map((txn: any) => {
-    //             const transfer = {
-    //                 hash: txn.hash,
-    //                 assetName: Coins[wallet.chain].symbol,
-    //                 assetLogo: Coins[wallet.chain].logo ?? "",
-    //                 from: txn.from_address,
-    //                 to: txn.to_address,
-    //                 direction: txn.from_address === wallet.address.toLowerCase() ? "Out" : "In",
-    //                 count: 1,
-    //                 amount: txn.value ? +ethers.utils.formatUnits(txn.value, 18) : 0,
-    //                 date: txn.block_timestamp,
-    //                 chain: wallet.chain
-    //             };
-    //             return transfer;
-    //         })
-    //     return mappedTransfers;
-    // }
     // Assets
     async getAssetsFromProvider(req) {
         try {
@@ -397,15 +267,17 @@ class TreasuryManager {
             balance: item.quote / item.quote_rate,
             uniqueKey
         };
-        console.log(totalAssets);
-        totalAssets[item.contract_address] = totalAssets[item.contract_address] || {
+        totalAssets[uniqueKey] = totalAssets[uniqueKey] || {
             ...token,
             quote: 0,
             balance: 0
         };
-        totalAssets[item.contract_address].quote += token.quote;
-        totalAssets[item.contract_address].balance += token.balance;
-        return totalAssets[item.contract_address];
+        totalAssets[uniqueKey].quote += +token.quote;
+        totalAssets[uniqueKey].balance += token.balance;
+        console.log("#######");
+        console.log(+token.quote);
+        console.log("#######");
+        return totalAssets[uniqueKey];
     }
     updateBlockchainAssets(totalAssetsByBlockchain, chain, token) {
         const blockchainAssets = totalAssetsByBlockchain[chain] || {
