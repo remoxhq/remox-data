@@ -423,7 +423,7 @@ class TreasuryManager implements ITreasuryService {
             decimals: item.contract_decimals,
             symbol: item.contract_ticker_symbol,
             address: item.contract_address,
-            logo: item.logo_url,
+            logo: logos[item.contract_ticker_symbol?.toLowerCase() ?? ""].logoUrl,
             quote: item.quote,
             quote_rate: item.quote_rate,
             balance: item.quote / item.quote_rate,

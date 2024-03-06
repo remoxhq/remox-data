@@ -26,14 +26,14 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     const tokenBalance = ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals);
                     const tokenUsdValue = holding.quote_rate;
                     const amount = originAmount < 0 ? 0 : originAmount
-                    const { contract_ticker_symbol } = token;
+                    const { contract_ticker_symbol, contract_address } = token;
                     const network = wallet.network;
 
                     let treasuryByDate = historicalTreasury[date] ||
                     {
                         totalTreasury: 0,
                         tokenBalances: {
-                            [contract_ticker_symbol]: {
+                            [contract_address]: {
                                 balanceUsd: 0,
                                 tokenCount: 0,
                                 tokenUsdValue
@@ -42,7 +42,7 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                         networkBalances: { [network]: amount }
                     };
 
-                    treasuryByDate.tokenBalances[contract_ticker_symbol] = treasuryByDate.tokenBalances[contract_ticker_symbol] ||
+                    treasuryByDate.tokenBalances[contract_address] = treasuryByDate.tokenBalances[contract_address] ||
                     {
                         balanceUsd: 0,
                         tokenCount: 0,
@@ -50,8 +50,8 @@ export const rootParser = async (dao: Organization, historicalTreasury: Treasury
                     }
 
                     treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || amount
-                    treasuryByDate.tokenBalances[contract_ticker_symbol].balanceUsd += amount
-                    treasuryByDate.tokenBalances[contract_ticker_symbol].tokenCount += + tokenBalance
+                    treasuryByDate.tokenBalances[contract_address].balanceUsd += amount
+                    treasuryByDate.tokenBalances[contract_address].tokenCount += + tokenBalance
                     treasuryByDate.totalTreasury += amount;
                     treasuryByDate.networkBalances[network] += amount;
 

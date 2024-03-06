@@ -272,7 +272,6 @@ class OrganizationManager implements IOrganizationService {
             })
             await rootParser(orgObj, historicalTreasury, walletAddresses, dashboardLink);
             const htValues = Object.entries(historicalTreasury);
-            console.log(htValues);
 
             let responseObj = {
                 name: dashboardLink,

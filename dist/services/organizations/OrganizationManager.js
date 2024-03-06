@@ -282,7 +282,6 @@ class OrganizationManager {
             });
             await (0, _utils.rootParser)(orgObj, historicalTreasury, walletAddresses, dashboardLink);
             const htValues = Object.entries(historicalTreasury);
-            console.log(htValues);
             let responseObj = {
                 name: dashboardLink,
                 orgId: newOrganization._id,
