@@ -9,6 +9,8 @@ import { ethers } from 'ethers';
 import { handleError } from '../../utils/helpers/responseHandler';
 import { logos } from '../../utils/logos';
 import Jwt, { JwtPayload } from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
+
 const tresuryCollection = "OrganizationsHistoricalBalances";
 export const organizationCollection = "Organizations"
 
@@ -146,6 +148,7 @@ class TreasuryManager implements ITreasuryService {
 
             mappedTxns.push(
                 {
+                    id: uuidv4() + transaction.tx_hash.substring(0, 5) + +ethers.utils.formatUnits(amount, sender_contract_decimals),
                     hash: transaction.tx_hash,
                     from: from,
                     to: to,
@@ -166,6 +169,7 @@ class TreasuryManager implements ITreasuryService {
 
         mappedTxns.push(
             {
+                id: uuidv4() + transaction.tx_hash.substring(0, 5) + +ethers.utils.formatUnits(transaction.value, sender_contract_decimals),
                 hash: transaction.tx_hash,
                 from: from_address,
                 to: to_address,
@@ -199,6 +203,7 @@ class TreasuryManager implements ITreasuryService {
         const mappedTransfers = Array.from(walletTransfers.raw.result)
             .map((transferItem: any) => {
                 const transfer = {
+                    id: uuidv4() + transferItem.transaction_hash?.substring(0, 5) + +ethers.utils.formatUnits(transferItem.value, transferItem.token_decimals),
                     hash: transferItem.transaction_hash,
                     assetName: transferItem.token_symbol,
                     assetLogo: logos[transferItem.token_symbol?.toLowerCase()] ? logos[transferItem.token_symbol.toLowerCase()].logoUrl : "",
@@ -221,6 +226,7 @@ class TreasuryManager implements ITreasuryService {
         const mappedTransfers = Array.from(walletNativeTxns.raw.result)
             .map((txn: any) => {
                 const transfer = {
+                    id: uuidv4() + txn.hash?.substring(0, 5) + txn.value ? +ethers.utils.formatUnits(txn.value, 18) : 0,
                     hash: txn.hash,
                     assetName: Coins[wallet.chain].symbol,
                     assetLogo: Coins[wallet.chain].logo ?? "",

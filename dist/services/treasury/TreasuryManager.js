@@ -24,6 +24,7 @@ const _ethers = require("ethers");
 const _responseHandler = require("../../utils/helpers/responseHandler");
 const _logos = require("../../utils/logos");
 const _jsonwebtoken = /*#__PURE__*/ _interop_require_default(require("jsonwebtoken"));
+const _uuid = require("uuid");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -151,6 +152,7 @@ class TreasuryManager {
             const symbol = sender_contract_ticker_symbol?.toString().toLowerCase();
             if (from !== wallet.address.toLowerCase() && to !== wallet.address.toLowerCase()) continue;
             mappedTxns.push({
+                id: (0, _uuid.v4)() + transaction.tx_hash.substring(0, 5) + +_ethers.ethers.utils.formatUnits(amount, sender_contract_decimals),
                 hash: transaction.tx_hash,
                 from: from,
                 to: to,
@@ -167,6 +169,7 @@ class TreasuryManager {
         if (!transaction.value) return;
         const { sender_contract_decimals, block_signed_at, from_address, to_address } = transaction;
         mappedTxns.push({
+            id: (0, _uuid.v4)() + transaction.tx_hash.substring(0, 5) + +_ethers.ethers.utils.formatUnits(transaction.value, sender_contract_decimals),
             hash: transaction.tx_hash,
             from: from_address,
             to: to_address,
@@ -204,6 +207,7 @@ class TreasuryManager {
     processTransfers(walletTransfers, wallet) {
         const mappedTransfers = Array.from(walletTransfers.raw.result).map((transferItem)=>{
             const transfer = {
+                id: (0, _uuid.v4)() + transferItem.transaction_hash?.substring(0, 5) + +_ethers.ethers.utils.formatUnits(transferItem.value, transferItem.token_decimals),
                 hash: transferItem.transaction_hash,
                 assetName: transferItem.token_symbol,
                 assetLogo: _logos.logos[transferItem.token_symbol?.toLowerCase()] ? _logos.logos[transferItem.token_symbol.toLowerCase()].logoUrl : "",
@@ -222,6 +226,7 @@ class TreasuryManager {
     processNativeTxns(walletNativeTxns, wallet) {
         const mappedTransfers = Array.from(walletNativeTxns.raw.result).map((txn)=>{
             const transfer = {
+                id: (0, _uuid.v4)() + txn.hash?.substring(0, 5) + txn.value ? +_ethers.ethers.utils.formatUnits(txn.value, 18) : 0,
                 hash: txn.hash,
                 assetName: _models.Coins[wallet.chain].symbol,
                 assetLogo: _models.Coins[wallet.chain].logo ?? "",
