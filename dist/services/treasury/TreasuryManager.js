@@ -391,20 +391,21 @@ class TreasuryManager {
             decimals: item.contract_decimals,
             symbol: item.contract_ticker_symbol,
             address: item.contract_address,
-            logo: _logos.logos[item.contract_ticker_symbol?.toLowerCase() ?? ""].logoUrl,
+            logo: _logos.logos[item.contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "",
             quote: item.quote,
             quote_rate: item.quote_rate,
             balance: item.quote / item.quote_rate,
             uniqueKey
         };
-        totalAssets[uniqueKey] = totalAssets[uniqueKey] || {
+        console.log(totalAssets);
+        totalAssets[item.contract_address] = totalAssets[item.contract_address] || {
             ...token,
             quote: 0,
             balance: 0
         };
-        totalAssets[uniqueKey].quote += token.quote;
-        totalAssets[uniqueKey].balance += token.balance;
-        return totalAssets[uniqueKey];
+        totalAssets[item.contract_address].quote += token.quote;
+        totalAssets[item.contract_address].balance += token.balance;
+        return totalAssets[item.contract_address];
     }
     updateBlockchainAssets(totalAssetsByBlockchain, chain, token) {
         const blockchainAssets = totalAssetsByBlockchain[chain] || {

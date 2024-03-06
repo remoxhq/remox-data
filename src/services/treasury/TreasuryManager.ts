@@ -423,18 +423,18 @@ class TreasuryManager implements ITreasuryService {
             decimals: item.contract_decimals,
             symbol: item.contract_ticker_symbol,
             address: item.contract_address,
-            logo: logos[item.contract_ticker_symbol?.toLowerCase() ?? ""].logoUrl,
+            logo: logos[item.contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "",
             quote: item.quote,
             quote_rate: item.quote_rate,
             balance: item.quote / item.quote_rate,
             uniqueKey
         };
+        console.log(totalAssets);
+        totalAssets[item.contract_address] = totalAssets[item.contract_address] || { ...token, quote: 0, balance: 0 };
+        totalAssets[item.contract_address].quote += token.quote;
+        totalAssets[item.contract_address].balance += token.balance;
 
-        totalAssets[uniqueKey] = totalAssets[uniqueKey] || { ...token, quote: 0, balance: 0 };
-        totalAssets[uniqueKey].quote += token.quote;
-        totalAssets[uniqueKey].balance += token.balance;
-
-        return totalAssets[uniqueKey];
+        return totalAssets[item.contract_address];
     }
 
     private updateBlockchainAssets(totalAssetsByBlockchain: AssetByBlockchainMap, chain: string, token: AssetDto) {
