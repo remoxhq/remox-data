@@ -224,6 +224,7 @@ class TreasuryManager implements ITreasuryService {
 
     private processNativeTxns(walletNativeTxns: any, wallet: Account) {
         const mappedTransfers = Array.from(walletNativeTxns.raw.result)
+            .filter((x: any) => x.amount)
             .map((txn: any) => {
                 const transfer = {
                     id: uuidv4() + txn.hash?.substring(0, 5) + txn.value ? +ethers.utils.formatUnits(txn.value, 18) : 0,

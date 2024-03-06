@@ -224,7 +224,7 @@ class TreasuryManager {
         return mappedTransfers;
     }
     processNativeTxns(walletNativeTxns, wallet) {
-        const mappedTransfers = Array.from(walletNativeTxns.raw.result).map((txn)=>{
+        const mappedTransfers = Array.from(walletNativeTxns.raw.result).filter((x)=>x.amount).map((txn)=>{
             const transfer = {
                 id: (0, _uuid.v4)() + txn.hash?.substring(0, 5) + txn.value ? +_ethers.ethers.utils.formatUnits(txn.value, 18) : 0,
                 hash: txn.hash,
