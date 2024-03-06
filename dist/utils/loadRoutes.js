@@ -35,7 +35,7 @@ function configureRouter(app) {
     const authController = diContainer.get(_types.TYPES.AuthController);
     // bind actions
     app.route(_apiAttributes.TreasuryRoute.GetAnnualTreasury).get(treasuryController.getAnnualTreasury.bind(treasuryController));
-    app.route(_apiAttributes.TreasuryRoute.GetTransactions).post(treasuryController.getTransactions.bind(treasuryController));
+    app.route(_apiAttributes.TreasuryRoute.GetTransactions).get(treasuryController.getTransactions.bind(treasuryController));
     app.route(_apiAttributes.TreasuryRoute.GetAssets).post(treasuryController.getAssets.bind(treasuryController));
     app.route(_apiAttributes.OrganizationRoute.Create).post((0, _middlewares.checkUserJwt)(), (0, _middlewares.validateBody)(_models.organizationShcema, "accounts"), organizationController.create.bind(organizationController));
     app.route(_apiAttributes.OrganizationRoute.GetByName).get((0, _middlewares.authenticateUserOrAllowAnonymous)(), organizationController.getByName.bind(organizationController));

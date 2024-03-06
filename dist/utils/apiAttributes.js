@@ -24,7 +24,7 @@ var TreasuryRoute;
 (function(TreasuryRoute) {
     TreasuryRoute[TreasuryRoute["GetAnnualTreasury"] = base + "/treasury/balance/:name"] = "GetAnnualTreasury";
     TreasuryRoute[TreasuryRoute["GetAssets"] = base + "/treasury/assets"] = "GetAssets";
-    TreasuryRoute[TreasuryRoute["GetTransactions"] = base + "/treasury/txs"] = "GetTransactions";
+    TreasuryRoute[TreasuryRoute["GetTransactions"] = base + "/treasury/txs/:slug/:next?"] = "GetTransactions";
 })(TreasuryRoute || (TreasuryRoute = {}));
 var OrganizationRoute;
 (function(OrganizationRoute) {

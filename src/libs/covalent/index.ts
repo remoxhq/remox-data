@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AssetWallet, Coins, CovalentAssetHold } from "../../models";
+import { Account, AssetWallet, Coins, CovalentAssetHold } from "../../models";
 import { config } from 'dotenv';
 import Moralis from 'moralis';
 config()
@@ -13,10 +13,10 @@ export const covalentPortfolioRequest = async (wallet: AssetWallet) => {
         .get<{ data: CovalentAssetHold }>(`https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/balances_v2/?key=${process.env.COVALENT_API_KEY}`);
 }
 
-export const covalentTxnRequest = async (wallet: AssetWallet) => {
+export const covalentTxnRequest = async (wallet: Account, page: string) => {
     return await axios
-        .get<{ data: any }>(wallet.page ?
-            wallet.page + `?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`
+        .get<{ data: any }>(page ?
+            page + `?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`
             : `https://api.covalenthq.com/v1/${wallet.chain}/address/${wallet.address}/transactions_v3/?quote-currency=usd&key=${process.env.COVALENT_API_KEY}`);
 }
 
@@ -24,7 +24,7 @@ interface ExecutionType {
     [type: string]: () => any
 }
 
-export const moralisRequest = async (wallet: AssetWallet, type: string) => {
+export const moralisRequest = async (wallet: Account, page: string, type: string) => {
     if (!Moralis.Core.isStarted) {
         await Moralis.start({
             apiKey: process.env.MORALIS_API_KEY
@@ -35,7 +35,7 @@ export const moralisRequest = async (wallet: AssetWallet, type: string) => {
         chain: Coins[wallet.chain].hexId,
         limit: 25,
         address: wallet.address,
-        cursor: wallet.page
+        cursor: page
     }
 
     const execute = {

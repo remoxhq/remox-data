@@ -28,7 +28,7 @@ export default function configureRouter(app: any) {
         .get(treasuryController.getAnnualTreasury.bind(treasuryController))
 
     app.route(TreasuryRoute.GetTransactions)
-        .post(treasuryController.getTransactions.bind(treasuryController))
+        .get(treasuryController.getTransactions.bind(treasuryController))
 
     app.route(TreasuryRoute.GetAssets)
         .post(treasuryController.getAssets.bind(treasuryController))
