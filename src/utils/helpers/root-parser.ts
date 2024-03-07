@@ -1,7 +1,7 @@
 import { Chain, PortfolioResponse } from "../../libs/covalent"
 import { Organization } from "../../libs/firebase-db"
 import { config } from "dotenv"
-import { Portfolio, TreasuryIndexer } from "../../models/treasuries/types";
+import { Portfolio } from "../../models/treasuries/types";
 import axios from "axios";
 import { ethers } from "ethers";
 import { logos } from "../logos";
@@ -47,7 +47,8 @@ export const rootParser = async (dao: Organization, historicalTreasury: Portfoli
                         ||
                     {
                         logo: logos[contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "",
-                        symbol: contract_ticker_symbol
+                        symbol: contract_ticker_symbol,
+                        chain: wallet.network
                     }
 
                     treasuryByDate.tokenBalances[contract_address] = treasuryByDate.tokenBalances[contract_address] ||
@@ -61,15 +62,6 @@ export const rootParser = async (dao: Organization, historicalTreasury: Portfoli
                     treasuryByDate.tokenBalances[contract_address].tokenCount += tokenBalance
                     treasuryByDate.totalTreasury += amount;
                     treasuryByDate.networkBalances[network] += amount;
-
-                    if (contract_ticker_symbol === "USDT") {
-                        console.log(date);
-                        console.log(treasuryByDate.tokenBalances[contract_address].balanceUsd);
-                        console.log(holding.close?.balance);
-                        console.log(token.contract_decimals);
-                        console.log(+ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals));
-                        console.log("##################################");
-                    }
 
                     historicalTreasury.annual[date] = treasuryByDate;
                 });

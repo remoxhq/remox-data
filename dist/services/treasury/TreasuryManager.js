@@ -231,7 +231,7 @@ class TreasuryManager {
                 const covalentAssets = await (0, _covalent.covalentPortfolioRequest)(wallet);
                 const filteredAssets = this.filterWalletAssets(covalentAssets.data.data);
                 filteredAssets.forEach((item)=>{
-                    const token = this.processToken(item, totalAssets);
+                    const token = this.processToken(item, totalAssets, wallet);
                     this.updateBlockchainAssets(totalAssetsByBlockchain, wallet.chain, token);
                 });
             }));
@@ -256,7 +256,7 @@ class TreasuryManager {
         ];
         return walletData.items.filter((item)=>item.quote || desiredTokens.includes(item.contract_ticker_symbol));
     }
-    processToken(item, totalAssets) {
+    processToken(item, totalAssets, wallet) {
         const uniqueKey = item.contract_address + item.contract_ticker_symbol;
         const token = {
             decimals: item.contract_decimals,
@@ -266,7 +266,8 @@ class TreasuryManager {
             quote: item.quote,
             quote_rate: item.quote_rate,
             balance: item.quote / item.quote_rate,
-            uniqueKey
+            uniqueKey,
+            chain: wallet.chain
         };
         totalAssets[uniqueKey] = totalAssets[uniqueKey] || {
             ...token,
@@ -275,9 +276,6 @@ class TreasuryManager {
         };
         totalAssets[uniqueKey].quote += +token.quote;
         totalAssets[uniqueKey].balance += token.balance;
-        console.log("#######");
-        console.log(+token.quote);
-        console.log("#######");
         return totalAssets[uniqueKey];
     }
     updateBlockchainAssets(totalAssetsByBlockchain, chain, token) {

@@ -236,7 +236,7 @@ class TreasuryManager implements ITreasuryService {
                 const filteredAssets = this.filterWalletAssets(covalentAssets.data.data);
 
                 filteredAssets.forEach((item: CovalentAsset) => {
-                    const token = this.processToken(item, totalAssets);
+                    const token = this.processToken(item, totalAssets, wallet);
                     this.updateBlockchainAssets(totalAssetsByBlockchain, wallet.chain, token)
                 });
             }))
@@ -263,7 +263,7 @@ class TreasuryManager implements ITreasuryService {
         return walletData.items.filter(item => item.quote || (desiredTokens.includes(item.contract_ticker_symbol)));
     }
 
-    private processToken(item: CovalentAsset, totalAssets: AssetMap) {
+    private processToken(item: CovalentAsset, totalAssets: AssetMap, wallet: AssetWallet) {
         const uniqueKey = item.contract_address + item.contract_ticker_symbol;
         const token: AssetDto = {
             decimals: item.contract_decimals,
@@ -273,16 +273,13 @@ class TreasuryManager implements ITreasuryService {
             quote: item.quote,
             quote_rate: item.quote_rate,
             balance: item.quote / item.quote_rate,
-            uniqueKey
+            uniqueKey,
+            chain: wallet.chain
         };
 
         totalAssets[uniqueKey] = totalAssets[uniqueKey] || { ...token, quote: 0, balance: 0 };
         totalAssets[uniqueKey].quote += +token.quote;
         totalAssets[uniqueKey].balance += token.balance;
-
-        console.log("#######");
-        console.log(+token.quote);
-        console.log("#######");
 
         return totalAssets[uniqueKey];
     }

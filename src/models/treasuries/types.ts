@@ -5,7 +5,8 @@ export interface Portfolio {
   existingTokenLogos: {
     [symbol: string]: {
       logo: string,
-      symbol: string
+      symbol: string,
+      chain: string
     }
   }
 }
@@ -80,7 +81,8 @@ export interface AssetDto {
   quote: number,
   quote_rate: number,
   balance: number
-  uniqueKey: string
+  uniqueKey: string,
+  chain: string
 }
 
 // txn DTOs
