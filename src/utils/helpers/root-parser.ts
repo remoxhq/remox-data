@@ -24,7 +24,7 @@ export const rootParser = async (dao: Organization, historicalTreasury: Portfoli
                     //split date and parse amount
                     const date = holding.timestamp.toString().split("T")[0];
                     const originAmount = holding.close?.quote ?? 0;
-                    const tokenBalance = ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals);
+                    const tokenBalance = +ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals);
                     const tokenUsdValue = holding.quote_rate;
                     const amount = originAmount < 0 ? 0 : originAmount
                     const { contract_ticker_symbol, contract_address } = token;
@@ -43,8 +43,12 @@ export const rootParser = async (dao: Organization, historicalTreasury: Portfoli
                         networkBalances: { [network]: amount }
                     };
 
-                    historicalTreasury.existingTokenLogos[contract_ticker_symbol] = historicalTreasury.existingTokenLogos[contract_ticker_symbol]
-                        || (logos[contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "")
+                    historicalTreasury.existingTokenLogos[contract_address] = historicalTreasury.existingTokenLogos[contract_address]
+                        ||
+                    {
+                        logo: logos[contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "",
+                        symbol: contract_ticker_symbol
+                    }
 
                     treasuryByDate.tokenBalances[contract_address] = treasuryByDate.tokenBalances[contract_address] ||
                     {
@@ -52,11 +56,20 @@ export const rootParser = async (dao: Organization, historicalTreasury: Portfoli
                         tokenCount: 0,
                         tokenUsdValue
                     }
-                    treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || amount
+                    treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || 0
                     treasuryByDate.tokenBalances[contract_address].balanceUsd += amount
-                    treasuryByDate.tokenBalances[contract_address].tokenCount += + tokenBalance
+                    treasuryByDate.tokenBalances[contract_address].tokenCount += tokenBalance
                     treasuryByDate.totalTreasury += amount;
                     treasuryByDate.networkBalances[network] += amount;
+
+                    if (contract_ticker_symbol === "USDT") {
+                        console.log(date);
+                        console.log(treasuryByDate.tokenBalances[contract_address].balanceUsd);
+                        console.log(holding.close?.balance);
+                        console.log(token.contract_decimals);
+                        console.log(+ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals));
+                        console.log("##################################");
+                    }
 
                     historicalTreasury.annual[date] = treasuryByDate;
                 });

@@ -2,7 +2,12 @@
 
 export interface Portfolio {
   annual: TreasuryIndexer,
-  existingTokenLogos: { [symbol: string]: string }
+  existingTokenLogos: {
+    [symbol: string]: {
+      logo: string,
+      symbol: string
+    }
+  }
 }
 
 export interface TreasuryIndexer {

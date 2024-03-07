@@ -244,6 +244,7 @@ class TreasuryManager implements ITreasuryService {
             const sortedAssets = Object.values(totalAssets).sort((a, b) => b.quote - a.quote);
             const sortedAssetsByBlockchain = Object.values(totalAssetsByBlockchain).map((item) => ({
                 ...item,
+                totalAssetUsdValue: Object.values(item.assets).reduce((result: number, x) => result += x.quote, 0),
                 assets: Object.values(item.assets).sort((a, b) => b.quote - a.quote),
             }));
 

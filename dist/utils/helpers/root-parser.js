@@ -30,7 +30,7 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                     //split date and parse amount
                     const date = holding.timestamp.toString().split("T")[0];
                     const originAmount = holding.close?.quote ?? 0;
-                    const tokenBalance = _ethers.ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals);
+                    const tokenBalance = +_ethers.ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals);
                     const tokenUsdValue = holding.quote_rate;
                     const amount = originAmount < 0 ? 0 : originAmount;
                     const { contract_ticker_symbol, contract_address } = token;
@@ -48,17 +48,28 @@ const rootParser = async (dao, historicalTreasury, walletAddresses, name)=>{
                             [network]: amount
                         }
                     };
-                    historicalTreasury.existingTokenLogos[contract_ticker_symbol] = historicalTreasury.existingTokenLogos[contract_ticker_symbol] || (_logos.logos[contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "");
+                    historicalTreasury.existingTokenLogos[contract_address] = historicalTreasury.existingTokenLogos[contract_address] || {
+                        logo: _logos.logos[contract_ticker_symbol?.toLowerCase() ?? ""]?.logoUrl ?? "",
+                        symbol: contract_ticker_symbol
+                    };
                     treasuryByDate.tokenBalances[contract_address] = treasuryByDate.tokenBalances[contract_address] || {
                         balanceUsd: 0,
                         tokenCount: 0,
                         tokenUsdValue
                     };
-                    treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || amount;
+                    treasuryByDate.networkBalances[network] = treasuryByDate.networkBalances[network] || 0;
                     treasuryByDate.tokenBalances[contract_address].balanceUsd += amount;
-                    treasuryByDate.tokenBalances[contract_address].tokenCount += +tokenBalance;
+                    treasuryByDate.tokenBalances[contract_address].tokenCount += tokenBalance;
                     treasuryByDate.totalTreasury += amount;
                     treasuryByDate.networkBalances[network] += amount;
+                    if (contract_ticker_symbol === "USDT") {
+                        console.log(date);
+                        console.log(treasuryByDate.tokenBalances[contract_address].balanceUsd);
+                        console.log(holding.close?.balance);
+                        console.log(token.contract_decimals);
+                        console.log(+_ethers.ethers.utils.formatUnits(holding.close?.balance?.toString() ?? '0', token.contract_decimals));
+                        console.log("##################################");
+                    }
                     historicalTreasury.annual[date] = treasuryByDate;
                 });
             });
