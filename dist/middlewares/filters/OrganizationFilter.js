@@ -56,15 +56,15 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                     ],
                     data: [
                         {
+                            $sort: {
+                                balance: -1
+                            }
+                        },
+                        {
                             $skip: pageIndex
                         },
                         {
                             $limit: pageSize
-                        },
-                        {
-                            $sort: {
-                                balance: -1
-                            }
                         }
                     ]
                 }

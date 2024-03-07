@@ -52,9 +52,9 @@ export const addOrganizationFilter = () =>
                     ],
                     data:
                         [
+                            { $sort: { balance: -1 } },
                             { $skip: pageIndex },
-                            { $limit: pageSize },
-                            { $sort: { balance: -1 } }
+                            { $limit: pageSize }
                         ]
                 }
             });
