@@ -74,7 +74,7 @@ class OrganizationManager implements IOrganizationService {
 
     async getAllOrganizations(req: OrganizationFilterRequest, res: Response): Promise<Response> {
         try {
-            const pageIndex = parseInt(req.query.pageIndex as string, 10) || 1;
+            const pageIndex = parseInt(req.query.pageIndex as string, 10) || 0;
             const pageSize = parseInt(req.query.pageSize as string, 10);
             const aggregationPipeline = req.aggregationPipeline;
 

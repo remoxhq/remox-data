@@ -102,7 +102,7 @@ class OrganizationManager {
     }
     async getAllOrganizations(req, res) {
         try {
-            const pageIndex = parseInt(req.query.pageIndex, 10) || 1;
+            const pageIndex = parseInt(req.query.pageIndex, 10) || 0;
             const pageSize = parseInt(req.query.pageSize, 10);
             const aggregationPipeline = req.aggregationPipeline;
             const db = req.app.locals.db;

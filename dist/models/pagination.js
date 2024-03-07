@@ -22,7 +22,7 @@ function _define_property(obj, key, value) {
     return obj;
 }
 class Pagination {
-    constructor(items, totalCount, pageIndex = 1, pageSize = 20){
+    constructor(items, totalCount, pageIndex = 0, pageSize = 20){
         _define_property(this, "items", void 0);
         _define_property(this, "pageSize", void 0);
         _define_property(this, "pageIndex", void 0);

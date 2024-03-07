@@ -5,7 +5,7 @@ export class Pagination<T> {
     private totalPages: number
     private totalCount: number
 
-    constructor(items: T[], totalCount: number, pageIndex: number = 1, pageSize: number = 20,) {
+    constructor(items: T[], totalCount: number, pageIndex: number = 0, pageSize: number = 20,) {
         this.items = items;
         this.pageSize = pageSize;
         this.pageIndex = pageIndex;
