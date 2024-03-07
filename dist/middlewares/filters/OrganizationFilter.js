@@ -61,7 +61,7 @@ const addOrganizationFilter = ()=>async (req, res, next)=>{
                             }
                         },
                         {
-                            $skip: pageIndex
+                            $skip: pageIndex * pageSize
                         },
                         {
                             $limit: pageSize

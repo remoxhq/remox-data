@@ -53,7 +53,7 @@ export const addOrganizationFilter = () =>
                     data:
                         [
                             { $sort: { balance: -1 } },
-                            { $skip: pageIndex },
+                            { $skip: pageIndex * pageSize },
                             { $limit: pageSize }
                         ]
                 }
