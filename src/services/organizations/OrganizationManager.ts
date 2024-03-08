@@ -34,7 +34,7 @@ class OrganizationManager implements IOrganizationService {
             parsedBody.createdBy = req.headers.address;
             await this.attachCommonFields(parsedBody, req);
 
-            if (parsedBody.isVerified && req.user.role !== Roles.SuperAdmin)
+            if (parsedBody.isVerified && req.user?.role !== Roles.SuperAdmin)
                 throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.UnAuthorized);
 
             const createdOrg = await collection.insertOne(parsedBody)
@@ -61,10 +61,10 @@ class OrganizationManager implements IOrganizationService {
 
             const collection = db.collection(organizationCollection);
             const response = await collection.findOne<Organization>({ dashboardLink: orgSlug, isDeleted: false });
-            if (!response) throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);
+            if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-            if ((response.isPrivate && response.createdBy !== req.user?.publicKey) && req.user.role !== Roles.SuperAdmin)
-                throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
+            if ((response.isPrivate && response.createdBy !== req.user?.publicKey) && req.user?.role !== Roles.SuperAdmin)
+                throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);
 
             return res.status(200).send(new AppResponse(200, true, undefined, response));
         } catch (error: any) {
@@ -140,7 +140,7 @@ class OrganizationManager implements IOrganizationService {
 
             if (isAccountsSame) parsedBody.isActive = true;
             if (!parsedBody.image) parsedBody.image = response.image;
-            if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
+            if (!(req.user?.role === Roles.SuperAdmin || response.createdBy === publicKey))
                 throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);
 
             const result = await collection.updateOne(
@@ -175,7 +175,7 @@ class OrganizationManager implements IOrganizationService {
             const response = await collection.findOne({ _id: new ObjectId(orgId) });
             if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-            if (!(req.user.role === Roles.SuperAdmin || response.createdBy === publicKey))
+            if (!(req.user?.role === Roles.SuperAdmin || response.createdBy === publicKey))
                 throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);;
 
             const result = await collection.updateOne(
