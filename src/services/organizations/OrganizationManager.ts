@@ -61,7 +61,7 @@ class OrganizationManager implements IOrganizationService {
 
             const collection = db.collection(organizationCollection);
             const response = await collection.findOne<Organization>({ dashboardLink: orgSlug, isDeleted: false });
-            if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
+            if (!response) throw new CustomError(ResponseMessage.ForbiddenRequest, ExceptionType.UnAuthorized);
 
             if ((response.isPrivate && response.createdBy !== req.user?.publicKey) && req.user.role !== Roles.SuperAdmin)
                 throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
