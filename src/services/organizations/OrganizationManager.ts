@@ -149,7 +149,6 @@ class OrganizationManager implements IOrganizationService {
             );
 
             parsedBody._id = orgId;
-
             if (!isAccountsSame && !req.query.removeAnnual) {
                 this.fetchOrganizationAnnualBalance(
                     collection,
@@ -290,13 +289,13 @@ class OrganizationManager implements IOrganizationService {
             };
 
             await balanceCollection.updateOne(
-                { orgId: newOrganization._id },
+                { orgId: new ObjectId(newOrganization._id) },
                 { $set: responseObj },
                 { upsert: true }
             )
 
             await organizationCollection.updateOne(
-                { _id: createdOrgId },
+                { _id: new ObjectId(newOrganization._id) },
                 {
                     $set: {
                         isActive: true,

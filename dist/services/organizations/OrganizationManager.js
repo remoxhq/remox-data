@@ -296,14 +296,14 @@ class OrganizationManager {
                 }, {}) : {}
             };
             await balanceCollection.updateOne({
-                orgId: newOrganization._id
+                orgId: new _mongodb.ObjectId(newOrganization._id)
             }, {
                 $set: responseObj
             }, {
                 upsert: true
             });
             await organizationCollection.updateOne({
-                _id: createdOrgId
+                _id: new _mongodb.ObjectId(newOrganization._id)
             }, {
                 $set: {
                     isActive: true,
