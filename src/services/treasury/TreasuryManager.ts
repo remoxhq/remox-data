@@ -60,7 +60,7 @@ class TreasuryManager implements ITreasuryService {
         const response = await collection.findOne<Organization>({ dashboardLink: slug, isDeleted: false });
         if (!response) throw new CustomError(ResponseMessage.OrganizationNotFound, ExceptionType.NotFound);
 
-        const nextData = req.params.next.length > 10
+        const nextData = req.params.next?.length > 10
             ? Jwt.verify(req.params.next, process.env.AUTH_SECRET_KEY!) as JwtPayload
             : {}
 

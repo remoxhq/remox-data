@@ -79,7 +79,7 @@ class TreasuryManager {
             isDeleted: false
         });
         if (!response) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.NotFound);
-        const nextData = req.params.next.length > 10 ? _jsonwebtoken.default.verify(req.params.next, process.env.AUTH_SECRET_KEY) : {};
+        const nextData = req.params.next?.length > 10 ? _jsonwebtoken.default.verify(req.params.next, process.env.AUTH_SECRET_KEY) : {};
         let links = {};
         let totalTxs = [];
         await Promise.all(response.accounts.map(async (wallet)=>{

@@ -334,7 +334,7 @@ const logos = {
         "symbol": "lft"
     },
     "usdc": {
-        "logoUrl": "https://assets.coingecko.com/coins/images/33981/small/2023-12-22_17.45.24.jpg?1703580197",
+        "logoUrl": "https://cryptologos.cc/logos/usd-coin-usdc-logo.png",
         "symbol": "usdc"
     },
     "$aura": {
