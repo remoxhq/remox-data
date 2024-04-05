@@ -83,7 +83,7 @@ class TreasuryManager implements ITreasuryService {
         }));
 
         return {
-            txs: totalTxs.sort((a, b) => a.date - b.date),
+            txs: totalTxs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
             next: Object.keys(links).length ? Jwt.sign(links, process.env.AUTH_SECRET_KEY!) : undefined
         };
     }

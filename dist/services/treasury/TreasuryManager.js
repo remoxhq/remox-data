@@ -95,7 +95,7 @@ class TreasuryManager {
             }
         }));
         return {
-            txs: totalTxs,
+            txs: totalTxs.sort((a, b)=>new Date(b.date).getTime() - new Date(a.date).getTime()),
             next: Object.keys(links).length ? _jsonwebtoken.default.sign(links, process.env.AUTH_SECRET_KEY) : undefined
         };
     }
@@ -176,7 +176,7 @@ class TreasuryManager {
             txns: [
                 ...mappedTransfers,
                 ...mappedNativeTxns
-            ].sort((a, b)=>a.date - b.date),
+            ],
             links: {
                 [wallet.address]: links
             }
