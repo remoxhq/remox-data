@@ -83,7 +83,7 @@ class TreasuryManager implements ITreasuryService {
         }));
 
         return {
-            txs: totalTxs,
+            txs: totalTxs.sort((a, b) => a.date - b.date),
             next: Object.keys(links).length ? Jwt.sign(links, process.env.AUTH_SECRET_KEY!) : undefined
         };
     }
@@ -167,7 +167,7 @@ class TreasuryManager implements ITreasuryService {
         const mappedNativeTxns = this.processNativeTxns(walletativeTxns, wallet)
 
         return {
-            txns: [...mappedTransfers, ...mappedNativeTxns].sort((a, b) => a.date - b.date),
+            txns: [...mappedTransfers, ...mappedNativeTxns],
             links: { [wallet.address]: links }
         }
     }
