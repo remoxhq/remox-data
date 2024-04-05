@@ -176,7 +176,7 @@ class TreasuryManager {
             txns: [
                 ...mappedTransfers,
                 ...mappedNativeTxns
-            ],
+            ].sort((a, b)=>a.date - b.date),
             links: {
                 [wallet.address]: links
             }

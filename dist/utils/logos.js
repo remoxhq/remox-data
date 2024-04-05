@@ -4346,7 +4346,7 @@ const logos = {
         "symbol": "tinfa"
     },
     "eth": {
-        "logoUrl": "https://assets.coingecko.com/coins/images/34540/small/film.jpg?1705338132",
+        "logoUrl": "https://assets.coingecko.com/coins/images/279/standard/ethereum.png?1696501628",
         "symbol": "eth"
     },
     "caps": {
@@ -10466,7 +10466,7 @@ const logos = {
         "symbol": "ring"
     },
     "cusd": {
-        "logoUrl": "https://assets.coingecko.com/coins/images/26588/small/CUSD-01.png?1696525663",
+        "logoUrl": "https://assets.coingecko.com/coins/images/13161/standard/icon-celo-dollar-color-1000-circle-cropped.png?1696512945",
         "symbol": "cusd"
     },
     "ndx": {

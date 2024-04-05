@@ -10463,7 +10463,7 @@ export const logos: MappedTokens = {
     "symbol": "ring"
   },
   "cusd": {
-    "logoUrl": "https://assets.coingecko.com/coins/images/26588/small/CUSD-01.png?1696525663",
+    "logoUrl": "https://assets.coingecko.com/coins/images/13161/standard/icon-celo-dollar-color-1000-circle-cropped.png?1696512945",
     "symbol": "cusd"
   },
   "ndx": {

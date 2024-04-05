@@ -167,7 +167,7 @@ class TreasuryManager implements ITreasuryService {
         const mappedNativeTxns = this.processNativeTxns(walletativeTxns, wallet)
 
         return {
-            txns: [...mappedTransfers, ...mappedNativeTxns],
+            txns: [...mappedTransfers, ...mappedNativeTxns].sort((a, b) => a.date - b.date),
             links: { [wallet.address]: links }
         }
     }

@@ -77,7 +77,7 @@ class OrganizationManager {
             if (parsedBody.isVerified && req.user?.role !== _types.Roles.SuperAdmin) throw new _models.CustomError(_types.ResponseMessage.OrganizationNotFound, _models.ExceptionType.UnAuthorized);
             const createdOrg = await collection.insertOne(parsedBody);
             if (!req.query.removeAnnual) {
-                this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId);
+                this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, createdOrg.insertedId, req.user.publicKey);
             }
             return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationCreated));
         } catch (error) {
@@ -169,7 +169,7 @@ class OrganizationManager {
             });
             parsedBody._id = orgId;
             if (!isAccountsSame && !req.query.removeAnnual) {
-                this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId);
+                this.fetchOrganizationAnnualBalance(collection, parsedBody, db.collection(organizationHistoricalBalanceCollection), io, result.upsertedId, req.user.publicKey);
             }
             return res.status(200).send(new _models.AppResponse(200, true, undefined, _types.ResponseMessage.OrganizationUpdated));
         } catch (error) {
@@ -265,7 +265,7 @@ class OrganizationManager {
             }
         });
     }
-    async fetchOrganizationAnnualBalance(organizationCollection, newOrganization, balanceCollection, io, createdOrgId) {
+    async fetchOrganizationAnnualBalance(organizationCollection, newOrganization, balanceCollection, io, createdOrgId, userAddress) {
         try {
             console.log(new Date());
             let portfolio = {};
@@ -312,7 +312,7 @@ class OrganizationManager {
                 }
             });
             io.emit('annualBalanceFetched', {
-                message: `Balance fething task completed successfully for organization id ${createdOrgId}`
+                message: userAddress
             });
             console.log(new Date());
         } catch (error) {
