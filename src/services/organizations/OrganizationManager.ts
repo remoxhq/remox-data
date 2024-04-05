@@ -45,7 +45,8 @@ class OrganizationManager implements IOrganizationService {
                     parsedBody,
                     db.collection(organizationHistoricalBalanceCollection),
                     io,
-                    createdOrg.insertedId)
+                    createdOrg.insertedId,
+                    req.user.publicKey)
             }
 
             return res.status(200).send(new AppResponse(200, true, undefined, ResponseMessage.OrganizationCreated));
@@ -155,7 +156,8 @@ class OrganizationManager implements IOrganizationService {
                     parsedBody,
                     db.collection(organizationHistoricalBalanceCollection),
                     io,
-                    result.upsertedId!)
+                    result.upsertedId!,
+                    req.user.publicKey)
             }
 
             return res.status(200).send(new AppResponse(200, true, undefined, ResponseMessage.OrganizationUpdated));;
@@ -254,7 +256,8 @@ class OrganizationManager implements IOrganizationService {
         newOrganization: Organization,
         balanceCollection: Collection<Document>,
         io: any,
-        createdOrgId: ObjectId) {
+        createdOrgId: ObjectId,
+        userAddress: string) {
         try {
             console.log(new Date());
 
@@ -305,7 +308,7 @@ class OrganizationManager implements IOrganizationService {
                 }
             );
 
-            io.emit('annualBalanceFetched', { message: `Balance fething task completed successfully for organization id ${createdOrgId}` });
+            io.emit('annualBalanceFetched', { message: userAddress });
             console.log(new Date());
         } catch (error: any) {
             throw new Error(error);
