@@ -4343,7 +4343,7 @@ export const logos: MappedTokens = {
     "symbol": "tinfa"
   },
   "eth": {
-    "logoUrl": "https://assets.coingecko.com/coins/images/34540/small/film.jpg?1705338132",
+    "logoUrl": "https://assets.coingecko.com/coins/images/279/standard/ethereum.png?1696501628",
     "symbol": "eth"
   },
   "caps": {
