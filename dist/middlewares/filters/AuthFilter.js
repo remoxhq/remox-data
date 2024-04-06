@@ -39,7 +39,7 @@ const checkUserSignature = ()=>async (req, res, next)=>{
         try {
             let accessKey = req.headers.accesskey?.toString();
             if (!accessKey) throw new _models.CustomError(_types.ResponseMessage.UnAuthorizedAction, _models.ExceptionType.UnAuthenticated);
-            const decoded = _jsonwebtoken.default.verify(accessKey, process.env.AUTH_SECRET_KEY);
+            const decoded = _jsonwebtoken.default.verify(accessKey, process.env.AUTH_ACCESS_KEY);
             req.user = {
                 publicKey: decoded.address
             };

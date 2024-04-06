@@ -10,7 +10,7 @@ export const checkUserSignature = () =>
         try {
             let accessKey = req.headers.accesskey?.toString();
             if (!accessKey) throw new CustomError(ResponseMessage.UnAuthorizedAction, ExceptionType.UnAuthenticated)
-            const decoded = Jwt.verify(accessKey, process.env.AUTH_SECRET_KEY!) as JwtPayload
+            const decoded = Jwt.verify(accessKey, process.env.AUTH_ACCESS_KEY!) as JwtPayload
 
             req.user = {
                 publicKey: decoded.address
