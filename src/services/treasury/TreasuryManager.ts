@@ -260,7 +260,7 @@ class TreasuryManager implements ITreasuryService {
 
     private filterWalletAssets(walletData: CovalentAssetHold) {
         const desiredTokens = [DesiredTokens.Safe.toString(), DesiredTokens.Orange.toString()];
-        return walletData.items.filter(item => item.quote || (desiredTokens.includes(item.contract_ticker_symbol)));
+        return walletData.items.filter(item => item.contract_name !== 'Celo native asset' && (item.quote || (desiredTokens.includes(item.contract_ticker_symbol))));
     }
 
     private processToken(item: CovalentAsset, totalAssets: AssetMap, wallet: AssetWallet) {

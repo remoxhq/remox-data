@@ -50,6 +50,7 @@ export interface CovalentAsset {
   contract_decimals: number,
   contract_ticker_symbol: string,
   contract_address: string,
+  contract_name: string,
   logo_url: string,
   quote: number,
   quote_rate: number,
