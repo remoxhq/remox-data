@@ -84,19 +84,22 @@ class TreasuryManager {
         let totalTxs = [];
         await Promise.all(response.accounts.map(async (wallet)=>{
             const walletPageCursor = nextData[wallet.address] ? nextData[wallet.address].next : "";
-            if (wallet.chain === "celo-mainnet") {
-                const mappedCeloTxns = await this.processCeloTransactions(wallet, walletPageCursor);
-                totalTxs.push(...mappedCeloTxns?.txns ?? []);
-                links[wallet.address] = mappedCeloTxns?.links[wallet.address];
-            } else {
-                const mappedEvmTxns = await this.processEvmTxns(wallet, walletPageCursor);
-                totalTxs.push(...mappedEvmTxns.txns);
-                links[wallet.address] = mappedEvmTxns?.links[wallet.address];
+            console.log(walletPageCursor);
+            if (!req.params.next || walletPageCursor) {
+                if (wallet.chain === "celo-mainnet") {
+                    const mappedCeloTxns = await this.processCeloTransactions(wallet, walletPageCursor);
+                    totalTxs.push(...mappedCeloTxns?.txns ?? []);
+                    if (mappedCeloTxns) links[wallet.address] = mappedCeloTxns.links[wallet.address];
+                } else {
+                    const mappedEvmTxns = await this.processEvmTxns(wallet, walletPageCursor);
+                    totalTxs.push(...mappedEvmTxns.txns);
+                    links[wallet.address] = mappedEvmTxns?.links[wallet.address];
+                }
             }
         }));
         return {
             txs: totalTxs.sort((a, b)=>new Date(b.date).getTime() - new Date(a.date).getTime()),
-            next: Object.keys(links).length ? _jsonwebtoken.default.sign(links, process.env.AUTH_SECRET_KEY) : undefined
+            next: Object.keys(links).length && Object.values(links).some((x)=>x.next) ? _jsonwebtoken.default.sign(links, process.env.AUTH_SECRET_KEY) : undefined
         };
     }
     async processCeloTransactions(wallet, page) {

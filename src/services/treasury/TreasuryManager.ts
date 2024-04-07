@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { injectable } from "inversify";
 import ITreasuryService from "./ITreasuryService";
 import { Db } from "mongodb";
-import { Account, AppResponse, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, CustomError, ExceptionType, Organization, PagingLinks } from '../../models';
+import { Account, AppResponse, AssetByBlockchainMap, AssetDto, AssetMap, AssetWallet, Coins, CovalentAsset, CovalentAssetHold, CustomError, ExceptionType, Organization, PagingLinks, PagingLinksMap } from '../../models';
 import { DesiredTokens, ResponseMessage } from '../../utils/types';
 import { covalentPortfolioRequest, covalentTxnRequest, moralisRequest } from '../../libs/covalent';
 import { ethers } from 'ethers';
@@ -64,27 +64,32 @@ class TreasuryManager implements ITreasuryService {
             ? Jwt.verify(req.params.next, process.env.AUTH_SECRET_KEY!) as JwtPayload
             : {}
 
-        let links: any = {}
+        let links: PagingLinksMap = {}
         let totalTxs: any[] = []
 
         await Promise.all(response.accounts.map(async (wallet: Account) => {
             const walletPageCursor = nextData[wallet.address] ? nextData[wallet.address].next : "";
+            console.log(walletPageCursor);
 
-            if (wallet.chain === "celo-mainnet") {
-                const mappedCeloTxns = await this.processCeloTransactions(wallet, walletPageCursor)
-                totalTxs.push(...mappedCeloTxns?.txns ?? [])
-                links[wallet.address] = mappedCeloTxns?.links[wallet.address]
-            }
-            else {
-                const mappedEvmTxns = await this.processEvmTxns(wallet, walletPageCursor)
-                totalTxs.push(...mappedEvmTxns.txns)
-                links[wallet.address] = mappedEvmTxns?.links[wallet.address]
+            if (!req.params.next || walletPageCursor) {
+                if (wallet.chain === "celo-mainnet") {
+                    const mappedCeloTxns = await this.processCeloTransactions(wallet, walletPageCursor)
+                    totalTxs.push(...mappedCeloTxns?.txns ?? [])
+
+                    if (mappedCeloTxns)
+                        links[wallet.address] = mappedCeloTxns.links[wallet.address]
+                }
+                else {
+                    const mappedEvmTxns = await this.processEvmTxns(wallet, walletPageCursor)
+                    totalTxs.push(...mappedEvmTxns.txns)
+                    links[wallet.address] = mappedEvmTxns?.links[wallet.address]
+                }
             }
         }));
 
         return {
             txs: totalTxs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-            next: Object.keys(links).length ? Jwt.sign(links, process.env.AUTH_SECRET_KEY!) : undefined
+            next: Object.keys(links).length && Object.values(links).some(x => x.next) ? Jwt.sign(links, process.env.AUTH_SECRET_KEY!) : undefined
         };
     }
 

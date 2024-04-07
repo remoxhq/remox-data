@@ -1,5 +1,7 @@
 //portfolio DTOs
 
+import { string } from "joi"
+
 export interface Portfolio {
   annual: TreasuryIndexer,
   existingTokenLogos: {
@@ -108,6 +110,10 @@ export interface TransferDto {
 export interface PagingLinks {
   prev: string,
   next: string
+}
+
+export interface PagingLinksMap {
+  [key: string]: PagingLinks
 }
 
 export interface NativeTokenLogos {
