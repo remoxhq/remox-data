@@ -69,9 +69,8 @@ class TreasuryManager implements ITreasuryService {
 
         await Promise.all(response.accounts.map(async (wallet: Account) => {
             const walletPageCursor = nextData[wallet.address] ? nextData[wallet.address].next : "";
-            console.log(walletPageCursor);
 
-            if (!req.params.next || walletPageCursor) {
+            if (req.params.next.length === 2 || walletPageCursor) {
                 if (wallet.chain === "celo-mainnet") {
                     const mappedCeloTxns = await this.processCeloTransactions(wallet, walletPageCursor)
                     totalTxs.push(...mappedCeloTxns?.txns ?? [])
