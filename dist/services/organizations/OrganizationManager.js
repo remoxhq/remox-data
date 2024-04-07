@@ -299,6 +299,8 @@ class OrganizationManager {
                 orgId: newOrganization._id
             }, {
                 $set: responseObj
+            }, {
+                upsert: true
             });
             await organizationCollection.updateOne({
                 _id: new _mongodb.ObjectId(newOrganization._id)

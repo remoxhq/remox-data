@@ -294,6 +294,7 @@ class OrganizationManager implements IOrganizationService {
             await balanceCollection.updateOne(
                 { orgId: newOrganization._id },
                 { $set: responseObj },
+                { upsert: true }
             )
 
             await organizationCollection.updateOne(
