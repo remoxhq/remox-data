@@ -12799,7 +12799,7 @@ export const logos: MappedTokens = {
     "symbol": "illuvia"
   },
   "weth": {
-    "logoUrl": "missing_small.png",
+    "logoUrl": "https://basescan.org/token/images/weth_28.png",
     "symbol": "weth"
   },
   "ptkn": {

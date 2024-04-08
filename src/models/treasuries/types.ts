@@ -1,7 +1,4 @@
 //portfolio DTOs
-
-import { string } from "joi"
-
 export interface Portfolio {
   annual: TreasuryIndexer,
   existingTokenLogos: {
@@ -164,5 +161,20 @@ export const Coins: NativeTokenLogos = {
     symbol: "Celo",
     logo: "https://celoscan.io/images/svg/brands/main.svg?v=24.2.3.0",
     hexId: ""
+  },
+  ["cronos-mainnet"]: {
+    symbol: "CRO",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/3635.png",
+    hexId: "0x19"
+  },
+  ["base-mainnet"]: {
+    symbol: "BASE",
+    logo: "https://assets.coingecko.com/coins/images/31199/standard/59302ba8-022e-45a4-8d00-e29fe2ee768c-removebg-preview.png?1696530026",
+    hexId: "0x2105"
+  },
+  ["fantom-mainnet"]: {
+    symbol: "FTM",
+    logo: "https://assets.coingecko.com/coins/images/4001/standard/Fantom_round.png?1696504642",
+    hexId: "0xfa"
   },
 }
