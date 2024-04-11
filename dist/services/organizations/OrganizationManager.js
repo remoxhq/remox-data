@@ -287,7 +287,7 @@ class OrganizationManager {
             const htValues = Object.entries(portfolio.annual);
             let responseObj = {
                 name: dashboardLink,
-                orgId: newOrganization._id,
+                orgId: new _mongodb.ObjectId(newOrganization._id),
                 addresses: walletAddresses,
                 existingTokens: portfolio.existingTokenLogos,
                 annual: htValues.length ? htValues.filter(([time, amount])=>Math.abs(_dateandtime.default.subtract(new Date(), new Date(time)).toDays()) <= 365).sort(([key1], [key2])=>new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1).reduce((a, c)=>{
@@ -295,6 +295,7 @@ class OrganizationManager {
                     return a;
                 }, {}) : {}
             };
+            const sortedBalance = Object.entries(responseObj.annual);
             await balanceCollection.updateOne({
                 orgId: new _mongodb.ObjectId(newOrganization._id)
             }, {
@@ -307,8 +308,8 @@ class OrganizationManager {
             }, {
                 $set: {
                     isActive: true,
-                    balance: htValues.length ? htValues[0][1].totalTreasury : 0,
-                    lastDayBalance: htValues.length ? htValues[1][1].totalTreasury : 0
+                    balance: sortedBalance.length ? sortedBalance[sortedBalance.length - 1][1].totalTreasury : 0,
+                    lastDayBalance: sortedBalance.length ? sortedBalance[sortedBalance.length - 2][1].totalTreasury : 0
                 }
             });
             io.emit('annualBalanceFetched', {

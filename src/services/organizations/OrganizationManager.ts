@@ -282,7 +282,7 @@ class OrganizationManager implements IOrganizationService {
 
             let responseObj = {
                 name: dashboardLink,
-                orgId: newOrganization._id,
+                orgId: new ObjectId(newOrganization._id),
                 addresses: walletAddresses,
                 existingTokens: portfolio.existingTokenLogos,
                 annual: htValues.length ? htValues
@@ -290,6 +290,8 @@ class OrganizationManager implements IOrganizationService {
                     .sort(([key1], [key2]) => new Date(key1).getTime() > new Date(key2).getTime() ? 1 : -1)
                     .reduce<typeof historicalTreasury>((a, c) => { a[c[0]] = c[1]; return a }, {}) : {},
             };
+
+            const sortedBalance = Object.entries(responseObj.annual);
 
             await balanceCollection.updateOne(
                 { orgId: new ObjectId(newOrganization._id) },
@@ -302,8 +304,8 @@ class OrganizationManager implements IOrganizationService {
                 {
                     $set: {
                         isActive: true,
-                        balance: htValues.length ? htValues[0][1].totalTreasury : 0,
-                        lastDayBalance: htValues.length ? htValues[1][1].totalTreasury : 0
+                        balance: sortedBalance.length ? sortedBalance[sortedBalance.length - 1][1].totalTreasury : 0,
+                        lastDayBalance: sortedBalance.length ? sortedBalance[sortedBalance.length - 2][1].totalTreasury : 0
                     }
                 }
             );

@@ -242,7 +242,7 @@ class TreasuryManager {
                     ...item,
                     totalAssetUsdValue: Object.values(item.assets).reduce((result, x)=>result += x.quote, 0),
                     assets: Object.values(item.assets).sort((a, b)=>b.quote - a.quote)
-                }));
+                })).sort((a, b)=>b.totalAssetUsdValue - a.totalAssetUsdValue);
             return {
                 assets: sortedAssets,
                 assetsByBlockchain: sortedAssetsByBlockchain
