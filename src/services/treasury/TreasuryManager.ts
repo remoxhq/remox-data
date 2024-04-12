@@ -268,7 +268,7 @@ class TreasuryManager implements ITreasuryService {
     }
 
     private processToken(item: CovalentAsset, totalAssets: AssetMap, wallet: AssetWallet) {
-        const uniqueKey = item.contract_address + item.contract_ticker_symbol;
+        const uniqueKey = item.contract_address + item.contract_ticker_symbol + wallet.chain;
         const token: AssetDto = {
             decimals: item.contract_decimals,
             symbol: item.contract_ticker_symbol,

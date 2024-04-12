@@ -259,7 +259,7 @@ class TreasuryManager {
         return walletData.items.filter((item)=>item.contract_name !== 'Celo native asset' && (item.quote || desiredTokens.includes(item.contract_ticker_symbol)));
     }
     processToken(item, totalAssets, wallet) {
-        const uniqueKey = item.contract_address + item.contract_ticker_symbol;
+        const uniqueKey = item.contract_address + item.contract_ticker_symbol + wallet.chain;
         const token = {
             decimals: item.contract_decimals,
             symbol: item.contract_ticker_symbol,
