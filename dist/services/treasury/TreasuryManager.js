@@ -102,17 +102,24 @@ class TreasuryManager {
         };
     }
     async processCeloTransactions(wallet, page) {
-        const response = await (0, _covalent.covalentTxnRequest)(wallet, page);
-        const items = response.data.data.items;
-        if (!items) return null;
-        const links = {
-            next: response.data.data.links.prev ?? "",
-            prev: response.data.data.links.next ?? ""
-        };
         const mappedTxns = [];
-        for (const transaction of items){
-            if (transaction.log_events) this.processCeloTransfers(transaction, mappedTxns, wallet);
-            else this.processCeloNativeTxns(transaction, mappedTxns, wallet);
+        let links = {
+            next: "",
+            prev: ""
+        };
+        while(mappedTxns.length === 0){
+            const response = await (0, _covalent.covalentTxnRequest)(wallet, page);
+            const items = response.data.data.items;
+            console.log(page);
+            links = {
+                next: response.data.data.links.prev ?? "",
+                prev: response.data.data.links.next ?? ""
+            };
+            for (const transaction of items){
+                if (transaction.log_events) this.processCeloTransfers(transaction, mappedTxns, wallet);
+                else this.processCeloNativeTxns(transaction, mappedTxns, wallet);
+            }
+            page = links.next;
         }
         return {
             txns: mappedTxns,

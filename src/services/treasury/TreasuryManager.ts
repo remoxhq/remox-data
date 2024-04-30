@@ -93,16 +93,22 @@ class TreasuryManager implements ITreasuryService {
     }
 
     private async processCeloTransactions(wallet: Account, page: string) {
-        const response = await covalentTxnRequest(wallet, page);
-        const items = response.data.data.items;
-        if (!items) return null;
-
-        const links: PagingLinks = { next: response.data.data.links.prev ?? "", prev: response.data.data.links.next ?? "" }
         const mappedTxns: any[] = []
+        let links: PagingLinks = { next: "", prev: "" }
 
-        for (const transaction of items) {
-            if (transaction.log_events) this.processCeloTransfers(transaction, mappedTxns, wallet);
-            else this.processCeloNativeTxns(transaction, mappedTxns, wallet)
+        while (mappedTxns.length === 0) {
+            const response = await covalentTxnRequest(wallet, page);
+            const items = response.data.data.items;
+            console.log(page);
+
+            links = { next: response.data.data.links.prev ?? "", prev: response.data.data.links.next ?? "" }
+
+            for (const transaction of items) {
+                if (transaction.log_events) this.processCeloTransfers(transaction, mappedTxns, wallet);
+                else this.processCeloNativeTxns(transaction, mappedTxns, wallet)
+            }
+
+            page = links.next;
         }
 
         return {
