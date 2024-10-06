@@ -11,7 +11,7 @@ class StorageManager implements IStorageService {
     constructor() {
         this._storage = new Storage({
             projectId: process.env.PROJECT_ID,
-            keyFilename: process.env.STORAGE_KEY_FILE,
+            keyFilename: process.env.STORAGE_KEY_FILE_NAME,
         });
     }
 

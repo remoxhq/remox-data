@@ -41,7 +41,7 @@ function loadMiddlewares(app: any) {
 function configureWSS(app: any, server: any) {
     const io = new Server(server, {
         cors: {
-            origin: process.env.COSR_ORIGINS,
+            origin: process.env.CORS_ORIGINS,
             methods: ["GET", "POST"]
         }
     });
