@@ -57,7 +57,7 @@ class StorageManager {
     constructor(){
         _define_property(this, "_storage", void 0);
         this._storage = new _storage.Storage({
-            projectId: process.env.FIREBASE_PROJECT_ID,
+            projectId: process.env.PROJECT_ID,
             keyFilename: process.env.STORAGE_KEY_FILE
         });
     }

@@ -24,14 +24,14 @@ function _interop_require_default(obj) {
 async function startServer(app) {
     try {
         const mongoDbUri = process.env.MONGODB_URI || "";
-        const port = process.env.PORT || 8080;
+        const port = process.env.APP_PORT;
         const client = new _mongodb.MongoClient(mongoDbUri);
         await client.connect();
         app.locals.db = client.db(process.env.DB_NAME);
         loadMiddlewares(app);
         (0, _loadRoutes.default)(app); // loads controler;
         const server = app.listen(port, ()=>{
-            console.log('Server is running on port 8080');
+            console.log('Server is running on port' + process.env.APP_PORT);
         });
         configureWSS(app, server);
         process.on('SIGINT', async ()=>{
@@ -52,7 +52,7 @@ function loadMiddlewares(app) {
 function configureWSS(app, server) {
     const io = new _socketio.Server(server, {
         cors: {
-            origin: "*",
+            origin: process.env.COSR_ORIGINS,
             methods: [
                 "GET",
                 "POST"

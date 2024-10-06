@@ -10,16 +10,15 @@ config();
 export async function startServer(app: any) {
     try {
         const mongoDbUri = process.env.MONGODB_URI || ""
-        const port = process.env.PORT || 8080
+        const port = process.env.APP_PORT
         const client = new MongoClient(mongoDbUri)
         await client.connect();
         app.locals.db = client.db(process.env.DB_NAME);
-
         loadMiddlewares(app)
         configureRouter(app);// loads controler;
 
         const server = app.listen(port, () => {
-            console.log('Server is running on port 8080');
+            console.log('Server is running on port' + process.env.APP_PORT);
         });
 
         configureWSS(app, server);
@@ -42,7 +41,7 @@ function loadMiddlewares(app: any) {
 function configureWSS(app: any, server: any) {
     const io = new Server(server, {
         cors: {
-            origin: "*",
+            origin: process.env.COSR_ORIGINS,
             methods: ["GET", "POST"]
         }
     });

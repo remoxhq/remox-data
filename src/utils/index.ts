@@ -1,6 +1,5 @@
 export * from "./helpers/root-parser";
 export * from "../models/treasuries/types";
-export * from "./helpers/fetch-balance";
 export * from "./apiAttributes";
 export * from "./loadRoutes";
 export * from "./serverConfig";

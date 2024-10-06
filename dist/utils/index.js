@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 _export_star(require("./helpers/root-parser"), exports);
 _export_star(require("../models/treasuries/types"), exports);
-_export_star(require("./helpers/fetch-balance"), exports);
 _export_star(require("./apiAttributes"), exports);
 _export_star(require("./loadRoutes"), exports);
 _export_star(require("./serverConfig"), exports);
